@@ -1,0 +1,45 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace SAMMAI.DataBase;
+
+public partial class SynSistemaIntegrar
+{
+    public int Id { get; set; }
+
+    public string Uid { get; set; } = null!;
+
+    public string Eid { get; set; } = null!;
+
+    public int IdUsuarioModifico { get; set; }
+
+    public int IdUsuarioCreo { get; set; }
+
+    public DateTime FechaModificacion { get; set; }
+
+    public DateTime FechaCreacion { get; set; }
+
+    public bool Active { get; set; }
+
+    public string SistemaIntegrar { get; set; } = null!;
+
+    public string? SistemaIntegrarCodigo { get; set; }
+
+    public string? Usuario { get; set; }
+
+    public string? Clave { get; set; }
+
+    public string? UrlAutenticar { get; set; }
+
+    public int IdTipoAutenticacion { get; set; }
+
+    public string? Token { get; set; }
+
+    public string? MetodoAutenticar { get; set; }
+
+    public string? EstructuraResponseAutenticar { get; set; }
+
+    public virtual SynTipoAutenticacion IdTipoAutenticacionNavigation { get; set; } = null!;
+
+    public virtual ICollection<SynPuntoIntegracion> SynPuntoIntegracions { get; set; } = new List<SynPuntoIntegracion>();
+}

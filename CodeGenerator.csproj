@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="DataBase\**" />
+    <Compile Remove="New folder\**" />
+    <EmbeddedResource Remove="DataBase\**" />
+    <EmbeddedResource Remove="New folder\**" />
+    <None Remove="DataBase\**" />
+    <None Remove="New folder\**" />
+  </ItemGroup>
+
+</Project>
