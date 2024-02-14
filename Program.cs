@@ -27,19 +27,22 @@ internal class Program
                 break;
 
             case 2:
+                string path;
+                path = "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.Transverse\\SAMMAI.Transverse\\Models\\Objects";
+
                 controllerDataBaseGenerator = new ControllerDataBaseGenerator(
-                rootPath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.DataBase\\SAMMAI.DataBase\\Repository\\Entities",
+                rootPath: path,
                 destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\Microservice");
 
                 string entity = "GenTipoDato";
 
-                response = controllerDataBaseGenerator.GenerateByEntity(entity);
+                response = controllerDataBaseGenerator.GenerateByEntity(entity, $"{path}\\{entity}Object.cs");
 
                 break;
 
             case 3:
                 controllerDataBaseGenerator = new ControllerDataBaseGenerator(
-                rootPath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.DataBase\\SAMMAI.DataBase\\Repository\\Entities",
+                rootPath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.Transverse\\SAMMAI.Transverse\\Models\\Objects",
                 destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\Microservice");
 
                 response = string.Join(Environment.NewLine, controllerDataBaseGenerator.GenerateForAllEntities());

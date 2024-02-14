@@ -32,7 +32,7 @@ namespace CodeGenerator
 
             foreach (FileModel file in files)
             {
-                response = GenerateByEntity(file.Name);
+                response = GenerateByEntity(file.Name.Replace("Object", string.Empty), file.Path);
                 if (!string.IsNullOrEmpty(response))
                     responses.Add(response);
             }
@@ -40,12 +40,13 @@ namespace CodeGenerator
             return responses;
         }
 
-        public string GenerateByEntity(string entity)
+        public string GenerateByEntity(string entity, string path)
         {
             string prefix;
             string entityUpper;
-            string entityLower; 
+            string entityLower;
             string init;
+            bool withCodigo;
 
             try
             {
@@ -54,8 +55,10 @@ namespace CodeGenerator
                 entityUpper = string.Concat(init.ToUpper(), entity.AsSpan(4));
                 entityLower = string.Concat(init.ToLower(), entity.AsSpan(4));
 
-                GenerateController(prefix, entityUpper, entityLower);
-                GenerateService(prefix, entityUpper, entityLower);
+                withCodigo = HasWord(path, $"public string? {entityUpper}Codigo {{ get; set; }}");
+
+                GenerateController(prefix, entityUpper, entityLower, withCodigo);
+                GenerateService(prefix, entityUpper, entityLower, withCodigo);
 
                 return string.Empty;
             }
@@ -65,7 +68,7 @@ namespace CodeGenerator
             }
         }
 
-        public void GenerateController(string prefix, string entityUpper, string entityLower)
+        public void GenerateController(string prefix, string entityUpper, string entityLower, bool WithCodigo)
         {
             List<string> content;
             string controllerRoute;
@@ -118,7 +121,7 @@ namespace CodeGenerator
                 $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
                 $"        public async Task<ActionResult<object>> GetById(int id)",
                 "        {",
-                $"            {prefix}{entityUpper}Object? response = await _{entityUpper}Service.GetById(id);",
+                $"            {prefix}{entityUpper}Object? response = await _{entityLower}Service.GetById(id);",
                 $"",
                 $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                 "        }",
@@ -142,59 +145,66 @@ namespace CodeGenerator
                 $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
                 $"        public async Task<ActionResult<object>> GetFullById(int id)",
                 "        {",
-                $"            View{prefix}{entityUpper}Object? response = await _{entityUpper}Service.GetFullById (id);",
+                $"            View{prefix}{entityUpper}Object? response = await _{entityLower}Service.GetFullById (id);",
                 $"",
                 $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                 "        }",
-                $"",
-                $"        /// <summary>",
-                $"        /// Gets a {entityUpper} by codigo",
-                $"        /// </summary>",
-                $"        /// <param name=\"codigo\"></param>",
-                $"        /// <returns></returns>",
-                $"        /// <remarks>",
-                $"        /// Gets a {entityUpper} by codigo",
-                $"        /// </remarks>",
-                $"        /// <response code=\"200\">Success: Returns the {entityUpper} object</response>",
-                $"        [AllowAnonymous]",
-                $"        [HttpGet]",
-                $"        [Route(\"codigo/{{codigo}}\")]",
-                $"        [Produces(GeneralConstants.ContentType.Json)]",
-                $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<{prefix}{entityUpper}Object>), (int)StatusCodeEnum.OK)]",
-                $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.NOT_FOUND)]",
-                $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
-                $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
-                $"        public async Task<ActionResult<object>> GetByCodigo(string codigo)",
-                "        {",
-                $"            {prefix}{entityUpper}Object? response = await _{entityUpper}Service.GetBycodigo(codigo);",
-                $"",
-                $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
-                "        }",
-                $"",
-                $"        /// <summary>",
-                $"        /// Gets a full {entityUpper} by codigo",
-                $"        /// </summary>",
-                $"        /// <param name=\"codigo\"></param>",
-                $"        /// <returns></returns>",
-                $"        /// <remarks>",
-                $"        /// Gets a full {entityUpper} by codigo",
-                $"        /// </remarks>",
-                $"        /// <response code=\"200\">Success: Returns the full {entityUpper} object</response>",
-                $"        [AllowAnonymous]",
-                $"        [HttpGet]",
-                $"        [Route(\"codigo/{{codigo}}/full\")]",
-                $"        [Produces(GeneralConstants.ContentType.Json)]",
-                $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<View{prefix}{entityUpper}Object>), (int)StatusCodeEnum.OK)]",
-                $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.NOT_FOUND)]",
-                $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
-                $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
-                $"        public async Task<ActionResult<object>> GetFullByCodigo(string codigo)",
-                "        {",
-                $"            View{prefix}{entityUpper}Object? response = await _{entityUpper}Service.GetFullBycodigo(codigo);",
-                $"",
-                $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
-                "        }",
-                $"",
+                $""
+            ];
+
+            if (WithCodigo)
+                content.AddRange([
+                    $"        /// <summary>",
+                    $"        /// Gets a {entityUpper} by codigo",
+                    $"        /// </summary>",
+                    $"        /// <param name=\"codigo\"></param>",
+                    $"        /// <returns></returns>",
+                    $"        /// <remarks>",
+                    $"        /// Gets a {entityUpper} by codigo",
+                    $"        /// </remarks>",
+                    $"        /// <response code=\"200\">Success: Returns the {entityUpper} object</response>",
+                    $"        [AllowAnonymous]",
+                    $"        [HttpGet]",
+                    $"        [Route(\"codigo/{{codigo}}\")]",
+                    $"        [Produces(GeneralConstants.ContentType.Json)]",
+                    $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<{prefix}{entityUpper}Object>), (int)StatusCodeEnum.OK)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.NOT_FOUND)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
+                    $"        public async Task<ActionResult<object>> GetByCodigo(string codigo)",
+                    "        {",
+                    $"            {prefix}{entityUpper}Object? response = await _{entityLower}Service.GetByCodigo(codigo);",
+                    $"",
+                    $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
+                    "        }",
+                    $"",
+                    $"        /// <summary>",
+                    $"        /// Gets a full {entityUpper} by codigo",
+                    $"        /// </summary>",
+                    $"        /// <param name=\"codigo\"></param>",
+                    $"        /// <returns></returns>",
+                    $"        /// <remarks>",
+                    $"        /// Gets a full {entityUpper} by codigo",
+                    $"        /// </remarks>",
+                    $"        /// <response code=\"200\">Success: Returns the full {entityUpper} object</response>",
+                    $"        [AllowAnonymous]",
+                    $"        [HttpGet]",
+                    $"        [Route(\"codigo/{{codigo}}/full\")]",
+                    $"        [Produces(GeneralConstants.ContentType.Json)]",
+                    $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<View{prefix}{entityUpper}Object>), (int)StatusCodeEnum.OK)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.NOT_FOUND)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
+                    $"        public async Task<ActionResult<object>> GetFullByCodigo(string codigo)",
+                    "        {",
+                    $"            View{prefix}{entityUpper}Object? response = await _{entityLower}Service.GetFullByCodigo(codigo);",
+                    $"",
+                    $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
+                    "        }",
+                    $""
+            ]);
+
+            content.AddRange([
                 $"        /// <summary>",
                 $"        /// Gets all {entityUpper}",
                 $"        /// </summary>",
@@ -304,37 +314,44 @@ namespace CodeGenerator
                 $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.NOT_FOUND)]",
                 $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                 $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
-                $"        public async Task<ActionResult<object>> SetActiveById(string id, bool active)",
+                $"        public async Task<ActionResult<object>> SetActiveById(int id, bool isActive)",
                 "        {",
                 $"            await _{entityLower}Service.SetActiveById(id, isActive);",
                 $"",
                 $"            return Ok();",
                 "        }",
-                $"",
-                $"        /// <summary>",
-                $"        /// Activate or inactivate a {entityUpper} by codigo",
-                $"        /// </summary>",
-                $"        /// <param name=\"codigo\"></param>",
-                $"        /// <param name=\"isActive\"></param>",
-                $"        /// <returns></returns>",
-                $"        /// <remarks>",
-                $"        /// Activate or inactivate a {entityUpper} by codigo",
-                $"        /// </remarks>",
-                $"        /// <response code=\"200\">Success</response>",
-                $"        [AllowAnonymous]",
-                $"        [HttpPatch]",
-                $"        [Route(\"codigo/{{codigo}}/active/{{isActive}}\")]",
-                $"        [Produces(GeneralConstants.ContentType.Json)]",
-                $"        [ProducesResponseType((int)StatusCodeEnum.OK)]",
-                $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.NOT_FOUND)]",
-                $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
-                $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
-                $"        public async Task<ActionResult<object>> SetActiveByCodigo(string codigo, bool active)",
-                "        {",
-                $"            await _{entityLower}Service.SetActiveByCodigo(codigo, isActive);",
-                $"",
-                $"            return Ok();",
-                "        }",
+                $""
+            ]);
+
+            if (WithCodigo)
+                content.AddRange([
+                    $"        /// <summary>",
+                    $"        /// Activate or inactivate a {entityUpper} by codigo",
+                    $"        /// </summary>",
+                    $"        /// <param name=\"codigo\"></param>",
+                    $"        /// <param name=\"isActive\"></param>",
+                    $"        /// <returns></returns>",
+                    $"        /// <remarks>",
+                    $"        /// Activate or inactivate a {entityUpper} by codigo",
+                    $"        /// </remarks>",
+                    $"        /// <response code=\"200\">Success</response>",
+                    $"        [AllowAnonymous]",
+                    $"        [HttpPatch]",
+                    $"        [Route(\"codigo/{{codigo}}/active/{{isActive}}\")]",
+                    $"        [Produces(GeneralConstants.ContentType.Json)]",
+                    $"        [ProducesResponseType((int)StatusCodeEnum.OK)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.NOT_FOUND)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
+                    $"        public async Task<ActionResult<object>> SetActiveByCodigo(string codigo, bool isActive)",
+                    "        {",
+                    $"            await _{entityLower}Service.SetActiveByCodigo(codigo, isActive);",
+                    $"",
+                    $"            return Ok();",
+                    "        }"
+            ]);
+
+            content.AddRange([
                 $"        #endregion",
                 $"",
                 $"        #region Custom Endpoints",
@@ -343,12 +360,12 @@ namespace CodeGenerator
                 "    }",
                 "}",
                 $""
-            ];
+            ]);
 
             GenerateFile("Controllers", $"{entityUpper}Controller.cs", content);
         }
 
-        public void GenerateService(string prefix, string entityUpper, string entityLower)
+        public void GenerateService(string prefix, string entityUpper, string entityLower, bool WithCodigo)
         {
             List<string> content;
 
@@ -397,37 +414,44 @@ namespace CodeGenerator
                 $"",
                 $"            throw new ApiException(StatusCodeEnum.NOT_FOUND);",
                 "        }",
-                $"",
-                $"        public async Task<{prefix}{entityUpper}Object?> GetByCodigo(string codigo)",
-                "        {",
-                $"            IEnumerable<{prefix}{entityUpper}> {entityLower}s = await GetFilteredAsync(x => x.{entityUpper}Codigo == codigo && x.Eid == _global.Eid && x.Active);",
-                $"",
-                $"            if ({entityLower}s?.Any() == true)",
-                $"                return {entityLower}s.ToList().FirstOrDefault();",
-                $"",
-                $"            throw new ApiException(StatusCodeEnum.NOT_FOUND);",
-                "        }",
-                $"",
-                $"        public async Task<View{prefix}{entityUpper}Object?> GetFullByCodigo(string codigo)",
-                "        {",
-                $"            IEnumerable<View{prefix}{entityUpper}> {entityLower}s = await GetViewFilteredAsync(x => x.{entityUpper}Codigo == codigo && x.Eid == _global.Eid && x.Active);",
-                $"",
-                $"            if ({entityLower}s?.Any() == true)",
-                $"                return {entityLower}s.ToList().FirstOrDefault();",
-                $"",
-                $"            throw new ApiException(StatusCodeEnum.NOT_FOUND);",
-                "        }",
-                $"",
+                $""
+            ];
+
+            if (WithCodigo)
+                content.AddRange([
+                    $"        public async Task<{prefix}{entityUpper}Object?> GetByCodigo(string codigo)",
+                    "        {",
+                    $"            IEnumerable<{prefix}{entityUpper}> {entityLower}s = await GetFilteredAsync(x => x.{entityUpper}Codigo == codigo && x.Eid == _global.Eid && x.Active);",
+                    $"",
+                    $"            if ({entityLower}s?.Any() == true)",
+                    $"                return {entityLower}s.ToList().FirstOrDefault();",
+                    $"",
+                    $"            throw new ApiException(StatusCodeEnum.NOT_FOUND);",
+                    "        }",
+                    $"",
+                    $"        public async Task<View{prefix}{entityUpper}Object?> GetFullByCodigo(string codigo)",
+                    "        {",
+                    $"            IEnumerable<View{prefix}{entityUpper}> {entityLower}s = await GetViewFilteredAsync(x => x.{entityUpper}Codigo == codigo && x.Eid == _global.Eid && x.Active);",
+                    $"",
+                    $"            if ({entityLower}s?.Any() == true)",
+                    $"                return {entityLower}s.ToList().FirstOrDefault();",
+                    $"",
+                    $"            throw new ApiException(StatusCodeEnum.NOT_FOUND);",
+                    "        }",
+                    $""
+                ]);
+
+            content.AddRange([
                 $"        public async Task<List<{prefix}{entityUpper}Object>?> GetAll()",
                 "        {",
-                $"            IEnumerable<{prefix}{entityUpper}> {entityLower}s = await GetFilteredAsync(x => x.Eid == _global.Eid && x.Active);",
+                $"            IEnumerable<{prefix}{entityUpper}Object> {entityLower}s = await GetFilteredAsync(x => x.Eid == _global.Eid && x.Active);",
                 $"",
                 $"            return {entityLower}s.ToList();",
                 "        }",
                 $"",
                 $"        public async Task<List<View{prefix}{entityUpper}Object>?> GetAllFull()",
                 "        {",
-                $"            IEnumerable<View{prefix}{entityUpper}> {entityLower}s = await GetViewFilteredAsync(x => x.Eid == _global.Eid && x.Active);",
+                $"            IEnumerable<View{prefix}{entityUpper}Object> {entityLower}s = await GetViewFilteredAsync(x => x.Eid == _global.Eid && x.Active);",
                 $"",
                 $"            return {entityLower}s.ToList();",
                 "        }",
@@ -485,24 +509,31 @@ namespace CodeGenerator
                 $"            if ({entityLower}Object is null)",
                 $"                throw new ApiException(StatusCodeEnum.BAD_REQUEST);",
                 "        }",
-                $"",
-                $"        public async Task SetActiveByCodigo(string codigo, bool active)",
-                "        {",
-                $"            {prefix}{entityUpper}Object {entityLower}Object;",
-                $"",
-                $"            {entityLower}Object = await GetByCodigo(codigo);",
-                $"",
-                $"            {entityLower}Object.Eid = _global.Eid;",
-                $"            {entityLower}Object.Uid = _global.Uid;",
-                $"            {entityLower}Object.IdUsuarioModifico = _global.IdUsuario;",
-                $"            {entityLower}Object.FechaModificacion = DateTime.Now;",
-                $"            {entityLower}Object.Active = active;",
-                $"",
-                $"            {entityLower}Object = await UpdateAsync({entityLower}Object.ObjectToObject<{prefix}{entityUpper}>());",
-                $"",
-                $"            if ({entityLower}Object is null)",
-                $"                throw new ApiException(StatusCodeEnum.BAD_REQUEST);",
-                "        }",
+                $""
+            ]);
+
+            if (WithCodigo)
+                content.AddRange([
+                    $"        public async Task SetActiveByCodigo(string codigo, bool active)",
+                    "        {",
+                    $"            {prefix}{entityUpper}Object {entityLower}Object;",
+                    $"",
+                    $"            {entityLower}Object = await GetByCodigo(codigo);",
+                    $"",
+                    $"            {entityLower}Object.Eid = _global.Eid;",
+                    $"            {entityLower}Object.Uid = _global.Uid;",
+                    $"            {entityLower}Object.IdUsuarioModifico = _global.IdUsuario;",
+                    $"            {entityLower}Object.FechaModificacion = DateTime.Now;",
+                    $"            {entityLower}Object.Active = active;",
+                    $"",
+                    $"            {entityLower}Object = await UpdateAsync({entityLower}Object.ObjectToObject<{prefix}{entityUpper}>());",
+                    $"",
+                    $"            if ({entityLower}Object is null)",
+                    $"                throw new ApiException(StatusCodeEnum.BAD_REQUEST);",
+                    "        }",
+                ]);
+
+            content.AddRange([
                 $"        #endregion",
                 $"",
                 $"        #region Custom Services",
@@ -511,12 +542,24 @@ namespace CodeGenerator
                 "    }",
                 "}",
                 $""
-            ];
+            ]);
 
             GenerateFile("Services", $"{entityUpper}Service.cs", content);
         }
 
         #region Utilities
+
+        private bool HasWord(string path, string key)
+        {
+            List<string> template = [.. File.ReadAllLines(path)];
+
+            foreach (string line in template)
+                if (line.Contains(key))
+                    return true;
+
+            return false;
+        }
+
         private void GenerateFile(string directory, string file, List<string> content)
             => Utilities.GenerateFile(_destinyPath, directory, file, content);
         #endregion
