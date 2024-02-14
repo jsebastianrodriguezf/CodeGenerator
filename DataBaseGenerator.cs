@@ -1,11 +1,8 @@
-﻿namespace GenerarCodigo
+﻿using CodeGenerator.Helper;
+using CodeGenerator.Models;
+
+namespace GenerarCodigo
 {
-    public class FileModel
-    {
-        public required string Name { get; set;}
-        public required string Extension { get; set;}
-        public required string Path { get; set;}
-    }
 
     public class DatabaseGenerator
     {
@@ -24,8 +21,8 @@
             _rootPath = rootPath;
             _destinyPath = destityPath;
             _files = [.. Directory.GetFiles(_rootPath)];
-            _filesModel = GetFilesModel(_files);
-            RegenerateDirectory(_destinyPath);
+            _filesModel = Utilities.GetFilesModel(_files);
+            Utilities.RegenerateDirectory(_destinyPath);
         }
 
         public string Generate()
@@ -243,49 +240,8 @@
         #endregion
 
         #region Utilities
-        private void GenerateFile(string directory, string file, List<string> content)
-        {
-            string pathDirectory;
-            string pathFile;
-
-            pathDirectory = Path.Combine(_destinyPath, directory);
-            pathFile = Path.Combine(pathDirectory, file);
-
-            if (!Directory.Exists(pathDirectory))
-                Directory.CreateDirectory(pathDirectory);
-
-            if (File.Exists(pathFile))
-                File.Delete(pathFile);
-
-            File.WriteAllLines(pathFile, content);
-        }
-
-        private static void RegenerateDirectory(string path)
-        {
-            if (Directory.Exists(path))
-                Directory.Delete(path, true);
-
-            Directory.CreateDirectory(path);
-        }
-
-        private static List<FileModel> GetFilesModel(List<string> files)
-        {
-            return [
-                .. files.
-                Select(x =>
-                {
-                    List<string> file = [.. x.Split("\\").Last().Split(".")];
-
-                    return new FileModel()
-                    {
-                        Path = x,
-                        Name = file.First(),
-                        Extension = file.Last()
-                    };
-                }).
-                OrderBy(x => x.Name),
-            ];
-        }
+        private void GenerateFile(string directory, string file, List<string> content) 
+            => Utilities.GenerateFile(_destinyPath, directory, file, content);
         #endregion
     }
 }
