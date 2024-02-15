@@ -29,13 +29,18 @@ namespace CodeGenerator
             string response;
 
             List<FileModel> files = _filesModel.Where(x => x.Name.Substring(3, 1) == x.Name.Substring(3, 1).ToUpper()).ToList();
+            List<string> contentDI = [];
 
             foreach (FileModel file in files)
             {
                 response = GenerateByEntity(file.Name.Replace("Object", string.Empty), file);
                 if (!string.IsNullOrEmpty(response))
                     responses.Add(response);
+
+                contentDI.Add(GenerateDI(file.Name));
             }
+
+            GenerateFile("Dependencies", "Dependency", contentDI);
 
             return responses;
         }
@@ -229,7 +234,7 @@ namespace CodeGenerator
                 $"        [HttpGet]",
                 $"        [Route(\"all\")]",
                 $"        [Produces(GeneralConstants.ContentType.Json)]",
-                $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<{prefix}{entityUpper}Object>), (int)StatusCodeEnum.OK)]",
+                $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<{prefix}{entityUpper}Object>>), (int)StatusCodeEnum.OK)]",
                 $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                 $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
                 $"        public async Task<ActionResult<object>> GetAll()",
@@ -255,7 +260,7 @@ namespace CodeGenerator
                     $"        [HttpGet]",
                     $"        [Route(\"all/full\")]",
                     $"        [Produces(GeneralConstants.ContentType.Json)]",
-                    $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<View{prefix}{entityUpper}Object>), (int)StatusCodeEnum.OK)]",
+                    $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<View{prefix}{entityUpper}Object>>), (int)StatusCodeEnum.OK)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
                     $"        public async Task<ActionResult<object>> GetAllFull()",
@@ -581,6 +586,11 @@ namespace CodeGenerator
             ]);
 
             GenerateFile("Services", $"{entityUpper}Service.cs", content);
+        }
+
+        public string GenerateDI(string entity)
+        {
+            return $"services.AddTransient<{entity.AsSpan(3).ToString().Replace("Object", string.Empty)}Service>();";
         }
 
         #region Utilities
