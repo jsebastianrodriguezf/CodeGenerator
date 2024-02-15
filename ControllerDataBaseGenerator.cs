@@ -271,7 +271,7 @@ namespace CodeGenerator
                 $"        /// <summary>",
                 $"        /// Insert a {entityUpper}",
                 $"        /// </summary>",
-                $"        /// <param name=\"{entityLower}></param>",
+                $"        /// <param name=\"{entityLower}\"></param>",
                 $"        /// <returns></returns>",
                 $"        /// <remarks>",
                 $"        /// Inserts a new {entityUpper}",
