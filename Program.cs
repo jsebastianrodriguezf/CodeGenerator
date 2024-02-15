@@ -1,4 +1,5 @@
 ﻿using CodeGenerator;
+using CodeGenerator.Models;
 using GenerarCodigo;
 
 internal class Program
@@ -27,16 +28,26 @@ internal class Program
                 break;
 
             case 2:
+                FileModel fileModel;
                 string path;
+                string entity;
+
                 path = "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.Transverse\\SAMMAI.Transverse\\Models\\Objects";
+                entity = "GenTipoDato";
+
+                fileModel = new FileModel()
+                {
+                    Path = $"{path}\\{entity}Object.cs",
+                    Name = $"{entity}Object",
+                    Extension = "cs"
+                };
 
                 controllerDataBaseGenerator = new ControllerDataBaseGenerator(
                 rootPath: path,
                 destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\Microservice");
 
-                string entity = "GenTipoDato";
 
-                response = controllerDataBaseGenerator.GenerateByEntity(entity, $"{path}\\{entity}Object.cs");
+                response = controllerDataBaseGenerator.GenerateByEntity(entity, fileModel);
 
                 break;
 
