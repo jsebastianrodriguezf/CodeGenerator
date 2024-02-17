@@ -13,7 +13,7 @@ internal class Program
 
         Console.WriteLine("Start ...");
 
-        option = 3;
+        option = 1;
 
         switch (option)
         {
@@ -27,13 +27,13 @@ internal class Program
 
                 break;
 
-            case 2:
+            case 1:
                 FileModel fileModel;
                 string path;
                 string entity;
 
                 path = "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.Transverse\\SAMMAI.Transverse\\Models\\Objects";
-                entity = "GenTipoDato";
+                entity = "GenDetalleConfiguracionAtributo";
 
                 fileModel = new FileModel()
                 {
@@ -51,7 +51,7 @@ internal class Program
 
                 break;
 
-            case 3:
+            case 2:
                 controllerDataBaseGenerator = new ControllerDataBaseGenerator(
                 rootPath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.Transverse\\SAMMAI.Transverse\\Models\\Objects",
                 destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\Microservice");

@@ -207,7 +207,7 @@ namespace GenerarCodigo
             const int indexStart = 7;
             List<string> content = [];
             int i = indexStart;
-
+            
             for (; i < template.Count; i++)
             {
                 string line = template[i];
@@ -215,7 +215,10 @@ namespace GenerarCodigo
                     break;
 
                 if (line != "")
-                    content.Add(line);
+                    if (line.Contains("public string Eid { get; set; } = null!;") || line.Contains("public string Uid { get; set; } = null!;"))
+                        content.Add(line.Replace("string", "string?").Replace(" = null!;", string.Empty));
+                    else
+                        content.Add(line);
             }
 
             return (i, content);
