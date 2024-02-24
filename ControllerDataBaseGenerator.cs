@@ -30,6 +30,7 @@ namespace CodeGenerator
 
             List<FileModel> files = _filesModel.Where(x => x.Name.Substring(3, 1) == x.Name.Substring(3, 1).ToUpper()).ToList();
             List<string> contentDI = [];
+            List<string> contentMappers = [];
 
             foreach (FileModel file in files)
             {
@@ -38,9 +39,11 @@ namespace CodeGenerator
                     responses.Add(response);
 
                 contentDI.Add(GenerateDI(file.Name));
+                contentMappers.AddRange(GenerateMapByEntity(file.Name));
             }
 
-            GenerateFile("Dependencies", "Dependency", contentDI);
+            GenerateFile("Dependencies", "Dependency.cs", contentDI);
+            GenerateFile("Profiles", "GeneralEntityProfile.cs", contentMappers);
 
             return responses;
         }
@@ -394,7 +397,8 @@ namespace CodeGenerator
             List<string> content;
 
             content = [
-                "using SAMMAI.DataBase.Repository.Context;",
+                $"using AutoMapper;",
+                $"using SAMMAI.DataBase.Repository.Context;",
                 $"using SAMMAI.DataBase.Repository.Entities;",
                 $"using SAMMAI.DataBase.Repository.Manager;",
                 $"using SAMMAI.Transverse.Helpers;",
@@ -406,16 +410,19 @@ namespace CodeGenerator
                 $"        private readonly ILogger<{entityUpper}Service> _logger;",
                 $"        private readonly SAMMAIContext _context;",
                 $"        private readonly Global _global;",
+                $"        private readonly IMapper _mapper;",
                 $"",
                 $"        public {entityUpper}Service(",
                 $"            ILogger<{entityUpper}Service> logger,",
                 $"            SAMMAIContext context,",
-                $"            Global global)",
+                $"            Global global,",
+                $"            IMapper mapper)",
                 $"            : base(context)",
                 "        {",
                 $"            _logger = logger ?? throw new ArgumentNullException(nameof(logger));",
                 $"            _context = context ?? throw new ArgumentNullException(nameof(context));",
                 $"            _global = global ?? throw new ArgumentNullException(nameof(global));",
+                $"            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));",
                 "        }",
                 $"",
                 $"        #region Base Services",
@@ -495,7 +502,7 @@ namespace CodeGenerator
                 $"            input.FechaModificacion = input.FechaCreacion;",
                 $"            input.Active = true;",
                 $"",
-                $"            {prefix}{entityUpper}Object? {entityLower} = await AddAsync(input.ObjectToObject<{prefix}{entityUpper}>());",
+                $"            {prefix}{entityUpper}Object? {entityLower} = await AddAsync(_mapper.Map<{prefix}{entityUpper}>(input));",
                 $"",
                 $"            if ({entityLower} != null)",
                 $"                return {entityLower};",
@@ -515,7 +522,7 @@ namespace CodeGenerator
                 $"            input.FechaModificacion = DateTime.Now;",
                 $"            input.Active = true;",
                 $"",
-                $"            {entityLower}Object = await UpdateAsync(input.ObjectToObject<{prefix}{entityUpper}>());",
+                $"            {entityLower}Object = await UpdateAsync(_mapper.Map<{prefix}{entityUpper}>(input));",
                 $"",
                 $"            if ({entityLower}Object is null)",
                 $"                throw new ApiException(StatusCodeEnum.BAD_REQUEST);",
@@ -533,7 +540,7 @@ namespace CodeGenerator
                 $"            {entityLower}Object.FechaModificacion = DateTime.Now;",
                 $"            {entityLower}Object.Active = active;",
                 $"",
-                $"            {entityLower}Object = await UpdateAsync({entityLower}Object.ObjectToObject<{prefix}{entityUpper}>());",
+                $"            {entityLower}Object = await UpdateAsync(_mapper.Map<{prefix}{entityUpper}>({entityLower}Object));",
                 $"",
                 $"            if ({entityLower}Object is null)",
                 $"                throw new ApiException(StatusCodeEnum.BAD_REQUEST);",
@@ -555,7 +562,7 @@ namespace CodeGenerator
                     $"            {entityLower}Object.FechaModificacion = DateTime.Now;",
                     $"            {entityLower}Object.Active = active;",
                     $"",
-                    $"            {entityLower}Object = await UpdateAsync({entityLower}Object.ObjectToObject<{prefix}{entityUpper}>());",
+                    $"            {entityLower}Object = await UpdateAsync(_mapper.Map<{prefix}{entityUpper}>({entityLower}Object));",
                     $"",
                     $"            if ({entityLower}Object is null)",
                     $"                throw new ApiException(StatusCodeEnum.BAD_REQUEST);",
@@ -579,6 +586,19 @@ namespace CodeGenerator
         public string GenerateDI(string entity)
         {
             return $"services.AddTransient<{entity.AsSpan(3).ToString().Replace("Object", string.Empty)}Service>();";
+        }
+
+        public List<string> GenerateMapByEntity(string entity)
+        {
+            List<string> content;
+
+            content = [
+                $"CreateMap<{entity}, {entity[..^"Object".Length]}>();",
+                $"CreateMap<{entity[..^"Object".Length]}, {entity}>();",
+                ""
+            ];
+
+            return content;
         }
 
         #region Utilities
