@@ -1,6 +1,5 @@
 ﻿using CodeGenerator.Helper;
 using CodeGenerator.Models;
-using System.Security.Principal;
 
 namespace CodeGenerator
 {
@@ -21,7 +20,6 @@ namespace CodeGenerator
             _filesModel = Utilities.GetFilesModel(_files);
             Utilities.RegenerateDirectory(_destinyPath);
         }
-
 
         public List<string> GenerateForAllEntities()
         {
@@ -64,7 +62,9 @@ namespace CodeGenerator
                 entityUpper = string.Concat(init.ToUpper(), entity.AsSpan(4));
                 entityLower = string.Concat(init.ToLower(), entity.AsSpan(4));
 
-                withCodigo = HasWord(file.Path, $"public string? {entityUpper}Codigo {{ get; set; }}");
+                withCodigo = 
+                    HasWord(file.Path, $"public string? {entityUpper}Codigo {{ get; set; }}") ||
+                    HasWord(file.Path, $"public string {entityUpper}Codigo {{ get; set; }} = null!;");
                 hasView = HasView(file);
 
                 GenerateController(prefix, entityUpper, entityLower, withCodigo, hasView);

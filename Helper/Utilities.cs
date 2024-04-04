@@ -46,5 +46,16 @@ namespace CodeGenerator.Helper
 
             File.WriteAllLines(pathFile, content);
         }
+
+        public static string GetRealName(string value)
+        {
+            const string Um = "um";
+            const string UmReplace = "a";
+
+            if (value.EndsWith(Um))
+                value = value[..(value.Length - (UmReplace.Length + 1))] + UmReplace;
+
+            return value;
+        }
     }
 }

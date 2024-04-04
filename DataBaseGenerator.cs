@@ -83,9 +83,12 @@ namespace GenerarCodigo
         private List<string> GetDBSetConext(string prespace)
         {
             List<string> content = [];
+            string name;
+
             foreach (FileModel file in _filesModel.Where(x => x.Name != _contextName))
             {
-                content.Add($"{prespace}public virtual DbSet<{file.Name}> {file.Name}s {{ get; set; }}");
+                name = Utilities.GetRealName(file.Name);
+                content.Add($"{prespace}public virtual DbSet<{name}> {name}s {{ get; set; }}");
             }
 
             return content;
@@ -94,9 +97,12 @@ namespace GenerarCodigo
         private List<string> GetConfigurationConext(string prespace)
         {
             List<string> content = [];
+            string name;
+
             foreach (FileModel file in _filesModel.Where(x => x.Name != _contextName))
             {
-                content.Add($"{prespace}modelBuilder.ApplyConfiguration(new {file.Name}Configuration());");
+                name = Utilities.GetRealName(file.Name);
+                content.Add($"{prespace}modelBuilder.ApplyConfiguration(new {name}Configuration());");
             }
 
             return content;
@@ -109,9 +115,12 @@ namespace GenerarCodigo
             List<string> content;
             List<string> template = [.. File.ReadAllLines(Path.Combine(_rootPath, $"{_contextName}.cs"))];
             int startSearchIndex = template.FindIndex(x => x == "    protected override void OnModelCreating(ModelBuilder modelBuilder)");
+            string classObjectName;
 
             foreach (FileModel file in _filesModel.Where(x => x.Name != _contextName))
             {
+                classObjectName = Utilities.GetRealName(file.Name);
+
                 content = [
                     "using Microsoft.EntityFrameworkCore;",
                     "using Microsoft.EntityFrameworkCore.Metadata.Builders;",
@@ -119,9 +128,9 @@ namespace GenerarCodigo
                     "",
                     "namespace SAMMAI.DataBase.Repository.Configurations;",
                     "",
-                    $"public class {file.Name}Configuration : IEntityTypeConfiguration<{file.Name}>",
+                    $"public class {classObjectName}Configuration : IEntityTypeConfiguration<{classObjectName}>",
                     "{",
-                    $"    public void Configure(EntityTypeBuilder<{file.Name}> builder)",
+                    $"    public void Configure(EntityTypeBuilder<{classObjectName}> builder)",
                     "    {"
                     ];
 
@@ -130,7 +139,7 @@ namespace GenerarCodigo
                 content.Add("    }");
                 content.Add("}");
 
-                GenerateFile("Configurations", $"{file.Name}Configuration.cs", content);
+                GenerateFile("Configurations", $"{classObjectName}Configuration.cs", content);
             }
         }
 
@@ -169,15 +178,17 @@ namespace GenerarCodigo
         {
             List<string> contentObject;
             List<string> contentEntity;
+            string classObjectName;
 
             foreach (FileModel file in _filesModel.Where(x => x.Name != _contextName))
             {
                 List<string> template = [.. File.ReadAllLines(file.Path)];
+                classObjectName = Utilities.GetRealName(file.Name);
 
                 contentObject = [
                     "namespace SAMMAI.Transverse.Models.Objects;",
                     "",
-                    $"public class {file.Name}Object",
+                    $"public class {classObjectName}Object",
                     "{"
                 ];
 
@@ -186,19 +197,19 @@ namespace GenerarCodigo
                 contentObject.AddRange(resp.Item2);
                 contentObject.Add("}");
 
-                GenerateFile("Objects", $"{file.Name}Object.cs", contentObject);
+                GenerateFile("Objects", $"{classObjectName}Object.cs", contentObject);
 
                 contentEntity = [
                     "namespace SAMMAI.DataBase.Repository.Entities;",
                     "",
-                    $"public partial class {file.Name} : {file.Name}Object",
+                    $"public partial class {classObjectName} : {file.Name}Object",
                     "{",
                 ];
 
                 contentEntity.AddRange(ExtractEntityEntity(resp.Item1, template));
                 contentEntity.Add("}");
 
-                GenerateFile("Entities", $"{file.Name}.cs", contentEntity);
+                GenerateFile("Entities", $"{classObjectName}.cs", contentEntity);
             }
         }
 
@@ -227,6 +238,10 @@ namespace GenerarCodigo
         public List<string> ExtractEntityEntity(int startIndex, List<string> template)
         {
             List<string> content = [];
+            const string umObj = "um>";
+            const string umObjReplace = "a>";
+            const string umClass = "um ";
+            const string umClassReplace = "a ";
 
             for (int i = startIndex; i < template.Count; i++)
             {
@@ -235,7 +250,19 @@ namespace GenerarCodigo
                     break;
 
                 if (linea != "")
+                {
+                    if (linea.Contains(umObj))
+                    {
+                        linea = linea.Replace(umObj, umObjReplace);
+                    }
+
+                    if (linea.Contains(umClass))
+                    {
+                        linea = linea.Replace(umClass, umClassReplace);
+                    }
+
                     content.Add(linea);
+                }                    
             }
 
             return content;

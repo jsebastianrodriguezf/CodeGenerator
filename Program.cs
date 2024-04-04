@@ -13,13 +13,13 @@ internal class Program
 
         Console.WriteLine("Start ...");
 
-        option = 1;
+        option = 0;
 
         switch (option)
         {
             case 0:
                 databaseGenerator = new DatabaseGenerator(
-                conextName: "SAMMAIContext",
+                conextName: "SAMMAIPrincipalContext",
                 rootPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\Models",
                 destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\Result");
 
@@ -33,7 +33,7 @@ internal class Program
                 string entity;
 
                 path = "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.Transverse\\SAMMAI.Transverse\\Models\\Objects";
-                entity = "GenDetalleConfiguracionAtributo";
+                entity = "GenConfiguracionCmm";
 
                 fileModel = new FileModel()
                 {
