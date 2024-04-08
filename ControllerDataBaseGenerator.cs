@@ -417,7 +417,7 @@ namespace CodeGenerator
                 $"            SAMMAIContext context,",
                 $"            Global global,",
                 $"            IMapper mapper)",
-                $"            : base(context)",
+                $"            : base(context, global)",
                 "        {",
                 $"            _logger = logger ?? throw new ArgumentNullException(nameof(logger));",
                 $"            _context = context ?? throw new ArgumentNullException(nameof(context));",

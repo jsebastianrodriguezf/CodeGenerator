@@ -202,7 +202,7 @@ namespace GenerarCodigo
                 contentEntity = [
                     "namespace SAMMAI.DataBase.Repository.Entities;",
                     "",
-                    $"public partial class {classObjectName} : {file.Name}Object",
+                    $"public partial class {classObjectName} : {classObjectName}Object",
                     "{",
                 ];
 
