@@ -62,7 +62,7 @@ namespace CodeGenerator
                 entityUpper = string.Concat(init.ToUpper(), entity.AsSpan(4));
                 entityLower = string.Concat(init.ToLower(), entity.AsSpan(4));
 
-                withCodigo = 
+                withCodigo =
                     HasWord(file.Path, $"public string? {entityUpper}Codigo {{ get; set; }}") ||
                     HasWord(file.Path, $"public string {entityUpper}Codigo {{ get; set; }} = null!;");
                 hasView = HasView(file);

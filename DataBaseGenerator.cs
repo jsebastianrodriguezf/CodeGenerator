@@ -15,7 +15,7 @@ namespace GenerarCodigo
         public DatabaseGenerator(
             string conextName,
             string rootPath,
-            string destityPath) 
+            string destityPath)
         {
             _contextName = conextName;
             _rootPath = rootPath;
@@ -75,7 +75,7 @@ namespace GenerarCodigo
             contenidoObject.AddRange([
                 "    }",
                 "}",
-                ]);
+            ]);
 
             GenerateFile("Context", $"{_contextName}.cs", contenidoObject);
         }
@@ -110,7 +110,7 @@ namespace GenerarCodigo
         #endregion
 
         #region GenerateConfiguration
-        public void GenerateConfiguration() 
+        public void GenerateConfiguration()
         {
             List<string> content;
             List<string> template = [.. File.ReadAllLines(Path.Combine(_rootPath, $"{_contextName}.cs"))];
@@ -152,8 +152,8 @@ namespace GenerarCodigo
 
             for (int i = startSearchIndex; i < template.Count; i++)
             {
-                textLine = template[i];                
-                
+                textLine = template[i];
+
                 if (textLine.Contains($"modelBuilder.Entity<{className}>(entity =>"))
                 {
                     for (int j = i + 2; !template[j].Contains("});"); j++)
@@ -174,7 +174,7 @@ namespace GenerarCodigo
         #endregion
 
         #region GenerateEntities
-        public void GenerateEntities() 
+        public void GenerateEntities()
         {
             List<string> contentObject;
             List<string> contentEntity;
@@ -218,7 +218,7 @@ namespace GenerarCodigo
             const int indexStart = 7;
             List<string> content = [];
             int i = indexStart;
-            
+
             for (; i < template.Count; i++)
             {
                 string line = template[i];
@@ -262,7 +262,7 @@ namespace GenerarCodigo
                     }
 
                     content.Add(linea);
-                }                    
+                }
             }
 
             return content;
@@ -270,7 +270,7 @@ namespace GenerarCodigo
         #endregion
 
         #region Utilities
-        private void GenerateFile(string directory, string file, List<string> content) 
+        private void GenerateFile(string directory, string file, List<string> content)
             => Utilities.GenerateFile(_destinyPath, directory, file, content);
         #endregion
     }

@@ -10,10 +10,12 @@ internal class Program
         int option;
         DatabaseGenerator databaseGenerator;
         ControllerDataBaseGenerator controllerDataBaseGenerator;
+        FolderTableGenerator folderTableGenerator;
+        SPsTableGenerator spsTableGenerator;
 
         Console.WriteLine("Start ...");
 
-        option = 0;
+        option = 4;
 
         switch (option)
         {
@@ -33,7 +35,7 @@ internal class Program
                 string entity;
 
                 path = "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.Transverse\\SAMMAI.Transverse\\Models\\Objects";
-                entity = "GenConfiguracionCmm";
+                entity = "GenSeccionFormulario";
 
                 fileModel = new FileModel()
                 {
@@ -57,6 +59,25 @@ internal class Program
                 destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\Microservice");
 
                 response = string.Join(Environment.NewLine, controllerDataBaseGenerator.GenerateForAllEntities());
+
+                break;
+
+            case 3:
+                folderTableGenerator = new FolderTableGenerator(
+                rootPath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.DataBase\\SAMMAI.DBObjects\\Tables",
+                configRootPath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.DataBase\\SAMMAI.DataBase\\Repository\\Configurations",
+                destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\DBObjects\\Tables");
+
+                response = string.Join(Environment.NewLine, folderTableGenerator.GenerateFolders());
+
+                break;
+
+            case 4:
+                spsTableGenerator = new SPsTableGenerator(
+                rootPath: "C:\\Workspaces\\Degenerador\\Degenerador\\sps",
+                destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\SPs");
+
+                response = string.Join(Environment.NewLine, spsTableGenerator.GenerateSPs());
 
                 break;
 
