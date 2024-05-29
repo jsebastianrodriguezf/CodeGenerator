@@ -1,23 +1,33 @@
 ﻿using CodeGenerator.Helper;
 using CodeGenerator.Models;
+using System.Collections.Generic;
+using System.IO;
 
 namespace CodeGenerator
 {
     public class ControllerDataBaseGenerator
     {
         private readonly string _rootPath;
+        private readonly string _destinyPath;
+        private readonly List<FileModel> _controllerModel;
+        private readonly List<FileModel> _serviceModel;
         private readonly List<string> _files;
         private readonly List<FileModel> _filesModel;
-        private readonly string _destinyPath;
 
         public ControllerDataBaseGenerator(
             string rootPath,
-            string destityPath)
+            string destityPath,
+            string controllerPath,
+            string servicePath)
         {
             _rootPath = rootPath;
             _destinyPath = destityPath;
             _files = [.. Directory.GetFiles(_rootPath)];
             _filesModel = Utilities.GetFilesModel(_files);
+
+            _controllerModel = Utilities.GetFilesModel([.. Directory.GetFiles(controllerPath)]);
+            _serviceModel = Utilities.GetFilesModel([.. Directory.GetFiles(servicePath)]);
+
             Utilities.RegenerateDirectory(_destinyPath);
         }
 
@@ -54,6 +64,8 @@ namespace CodeGenerator
             string init;
             bool withCodigo;
             bool hasView;
+            bool hasCmm;
+            bool hasPrincipalField;
 
             try
             {
@@ -65,10 +77,16 @@ namespace CodeGenerator
                 withCodigo =
                     HasWord(file.Path, $"public string? {entityUpper}Codigo {{ get; set; }}") ||
                     HasWord(file.Path, $"public string {entityUpper}Codigo {{ get; set; }} = null!;");
+
+                hasPrincipalField =
+                    HasWord(file.Path, $"public string? {entityUpper} {{ get; set; }}") ||
+                    HasWord(file.Path, $"public string {entityUpper} {{ get; set; }} = null!;");
+
+                hasCmm = HasWord(file.Path, $"public string? Cmm {{ get; set; }}");
                 hasView = HasView(file);
 
-                GenerateController(prefix, entityUpper, entityLower, withCodigo, hasView);
-                GenerateService(prefix, entityUpper, entityLower, withCodigo, hasView);
+                GenerateController(prefix, entityUpper, entityLower, withCodigo, hasView, hasCmm);
+                GenerateService(prefix, entityUpper, entityLower, withCodigo, hasView, hasCmm, hasPrincipalField);
 
                 return string.Empty;
             }
@@ -78,7 +96,7 @@ namespace CodeGenerator
             }
         }
 
-        public void GenerateController(string prefix, string entityUpper, string entityLower, bool WithCodigo, bool hasView)
+        public void GenerateController(string prefix, string entityUpper, string entityLower, bool WithCodigo, bool hasView, bool hasCmm)
         {
             List<string> content;
             string controllerRoute;
@@ -86,11 +104,12 @@ namespace CodeGenerator
             controllerRoute = "$\"{BaseApi}/" + $"{entityLower}\"";
 
             content = [
-                $"using SAMMAI.DataBase.Utility.ActionFilters;",
                 $"using Microsoft.AspNetCore.Mvc;",
                 $"using SAMMAI.DataBase.Services.Implementations;",
+                $"using SAMMAI.DataBase.Utility.ActionFilters;",
                 $"using SAMMAI.Transverse.Constants;",
                 $"using SAMMAI.Transverse.Helpers;",
+                $"using SAMMAI.Transverse.Models.Endpoints.DataBase.{entityUpper};",
                 $"using SAMMAI.Transverse.Models.Response.BaseApi;",
                 $"using static SAMMAI.DataBase.Utility.Constants.ApiRoutesConstants;",
                 $"",
@@ -159,12 +178,67 @@ namespace CodeGenerator
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
                     $"        public async Task<ActionResult<object>> GetFullById(int id)",
                     "        {",
-                    $"            View{prefix}{entityUpper}Object response = await _{entityLower}Service.GetFullById (id);",
+                    $"            View{prefix}{entityUpper}Object response = await _{entityLower}Service.GetFullById(id);",
                     $"",
                     $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                     "        }",
                     $""
+                ]);
+
+            content.AddRange([
+                $"        /// <summary>",
+                $"        /// Gets a set of {entityUpper} by ids",
+                $"        /// </summary>",
+                $"        /// <param name=\"ids\"></param>",
+                $"        /// <returns></returns>",
+                $"        /// <remarks>",
+                $"        /// Gets a set of {entityUpper} by ids",
+                $"        /// </remarks>",
+                $"        /// <response code=\"200\">Success: Returns a list of {entityUpper} objects</response>",
+                $"        [IdentifierFilter]",
+                $"        [HttpPost]",
+                $"        [Route(\"get-set\")]",
+                $"        [Produces(GeneralConstants.ContentType.Json)]",
+                $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<{prefix}{entityUpper}Object>>), (int)StatusCodeEnum.OK)]",
+                $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.NOT_FOUND)]",
+                $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
+                $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
+                $"        public async Task<ActionResult<object>> GetSetByIds([FromBody] List<int> ids)",
+                "        {",
+                $"            List<{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetSetByIds(ids);",
+                $"",
+                $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
+                "        }",
+                $""
             ]);
+
+            if (hasView)
+                content.AddRange([
+                    $"        /// <summary>",
+                    $"        /// Gets a full set of {entityUpper} by ids",
+                    $"        /// </summary>",
+                    $"        /// <param name=\"ids\"></param>",
+                    $"        /// <returns></returns>",
+                    $"        /// <remarks>",
+                    $"        /// Gets a full set of {entityUpper} by ids",
+                    $"        /// </remarks>",
+                    $"        /// <response code=\"200\">Success: Returns a list of full {entityUpper} objects</response>",
+                    $"        [IdentifierFilter]",
+                    $"        [HttpPost]",
+                    $"        [Route(\"get-set/full\")]",
+                    $"        [Produces(GeneralConstants.ContentType.Json)]",
+                    $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<View{prefix}{entityUpper}Object>>), (int)StatusCodeEnum.OK)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.NOT_FOUND)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
+                    $"        public async Task<ActionResult<object>> GetFullSetByIds([FromBody] List<int> ids)",
+                    "        {",
+                    $"            List<View{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetFullSetByIds(ids);",
+                    $"",
+                    $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
+                    "        }",
+                    $""
+                ]);
 
             if (WithCodigo)
             {
@@ -224,7 +298,64 @@ namespace CodeGenerator
             ]);
             }
 
-            content.AddRange([
+            if (hasCmm)
+            {
+                content.AddRange([
+                $"        /// <summary>",
+                $"        /// Gets all {entityUpper}",
+                $"        /// </summary>",
+                $"        /// <param name=\"cmmKeyword\">Search by cmm</param>",
+                $"        /// <returns></returns>",
+                $"        /// <remarks>",
+                $"        /// Gets all {entityUpper}",
+                $"        /// </remarks>",
+                $"        /// <response code=\"200\">Success: Returns a list of {entityUpper} object</response>",
+                $"        [IdentifierFilter]",
+                $"        [HttpGet]",
+                $"        [Route(\"all\")]",
+                $"        [Produces(GeneralConstants.ContentType.Json)]",
+                $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<{prefix}{entityUpper}Object>>), (int)StatusCodeEnum.OK)]",
+                $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
+                $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
+                $"        public async Task<ActionResult<object>> GetAll([FromQuery] string? cmmKeyword = null)",
+                "        {",
+                $"            List<{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAll(cmmKeyword);",
+                $"",
+                $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
+                "        }",
+                $""
+                    ]);
+
+                if (hasView)
+                    content.AddRange([
+                        $"        /// <summary>",
+                    $"        /// Gets all full {entityUpper}",
+                    $"        /// </summary>",
+                    $"        /// <param name=\"cmmKeyword\">Search by cmm</param>",
+                    $"        /// <returns></returns>",
+                    $"        /// <remarks>",
+                    $"        /// Gets all full {entityUpper}",
+                    $"        /// </remarks>",
+                    $"        /// <response code=\"200\">Success: Returns a full list of {entityUpper} object</response>",
+                    $"        [IdentifierFilter]",
+                    $"        [HttpGet]",
+                    $"        [Route(\"all/full\")]",
+                    $"        [Produces(GeneralConstants.ContentType.Json)]",
+                    $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<View{prefix}{entityUpper}Object>>), (int)StatusCodeEnum.OK)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
+                    $"        public async Task<ActionResult<object>> GetAllFull([FromQuery] string? cmmKeyword = null)",
+                    "        {",
+                    $"            List<View{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAllFull(cmmKeyword);",
+                    $"",
+                    $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
+                    "        }",
+                    $""
+                    ]);
+            }
+            else
+            {
+                content.AddRange([
                 $"        /// <summary>",
                 $"        /// Gets all {entityUpper}",
                 $"        /// </summary>",
@@ -249,9 +380,9 @@ namespace CodeGenerator
                 $""
                     ]);
 
-            if (hasView)
-                content.AddRange([
-                    $"        /// <summary>",
+                if (hasView)
+                    content.AddRange([
+                        $"        /// <summary>",
                     $"        /// Gets all full {entityUpper}",
                     $"        /// </summary>",
                     $"        /// <returns></returns>",
@@ -273,7 +404,8 @@ namespace CodeGenerator
                     $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                     "        }",
                     $""
-                ]);
+                    ]);
+            }
 
             content.AddRange([
                 $"        /// <summary>",
@@ -381,27 +513,35 @@ namespace CodeGenerator
             content.AddRange([
                 $"        #endregion",
                 $"",
-                $"        #region Custom Endpoints",
-                $"",
+                $"        #region Custom Endpoints"
+            ]);
+
+            content.AddRange(GetCustomServices(_controllerModel.FirstOrDefault(x => x.Name == $"{entityUpper}Controller"), "Endpoints"));
+            
+            content.AddRange([
                 $"        #endregion",
                 "    }",
-                "}",
-                $""
+                "}"
             ]);
 
             GenerateFile("Controllers", $"{entityUpper}Controller.cs", content);
         }
 
-        public void GenerateService(string prefix, string entityUpper, string entityLower, bool WithCodigo, bool hasView)
+        public void GenerateService(string prefix, string entityUpper, string entityLower, bool WithCodigo, bool hasView, bool hasCmm, bool hasPrincipalField)
         {
             List<string> content;
 
             content = [
                 $"using AutoMapper;",
+                $"using Microsoft.Data.SqlClient;",
                 $"using SAMMAI.DataBase.Repository.Context;",
                 $"using SAMMAI.DataBase.Repository.Entities;",
                 $"using SAMMAI.DataBase.Repository.Manager;",
+                $"using SAMMAI.DataBase.Repository.StorePrecedure.Entities;",
                 $"using SAMMAI.Transverse.Helpers;",
+                $"using SAMMAI.Transverse.Models.Endpoints.DataBase.{entityUpper};",
+                $"using System.Data;",
+                $"using static SAMMAI.Transverse.Constants.GeneralConstants;",
                 $"",
                 $"namespace SAMMAI.DataBase.Services.Implementations",
                 "{",
@@ -430,21 +570,54 @@ namespace CodeGenerator
                 "        {",
                 $"            IEnumerable<{prefix}{entityUpper}> {entityLower}s = await GetFilteredAsync(x => x.Id == id && x.Eid == _global.Eid && x.Active);",
                 $"",
-                $"            return {entityLower}s.ToList().FirstOrDefault() ?? throw new ApiException(StatusCodeEnum.NOT_FOUND);",
+                $"            return {entityLower}s.FirstOrDefault() ?? throw new ApiException(StatusCodeEnum.NOT_FOUND);",
                 "        }",
                 $""
             ];
 
             if (hasView)
                 content.AddRange([
-                $"        public async Task<View{prefix}{entityUpper}Object> GetFullById(int id)",
+                    $"        public async Task<View{prefix}{entityUpper}Object> GetFullById(int id)",
                     "        {",
                     $"            IEnumerable<View{prefix}{entityUpper}> {entityLower}s = await GetViewFilteredAsync(x => x.Id == id && x.Eid == _global.Eid && x.Active);",
                     $"",
-                    $"            return {entityLower}s.ToList().FirstOrDefault() ?? throw new ApiException(StatusCodeEnum.NOT_FOUND);",
+                    $"            return {entityLower}s.FirstOrDefault() ?? throw new ApiException(StatusCodeEnum.NOT_FOUND);",
                     "        }",
                     $""
+                ]);
+
+            content.AddRange([
+                $"        public Task<List<{prefix}{entityUpper}Object>> GetSetByIds(List<int> ids)",
+                "        {",
+                $"            IEnumerable<{prefix}{entityUpper}> {entityLower}s;",
+                $"",
+                $"            {entityLower}s = (",
+                $"                from {entityLower} in _context.Set<{prefix}{entityUpper}>()",
+                $"                join idsObject in ids on {entityLower}.Id equals idsObject",
+                $"                where {entityLower}.Eid == _global.Eid && {entityLower}.Active",
+                $"                select {entityLower});",
+                $"",
+                $"            return Task.FromResult(_mapper.Map<List<{prefix}{entityUpper}Object>>({entityLower}s));",
+                "        }",
+                $""
             ]);
+
+            if (hasView)
+                content.AddRange([
+                    $"        public Task<List<View{prefix}{entityUpper}Object>> GetFullSetByIds(List<int> ids)",
+                    "        {",
+                    $"            IEnumerable<View{prefix}{entityUpper}> {entityLower}s;",
+                    $"",
+                    $"            {entityLower}s = (",
+                    $"                from {entityLower} in _context.Set<View{prefix}{entityUpper}>()",
+                    $"                join idsObject in ids on {entityLower}.Id equals idsObject",
+                    $"                where {entityLower}.Eid == _global.Eid && {entityLower}.Active",
+                    $"                select {entityLower});",
+                    $"",
+                    $"            return Task.FromResult(_mapper.Map<List<View{prefix}{entityUpper}Object>>({entityLower}s));",
+                    "        }",
+                    $""
+                ]);
 
             if (WithCodigo)
             {
@@ -453,7 +626,7 @@ namespace CodeGenerator
                     "        {",
                     $"            IEnumerable<{prefix}{entityUpper}> {entityLower}s = await GetFilteredAsync(x => x.{entityUpper}Codigo == codigo && x.Eid == _global.Eid && x.Active);",
                     $"",
-                    $"            return {entityLower}s.ToList().FirstOrDefault() ?? throw new ApiException(StatusCodeEnum.NOT_FOUND);",
+                    $"            return {entityLower}s.FirstOrDefault() ?? throw new ApiException(StatusCodeEnum.NOT_FOUND);",
                     "        }",
                     $""
                 ]);
@@ -464,32 +637,66 @@ namespace CodeGenerator
                         "        {",
                         $"            IEnumerable<View{prefix}{entityUpper}> {entityLower}s = await GetViewFilteredAsync(x => x.{entityUpper}Codigo == codigo && x.Eid == _global.Eid && x.Active);",
                         $"",
-                        $"            return {entityLower}s.ToList().FirstOrDefault() ?? throw new ApiException(StatusCodeEnum.NOT_FOUND);",
+                        $"            return {entityLower}s.FirstOrDefault() ?? throw new ApiException(StatusCodeEnum.NOT_FOUND);",
                         "        }",
                         $""
                     ]);
             }
 
-            content.AddRange([
-                $"        public async Task<List<{prefix}{entityUpper}Object>> GetAll()",
-                "        {",
-                $"            IEnumerable<{prefix}{entityUpper}Object> {entityLower}s = await GetFilteredAsync(x => x.Eid == _global.Eid && x.Active);",
-                $"",
-                $"            return {entityLower}s.ToList();",
-                "        }",
-                $""
-            ]);
-
-            if (hasView)
+            if (hasCmm)
+            {
                 content.AddRange([
-                    $"        public async Task<List<View{prefix}{entityUpper}Object>> GetAllFull()",
+                    $"        public async Task<List<{prefix}{entityUpper}Object>> GetAll(string? cmmKeyword)",
                     "        {",
-                    $"            IEnumerable<View{prefix}{entityUpper}Object> {entityLower}s = await GetViewFilteredAsync(x => x.Eid == _global.Eid && x.Active);",
+                    $"            IEnumerable<{prefix}{entityUpper}Object> {entityLower}s = string.IsNullOrWhiteSpace(cmmKeyword) ?",
+                    $"                await GetFilteredAsync(x => x.Eid == _global.Eid && x.Active) :",
+                    $"                await GetFilteredAsync(x => {
+                            (hasPrincipalField ? $"(x.Cmm == null ? x.{entityUpper}.Contains(cmmKeyword) : x.Cmm.Contains(cmmKeyword))" : $"x.Cmm != null && x.Cmm.Contains(cmmKeyword)")
+                        } &&  x.Eid == _global.Eid && x.Active);",
                     $"",
                     $"            return {entityLower}s.ToList();",
                     "        }",
                     $""
                 ]);
+
+                if (hasView)
+                    content.AddRange([
+                        $"        public async Task<List<View{prefix}{entityUpper}Object>> GetAllFull(string? cmmKeyword)",
+                        "        {",
+                        $"            IEnumerable<View{prefix}{entityUpper}Object> {entityLower}s = string.IsNullOrWhiteSpace(cmmKeyword) ?",
+                        $"                await GetViewFilteredAsync(x => x.Eid == _global.Eid && x.Active) :",
+                        $"                await GetViewFilteredAsync(x => {
+                                (hasPrincipalField ? $"(x.Cmm == null ? x.{entityUpper}.Contains(cmmKeyword) : x.Cmm.Contains(cmmKeyword))" : $"x.Cmm != null && x.Cmm.Contains(cmmKeyword)")
+                            } &&  x.Eid == _global.Eid && x.Active);",
+                        $"",
+                        $"            return {entityLower}s.ToList();",
+                        "        }",
+                        $""
+                        ]);
+            }
+            else
+            {
+                content.AddRange([
+                    $"        public async Task<List<{prefix}{entityUpper}Object>> GetAll()",
+                    "        {",
+                    $"            IEnumerable<{prefix}{entityUpper}Object> {entityLower}s = await GetFilteredAsync(x => x.Eid == _global.Eid && x.Active);",
+                    $"",
+                    $"            return {entityLower}s.ToList();",
+                    "        }",
+                    $""
+                ]);
+
+                if (hasView)
+                    content.AddRange([
+                        $"        public async Task<List<View{prefix}{entityUpper}Object>> GetAllFull()",
+                        "        {",
+                        $"            IEnumerable<View{prefix}{entityUpper}Object> {entityLower}s = await GetViewFilteredAsync(x => x.Eid == _global.Eid && x.Active);",
+                        $"",
+                        $"            return {entityLower}s.ToList();",
+                        "        }",
+                        $""
+                        ]);
+            }
 
             content.AddRange([
                 $"        public async Task<{prefix}{entityUpper}Object> Insert({prefix}{entityUpper}Object input)",
@@ -572,15 +779,50 @@ namespace CodeGenerator
             content.AddRange([
                 $"        #endregion",
                 $"",
-                $"        #region Custom Services",
-                $"",
+                $"        #region Custom Services"
+            ]);
+
+            content.AddRange(GetCustomServices(_serviceModel.FirstOrDefault(x => x.Name == $"{entityUpper}Service"), "Services"));
+
+            content.AddRange([
                 $"        #endregion",
                 "    }",
-                "}",
-                $""
+                "}"
             ]);
 
             GenerateFile("Services", $"{entityUpper}Service.cs", content);
+        }
+
+        private List<string> GetCustomServices(FileModel? fileModel, string regionName)
+        {
+            List<string> customLines;
+            string startKey = "#region Custom " + regionName;
+            const string endKey = "#endregion";
+
+            customLines = [];
+
+            if (fileModel is null)
+                return [""];
+
+            List<string> template = [.. File.ReadAllLines(fileModel.Path)];
+
+            for (int i = 0; i < template.Count; i++)
+            {
+                string line = template[i];
+                if (line.Contains(startKey))
+                {
+                    for (i = i + 1; i < template.Count; i++)
+                    {
+                        line = template[i];
+                        if (line.Contains(endKey))
+                            i = template.Count;
+                        else
+                            customLines.Add(line);
+                    }
+                }
+            }
+
+            return customLines.Count > 0 ? customLines : [""];
         }
 
         public string GenerateDI(string entity)

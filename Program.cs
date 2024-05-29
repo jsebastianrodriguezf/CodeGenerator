@@ -15,7 +15,7 @@ internal class Program
 
         Console.WriteLine("Start ...");
 
-        option = 4;
+        option = 2;
 
         switch (option)
         {
@@ -35,7 +35,7 @@ internal class Program
                 string entity;
 
                 path = "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.Transverse\\SAMMAI.Transverse\\Models\\Objects";
-                entity = "GenSeccionFormulario";
+                entity = "GenFormularioCatalogoEquipo";
 
                 fileModel = new FileModel()
                 {
@@ -46,7 +46,9 @@ internal class Program
 
                 controllerDataBaseGenerator = new ControllerDataBaseGenerator(
                 rootPath: path,
-                destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\Microservice");
+                destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\Microservice",
+                controllerPath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.DataBase\\SAMMAI.DataBase\\Controllers",
+                servicePath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.DataBase\\SAMMAI.DataBase\\Services\\Implementations");
 
 
                 response = controllerDataBaseGenerator.GenerateByEntity(entity, fileModel);
@@ -56,7 +58,9 @@ internal class Program
             case 2:
                 controllerDataBaseGenerator = new ControllerDataBaseGenerator(
                 rootPath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.Transverse\\SAMMAI.Transverse\\Models\\Objects",
-                destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\Microservice");
+                destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\Microservice",
+                controllerPath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.DataBase\\SAMMAI.DataBase\\Controllers",
+                servicePath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.DataBase\\SAMMAI.DataBase\\Services\\Implementations");
 
                 response = string.Join(Environment.NewLine, controllerDataBaseGenerator.GenerateForAllEntities());
 
