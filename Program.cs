@@ -15,7 +15,7 @@ internal class Program
 
         Console.WriteLine("Start ...");
 
-        option = 2;
+        option = 5;
 
         switch (option)
         {
@@ -78,10 +78,19 @@ internal class Program
 
             case 4:
                 spsTableGenerator = new SPsTableGenerator(
-                rootPath: "C:\\Workspaces\\Degenerador\\Degenerador\\sps",
+                rootPath: "C:\\Workspaces\\GIT\\CodeGenerator\\BaseScript",
                 destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\SPs");
 
                 response = string.Join(Environment.NewLine, spsTableGenerator.GenerateSPs());
+
+                break;
+
+            case 5:
+                spsTableGenerator = new SPsTableGenerator(
+                rootPath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.DataBase\\SAMMAI.DBObjects\\Views",
+                destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\SPs");
+
+                response = string.Join(Environment.NewLine, spsTableGenerator.GenerateBasicViews());
 
                 break;
 

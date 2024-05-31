@@ -59,7 +59,7 @@ namespace CodeGenerator
                     Utilities.GenerateFile(_destinyPath, "Roots", tableName + ".txt", spTableRoot);
 
                     i += 1;
-                    linesByTable = []; 
+                    linesByTable = [];
                 }
                 else
                 {
@@ -107,9 +107,19 @@ namespace CodeGenerator
                 {
                     if (isView)
                     {
-                        int endViewIndex = sp.FindLastIndex(x => x.StartsWith("WHERE [") && x.EndsWith("].active=1")) + 6;
-                        Utilities.GenerateFile(_destinyPath, Path.Combine("Views", tableName), viewName, sp.GetRange(0, endViewIndex));
+                        int endViewIndex = sp.FindLastIndex(x => x.StartsWith("WHERE [") && x.EndsWith("].active=1"));
+
+                        if (endViewIndex == -1)
+                            endViewIndex = sp.FindLastIndex(x => x.Contains("INNER JOIN ["));
+
+                        endViewIndex += 6;
+
+                        List<string> viewContent = sp.GetRange(0, endViewIndex);
+
+                        Utilities.GenerateFile(_destinyPath, Path.Combine("Views", tableName), viewName, viewContent);
                         spRoot.Add(Path.Combine("Views", tableName, viewName).Replace(@"\", "/"));
+
+                        GenerateBasicView(viewContent, tableName, ref spRoot);
 
                         sp = sp.GetRange(endViewIndex, sp.Count - endViewIndex);
                     }
@@ -145,6 +155,104 @@ namespace CodeGenerator
             }
 
             return spRoot;
+        }
+
+        public string GenerateBasicViews()
+        {
+            List<string> spRoot = [];
+            List<string> allViewsContent = [];
+            List<FileModel> fileModels = Utilities.GetFilesModel([..
+                Directory.GetFileSystemEntries(_rootPath).
+                    Select(x =>
+                        Path.Combine(x, $"view_{x.Split(@"\").Last()}.sql"))]);
+            string tableName;
+
+            foreach (FileModel fileModel in fileModels)
+            {
+                if (!File.Exists(fileModel.Path)) continue;
+
+                List<string> viewTemplate = [.. File.ReadAllLines(fileModel.Path)];
+                tableName = fileModel.Name.Replace("view_", "");
+
+                allViewsContent.AddRange(GenerateBasicView(viewTemplate, tableName, ref spRoot));
+                allViewsContent.Add("------------------------------------------");
+                allViewsContent.Add($"PRINT 'view_{tableName}_base'");
+                allViewsContent.Add("------------------------------------------");
+
+                Utilities.GenerateFile(_destinyPath, Path.Combine("Views", tableName), $"{fileModel.Name}.sql", viewTemplate);
+            }
+
+            Utilities.GenerateFile(_destinyPath, "Roots", "01_All_views" + ".txt", spRoot);
+            Utilities.GenerateFile(_destinyPath, "AllBasicsViews", "Views" + ".sql", allViewsContent);
+
+            return "Ok";
+        }
+
+        private List<string> GenerateBasicView(List<string> seedViewContent, string tableName, ref List<string> spRoot)
+        {
+            List<string> basicViewContent = [];
+            string tableNameNotDot = tableName.Replace(".", "_");
+            string basicViewName = $"view_{tableNameNotDot}_base";
+            string viewName = $"view_{tableNameNotDot}";
+            bool inAForeignTable = false;
+
+            string tableNameFilter;
+
+            for (int i = 0; i < seedViewContent.Count; i++)
+            {
+                string line = seedViewContent[i];
+                if (line.Contains($"[{viewName}]"))
+                    line = line.Replace($"[{viewName}]", $"[{basicViewName}]");
+
+                if (line.Contains($"] AS [{tableNameNotDot}_id_"))
+                    tableNameFilter = $"] AS [{tableNameNotDot}_id_";
+                else
+                    tableNameFilter = $"] AS [id_";
+
+                if (!line.Contains("].[id_usuario_modifico] AS [id_usuario_modifico],", StringComparison.CurrentCultureIgnoreCase) &&
+                    !line.Contains("].[id_usuario_creo] AS [id_usuario_creo],", StringComparison.CurrentCultureIgnoreCase) &&
+                    line.Contains(tableNameFilter, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    basicViewContent.Add(line);
+
+                    i++;
+                    line = seedViewContent[i];
+                    basicViewContent.Add(line);
+
+                    inAForeignTable = true;
+                }
+                else
+                {
+                    if (inAForeignTable &&
+                        !line.TrimStart().StartsWith($"[{tableName}]") &&
+                        !line.TrimStart().Equals("[empresaCodigo].[empresa] As [multiempresa]"))
+                    {
+                        if (
+                            line.EndsWith("_codigo],") ||
+                            line.EndsWith("_codigoInventario],") ||
+                            line.EndsWith("_serial],") ||
+                            line.EndsWith("_nit],") ||
+                            line.EndsWith("_identificacion],") ||
+                            line.EndsWith("_numero],") ||
+                            line.EndsWith("prefijo],") ||
+                            line.EndsWith("identificador],"))
+                        {
+                            basicViewContent.Add(line);
+                        }
+
+                        continue;
+                    }
+
+                    inAForeignTable = false;
+                    basicViewContent.Add(line);
+                }
+            }
+
+
+            Utilities.GenerateFile(_destinyPath, Path.Combine("Views", tableName), $"{basicViewName}.sql", basicViewContent);
+            spRoot.Add(Path.Combine("Views", tableName, $"{basicViewName}.sql").Replace(@"\", "/"));
+
+            return basicViewContent;
         }
     }
 }

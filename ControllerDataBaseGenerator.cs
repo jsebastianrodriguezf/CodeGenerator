@@ -1,7 +1,5 @@
 ﻿using CodeGenerator.Helper;
 using CodeGenerator.Models;
-using System.Collections.Generic;
-using System.IO;
 
 namespace CodeGenerator
 {
@@ -517,7 +515,7 @@ namespace CodeGenerator
             ]);
 
             content.AddRange(GetCustomServices(_controllerModel.FirstOrDefault(x => x.Name == $"{entityUpper}Controller"), "Endpoints"));
-            
+
             content.AddRange([
                 $"        #endregion",
                 "    }",

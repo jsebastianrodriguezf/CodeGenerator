@@ -22,7 +22,7 @@ namespace CodeGenerator.Helper
                     return new FileModel()
                     {
                         Path = x,
-                        Name = file.First(),
+                        Name = string.Join(".", file.GetRange(0, file.Count - 1)),
                         Extension = file.Last()
                     };
                 }).
