@@ -162,7 +162,12 @@ namespace GenerarCodigo
                         if (textLine.Length >= prespace.Length)
                             textLine = textLine[prespace.Length..];
 
-                        content.Add(textLine.Replace("entity", "builder"));
+                        textLine = textLine.Replace("entity", "builder");
+
+                        if (textLine.Contains($"builder.Property(e => e.{className}1)"))
+                            textLine = textLine.Replace($"builder.Property(e => e.{className}1)", $"builder.Property(e => e.{className})");
+
+                        content.Add(textLine);
                     }
 
                     return content;
@@ -192,7 +197,7 @@ namespace GenerarCodigo
                     "{"
                 ];
 
-                (int, List<string>) resp = ExtractEntityObject(template);
+                (int, List<string>) resp = ExtractEntityObject(template, classObjectName);
 
                 contentObject.AddRange(resp.Item2);
                 contentObject.Add("}");
@@ -213,7 +218,7 @@ namespace GenerarCodigo
             }
         }
 
-        public (int, List<string>) ExtractEntityObject(List<string> template)
+        public (int, List<string>) ExtractEntityObject(List<string> template, string className)
         {
             const int indexStart = 7;
             List<string> content = [];
@@ -226,10 +231,15 @@ namespace GenerarCodigo
                     break;
 
                 if (line != "")
+                {
                     if (line.Contains("public string Eid { get; set; } = null!;") || line.Contains("public string Uid { get; set; } = null!;"))
-                        content.Add(line.Replace("string", "string?").Replace(" = null!;", string.Empty));
-                    else
-                        content.Add(line);
+                        line = line.Replace("string", "string?").Replace(" = null!;", string.Empty);
+
+                    if (line.Contains($" {className}1 {{ get; set; }}"))
+                        line = line.Replace($" {className}1 {{ get; set; }}", $" {className} {{ get; set; }}");
+
+                    content.Add(line);
+                }   
             }
 
             return (i, content);
@@ -252,14 +262,10 @@ namespace GenerarCodigo
                 if (linea != "")
                 {
                     if (linea.Contains(umObj))
-                    {
                         linea = linea.Replace(umObj, umObjReplace);
-                    }
 
                     if (linea.Contains(umClass))
-                    {
                         linea = linea.Replace(umClass, umClassReplace);
-                    }
 
                     content.Add(linea);
                 }

@@ -1,13 +1,14 @@
 ﻿using CodeGenerator;
 using CodeGenerator.Models;
 using GenerarCodigo;
+using static CodeGenerator.Enums.BaseEnums;
 
 internal class Program
 {
     private static void Main(string[] args)
     {
         string response;
-        int option;
+        InputEnum option;
         DatabaseGenerator databaseGenerator;
         ControllerDataBaseGenerator controllerDataBaseGenerator;
         FolderTableGenerator folderTableGenerator;
@@ -15,11 +16,11 @@ internal class Program
 
         Console.WriteLine("Start ...");
 
-        option = 5;
+        option = InputEnum.ControllerDataBaseGenerator;
 
         switch (option)
         {
-            case 0:
+            case InputEnum.DatabaseGenerator:
                 databaseGenerator = new DatabaseGenerator(
                 conextName: "SAMMAIPrincipalContext",
                 rootPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\Models",
@@ -29,7 +30,7 @@ internal class Program
 
                 break;
 
-            case 1:
+            case InputEnum.SingleControllerDataBaseGenerator:
                 FileModel fileModel;
                 string path;
                 string entity;
@@ -55,7 +56,7 @@ internal class Program
 
                 break;
 
-            case 2:
+            case InputEnum.ControllerDataBaseGenerator:
                 controllerDataBaseGenerator = new ControllerDataBaseGenerator(
                 rootPath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.Transverse\\SAMMAI.Transverse\\Models\\Objects",
                 destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\Microservice",
@@ -66,7 +67,7 @@ internal class Program
 
                 break;
 
-            case 3:
+            case InputEnum.FolderTableGenerator:
                 folderTableGenerator = new FolderTableGenerator(
                 rootPath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.DataBase\\SAMMAI.DBObjects\\Tables",
                 configRootPath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.DataBase\\SAMMAI.DataBase\\Repository\\Configurations",
@@ -76,7 +77,7 @@ internal class Program
 
                 break;
 
-            case 4:
+            case InputEnum.SPsTableGenerator:
                 spsTableGenerator = new SPsTableGenerator(
                 rootPath: "C:\\Workspaces\\GIT\\CodeGenerator\\BaseScript",
                 destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\SPs");
@@ -85,7 +86,7 @@ internal class Program
 
                 break;
 
-            case 5:
+            case InputEnum.BaseSPsTableGenerator:
                 spsTableGenerator = new SPsTableGenerator(
                 rootPath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.DataBase\\SAMMAI.DBObjects\\Views",
                 destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\SPs");
@@ -99,8 +100,6 @@ internal class Program
 
                 break;
         }
-
-
 
         Console.WriteLine($"Result: {response}");
         Console.WriteLine("End");

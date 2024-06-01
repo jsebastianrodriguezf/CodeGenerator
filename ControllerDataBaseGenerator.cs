@@ -98,6 +98,12 @@ namespace CodeGenerator
         {
             List<string> content;
             string controllerRoute;
+            string entityUpperBase;
+
+            entityUpperBase = entityUpper;
+
+            if (_filesModel.Any(x => x.Name == $"View{prefix}{entityUpper}sBaseObject"))
+                entityUpperBase += "s";
 
             controllerRoute = "$\"{BaseApi}/" + $"{entityLower}\"";
 
@@ -156,6 +162,7 @@ namespace CodeGenerator
             ];
 
             if (hasView)
+            {
                 content.AddRange([
                     $"        /// <summary>",
                     $"        /// Gets a full {entityUpper} by id",
@@ -181,7 +188,35 @@ namespace CodeGenerator
                     $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                     "        }",
                     $""
-                ]);
+               ]);
+
+                content.AddRange([
+                    $"        /// <summary>",
+                    $"        /// Gets a base {entityUpper} by id",
+                    $"        /// </summary>",
+                    $"        /// <param name=\"id\"></param>",
+                    $"        /// <returns></returns>",
+                    $"        /// <remarks>",
+                    $"        /// Gets a base {entityUpper} by id",
+                    $"        /// </remarks>",
+                    $"        /// <response code=\"200\">Success: Returns the base {entityUpper} object</response>",
+                    $"        [IdentifierFilter]",
+                    $"        [HttpGet]",
+                    $"        [Route(\"{{id}}/base\")]",
+                    $"        [Produces(GeneralConstants.ContentType.Json)]",
+                    $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<View{prefix}{entityUpperBase}BaseObject>), (int)StatusCodeEnum.OK)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.NOT_FOUND)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
+                    $"        public async Task<ActionResult<object>> GetBaseById(int id)",
+                    "        {",
+                    $"            View{prefix}{entityUpperBase}BaseObject response = await _{entityLower}Service.GetBaseById(id);",
+                    $"",
+                    $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
+                    "        }",
+                    $""
+               ]);
+            }
 
             content.AddRange([
                 $"        /// <summary>",
@@ -211,6 +246,7 @@ namespace CodeGenerator
             ]);
 
             if (hasView)
+            {
                 content.AddRange([
                     $"        /// <summary>",
                     $"        /// Gets a full set of {entityUpper} by ids",
@@ -237,6 +273,34 @@ namespace CodeGenerator
                     "        }",
                     $""
                 ]);
+
+                content.AddRange([
+                    $"        /// <summary>",
+                    $"        /// Gets a base set of {entityUpper} by ids",
+                    $"        /// </summary>",
+                    $"        /// <param name=\"ids\"></param>",
+                    $"        /// <returns></returns>",
+                    $"        /// <remarks>",
+                    $"        /// Gets a base set of {entityUpper} by ids",
+                    $"        /// </remarks>",
+                    $"        /// <response code=\"200\">Success: Returns a list of base {entityUpper} objects</response>",
+                    $"        [IdentifierFilter]",
+                    $"        [HttpPost]",
+                    $"        [Route(\"get-set/base\")]",
+                    $"        [Produces(GeneralConstants.ContentType.Json)]",
+                    $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<View{prefix}{entityUpperBase}BaseObject>>), (int)StatusCodeEnum.OK)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.NOT_FOUND)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
+                    $"        public async Task<ActionResult<object>> GetBaseSetByIds([FromBody] List<int> ids)",
+                    "        {",
+                    $"            List<View{prefix}{entityUpperBase}BaseObject> response = await _{entityLower}Service.GetBaseSetByIds(ids);",
+                    $"",
+                    $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
+                    "        }",
+                    $""
+                ]);
+            }
 
             if (WithCodigo)
             {
@@ -268,8 +332,9 @@ namespace CodeGenerator
                     ]);
 
                 if (hasView)
+                {
                     content.AddRange([
-                        $"        /// <summary>",
+                       $"        /// <summary>",
                         $"        /// Gets a full {entityUpper} by codigo",
                         $"        /// </summary>",
                         $"        /// <param name=\"codigo\"></param>",
@@ -293,116 +358,199 @@ namespace CodeGenerator
                         $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                         "        }",
                         $""
-            ]);
+                    ]);
+
+                    content.AddRange([
+                       $"        /// <summary>",
+                        $"        /// Gets a base {entityUpper} by codigo",
+                        $"        /// </summary>",
+                        $"        /// <param name=\"codigo\"></param>",
+                        $"        /// <returns></returns>",
+                        $"        /// <remarks>",
+                        $"        /// Gets a base {entityUpper} by codigo",
+                        $"        /// </remarks>",
+                        $"        /// <response code=\"200\">Success: Returns the base {entityUpper} object</response>",
+                        $"        [IdentifierFilter]",
+                        $"        [HttpGet]",
+                        $"        [Route(\"codigo/{{codigo}}/base\")]",
+                        $"        [Produces(GeneralConstants.ContentType.Json)]",
+                        $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<View{prefix}{entityUpperBase}BaseObject>), (int)StatusCodeEnum.OK)]",
+                        $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.NOT_FOUND)]",
+                        $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
+                        $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
+                        $"        public async Task<ActionResult<object>> GetBaseByCodigo(string codigo)",
+                        "        {",
+                        $"            View{prefix}{entityUpperBase}BaseObject response = await _{entityLower}Service.GetBaseByCodigo(codigo);",
+                        $"",
+                        $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
+                        "        }",
+                        $""
+                    ]);
+                }
             }
 
             if (hasCmm)
             {
                 content.AddRange([
-                $"        /// <summary>",
-                $"        /// Gets all {entityUpper}",
-                $"        /// </summary>",
-                $"        /// <param name=\"cmmKeyword\">Search by cmm</param>",
-                $"        /// <returns></returns>",
-                $"        /// <remarks>",
-                $"        /// Gets all {entityUpper}",
-                $"        /// </remarks>",
-                $"        /// <response code=\"200\">Success: Returns a list of {entityUpper} object</response>",
-                $"        [IdentifierFilter]",
-                $"        [HttpGet]",
-                $"        [Route(\"all\")]",
-                $"        [Produces(GeneralConstants.ContentType.Json)]",
-                $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<{prefix}{entityUpper}Object>>), (int)StatusCodeEnum.OK)]",
-                $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
-                $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
-                $"        public async Task<ActionResult<object>> GetAll([FromQuery] string? cmmKeyword = null)",
-                "        {",
-                $"            List<{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAll(cmmKeyword);",
-                $"",
-                $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
-                "        }",
-                $""
-                    ]);
-
-                if (hasView)
-                    content.AddRange([
-                        $"        /// <summary>",
-                    $"        /// Gets all full {entityUpper}",
+                    $"        /// <summary>",
+                    $"        /// Gets all {entityUpper}",
                     $"        /// </summary>",
                     $"        /// <param name=\"cmmKeyword\">Search by cmm</param>",
                     $"        /// <returns></returns>",
                     $"        /// <remarks>",
-                    $"        /// Gets all full {entityUpper}",
+                    $"        /// Gets all {entityUpper}",
                     $"        /// </remarks>",
-                    $"        /// <response code=\"200\">Success: Returns a full list of {entityUpper} object</response>",
+                    $"        /// <response code=\"200\">Success: Returns a list of {entityUpper} object</response>",
                     $"        [IdentifierFilter]",
                     $"        [HttpGet]",
-                    $"        [Route(\"all/full\")]",
+                    $"        [Route(\"all\")]",
                     $"        [Produces(GeneralConstants.ContentType.Json)]",
-                    $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<View{prefix}{entityUpper}Object>>), (int)StatusCodeEnum.OK)]",
+                    $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<{prefix}{entityUpper}Object>>), (int)StatusCodeEnum.OK)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
-                    $"        public async Task<ActionResult<object>> GetAllFull([FromQuery] string? cmmKeyword = null)",
+                    $"        public async Task<ActionResult<object>> GetAll([FromQuery] string? cmmKeyword = null)",
                     "        {",
-                    $"            List<View{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAllFull(cmmKeyword);",
+                    $"            List<{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAll(cmmKeyword);",
                     $"",
                     $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                     "        }",
                     $""
+                ]);
+
+                if (hasView)
+                {
+                    content.AddRange([
+                        $"        /// <summary>",
+                        $"        /// Gets all full {entityUpper}",
+                        $"        /// </summary>",
+                        $"        /// <param name=\"cmmKeyword\">Search by cmm</param>",
+                        $"        /// <returns></returns>",
+                        $"        /// <remarks>",
+                        $"        /// Gets all full {entityUpper}",
+                        $"        /// </remarks>",
+                        $"        /// <response code=\"200\">Success: Returns a full list of {entityUpper} object</response>",
+                        $"        [IdentifierFilter]",
+                        $"        [HttpGet]",
+                        $"        [Route(\"all/full\")]",
+                        $"        [Produces(GeneralConstants.ContentType.Json)]",
+                        $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<View{prefix}{entityUpper}Object>>), (int)StatusCodeEnum.OK)]",
+                        $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
+                        $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
+                        $"        public async Task<ActionResult<object>> GetAllFull([FromQuery] string? cmmKeyword = null)",
+                        "        {",
+                        $"            List<View{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAllFull(cmmKeyword);",
+                        $"",
+                        $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
+                        "        }",
+                        $""
                     ]);
+
+                    content.AddRange([
+                        $"        /// <summary>",
+                        $"        /// Gets all base {entityUpper}",
+                        $"        /// </summary>",
+                        $"        /// <param name=\"cmmKeyword\">Search by cmm</param>",
+                        $"        /// <returns></returns>",
+                        $"        /// <remarks>",
+                        $"        /// Gets all base {entityUpper}",
+                        $"        /// </remarks>",
+                        $"        /// <response code=\"200\">Success: Returns a base list of {entityUpper} object</response>",
+                        $"        [IdentifierFilter]",
+                        $"        [HttpGet]",
+                        $"        [Route(\"all/base\")]",
+                        $"        [Produces(GeneralConstants.ContentType.Json)]",
+                        $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<View{prefix}{entityUpperBase}BaseObject>>), (int)StatusCodeEnum.OK)]",
+                        $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
+                        $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
+                        $"        public async Task<ActionResult<object>> GetAllBase([FromQuery] string? cmmKeyword = null)",
+                        "        {",
+                        $"            List<View{prefix}{entityUpperBase}BaseObject> response = await _{entityLower}Service.GetAllBase(cmmKeyword);",
+                        $"",
+                        $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
+                        "        }",
+                        $""
+                    ]);
+                }
             }
             else
             {
                 content.AddRange([
-                $"        /// <summary>",
-                $"        /// Gets all {entityUpper}",
-                $"        /// </summary>",
-                $"        /// <returns></returns>",
-                $"        /// <remarks>",
-                $"        /// Gets all {entityUpper}",
-                $"        /// </remarks>",
-                $"        /// <response code=\"200\">Success: Returns a list of {entityUpper} object</response>",
-                $"        [IdentifierFilter]",
-                $"        [HttpGet]",
-                $"        [Route(\"all\")]",
-                $"        [Produces(GeneralConstants.ContentType.Json)]",
-                $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<{prefix}{entityUpper}Object>>), (int)StatusCodeEnum.OK)]",
-                $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
-                $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
-                $"        public async Task<ActionResult<object>> GetAll()",
-                "        {",
-                $"            List<{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAll();",
-                $"",
-                $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
-                "        }",
-                $""
-                    ]);
-
-                if (hasView)
-                    content.AddRange([
-                        $"        /// <summary>",
-                    $"        /// Gets all full {entityUpper}",
+                    $"        /// <summary>",
+                    $"        /// Gets all {entityUpper}",
                     $"        /// </summary>",
                     $"        /// <returns></returns>",
                     $"        /// <remarks>",
-                    $"        /// Gets all full {entityUpper}",
+                    $"        /// Gets all {entityUpper}",
                     $"        /// </remarks>",
-                    $"        /// <response code=\"200\">Success: Returns a full list of {entityUpper} object</response>",
+                    $"        /// <response code=\"200\">Success: Returns a list of {entityUpper} object</response>",
                     $"        [IdentifierFilter]",
                     $"        [HttpGet]",
-                    $"        [Route(\"all/full\")]",
+                    $"        [Route(\"all\")]",
                     $"        [Produces(GeneralConstants.ContentType.Json)]",
-                    $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<View{prefix}{entityUpper}Object>>), (int)StatusCodeEnum.OK)]",
+                    $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<{prefix}{entityUpper}Object>>), (int)StatusCodeEnum.OK)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
-                    $"        public async Task<ActionResult<object>> GetAllFull()",
+                    $"        public async Task<ActionResult<object>> GetAll()",
                     "        {",
-                    $"            List<View{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAllFull();",
+                    $"            List<{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAll();",
                     $"",
                     $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                     "        }",
                     $""
+                ]);
+
+                if (hasView)
+                {
+                    content.AddRange([
+                        $"        /// <summary>",
+                        $"        /// Gets all full {entityUpper}",
+                        $"        /// </summary>",
+                        $"        /// <returns></returns>",
+                        $"        /// <remarks>",
+                        $"        /// Gets all full {entityUpper}",
+                        $"        /// </remarks>",
+                        $"        /// <response code=\"200\">Success: Returns a full list of {entityUpper} object</response>",
+                        $"        [IdentifierFilter]",
+                        $"        [HttpGet]",
+                        $"        [Route(\"all/full\")]",
+                        $"        [Produces(GeneralConstants.ContentType.Json)]",
+                        $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<View{prefix}{entityUpper}Object>>), (int)StatusCodeEnum.OK)]",
+                        $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
+                        $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
+                        $"        public async Task<ActionResult<object>> GetAllFull()",
+                        "        {",
+                        $"            List<View{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAllFull();",
+                        $"",
+                        $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
+                        "        }",
+                        $""
                     ]);
+
+                    content.AddRange([
+                        $"        /// <summary>",
+                        $"        /// Gets all base {entityUpper}",
+                        $"        /// </summary>",
+                        $"        /// <returns></returns>",
+                        $"        /// <remarks>",
+                        $"        /// Gets all base {entityUpper}",
+                        $"        /// </remarks>",
+                        $"        /// <response code=\"200\">Success: Returns a base list of {entityUpper} object</response>",
+                        $"        [IdentifierFilter]",
+                        $"        [HttpGet]",
+                        $"        [Route(\"all/base\")]",
+                        $"        [Produces(GeneralConstants.ContentType.Json)]",
+                        $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<View{prefix}{entityUpperBase}BaseObject>>), (int)StatusCodeEnum.OK)]",
+                        $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
+                        $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
+                        $"        public async Task<ActionResult<object>> GetAllBase()",
+                        "        {",
+                        $"            List<View{prefix}{entityUpperBase}BaseObject> response = await _{entityLower}Service.GetAllBase();",
+                        $"",
+                        $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
+                        "        }",
+                        $""
+                    ]);
+                }
             }
 
             content.AddRange([
@@ -528,6 +676,17 @@ namespace CodeGenerator
         public void GenerateService(string prefix, string entityUpper, string entityLower, bool WithCodigo, bool hasView, bool hasCmm, bool hasPrincipalField)
         {
             List<string> content;
+            string viewGenerics;
+            string entityUpperBase;
+
+            entityUpperBase = entityUpper;
+
+            if (_filesModel.Any(x => x.Name == $"View{prefix}{entityUpper}sBaseObject"))
+                entityUpperBase += "s";
+
+            viewGenerics = hasView ?
+                $"View{prefix}{entityUpper}, View{prefix}{entityUpperBase}Base" :
+                $"{prefix}{entityUpper}, {prefix}{entityUpper}";
 
             content = [
                 $"using AutoMapper;",
@@ -543,7 +702,7 @@ namespace CodeGenerator
                 $"",
                 $"namespace SAMMAI.DataBase.Services.Implementations",
                 "{",
-                $"    public class {entityUpper}Service : BaseRepository<{prefix}{entityUpper}, {(hasView ? "View" : "")}{prefix}{entityUpper}, SAMMAIContext>",
+                $"    public class {entityUpper}Service : BaseRepository<{prefix}{entityUpper}, {viewGenerics}, SAMMAIContext>",
                 "    {",
                 $"        private readonly ILogger<{entityUpper}Service> _logger;",
                 $"        private readonly SAMMAIContext _context;",
@@ -574,6 +733,7 @@ namespace CodeGenerator
             ];
 
             if (hasView)
+            {
                 content.AddRange([
                     $"        public async Task<View{prefix}{entityUpper}Object> GetFullById(int id)",
                     "        {",
@@ -583,6 +743,17 @@ namespace CodeGenerator
                     "        }",
                     $""
                 ]);
+
+                content.AddRange([
+                    $"        public async Task<View{prefix}{entityUpperBase}BaseObject> GetBaseById(int id)",
+                    "        {",
+                    $"            IEnumerable<View{prefix}{entityUpperBase}Base> {entityLower}s = await GetViewBaseFilteredAsync(x => x.Id == id && x.Eid == _global.Eid && x.Active);",
+                    $"",
+                    $"            return {entityLower}s.FirstOrDefault() ?? throw new ApiException(StatusCodeEnum.NOT_FOUND);",
+                    "        }",
+                    $""
+                ]);
+            }
 
             content.AddRange([
                 $"        public Task<List<{prefix}{entityUpper}Object>> GetSetByIds(List<int> ids)",
@@ -601,8 +772,9 @@ namespace CodeGenerator
             ]);
 
             if (hasView)
+            {
                 content.AddRange([
-                    $"        public Task<List<View{prefix}{entityUpper}Object>> GetFullSetByIds(List<int> ids)",
+                   $"        public Task<List<View{prefix}{entityUpper}Object>> GetFullSetByIds(List<int> ids)",
                     "        {",
                     $"            IEnumerable<View{prefix}{entityUpper}> {entityLower}s;",
                     $"",
@@ -615,7 +787,24 @@ namespace CodeGenerator
                     $"            return Task.FromResult(_mapper.Map<List<View{prefix}{entityUpper}Object>>({entityLower}s));",
                     "        }",
                     $""
-                ]);
+               ]);
+
+                content.AddRange([
+                   $"        public Task<List<View{prefix}{entityUpperBase}BaseObject>> GetBaseSetByIds(List<int> ids)",
+                    "        {",
+                    $"            IEnumerable<View{prefix}{entityUpperBase}Base> {entityLower}s;",
+                    $"",
+                    $"            {entityLower}s = (",
+                    $"                from {entityLower} in _context.Set<View{prefix}{entityUpperBase}Base>()",
+                    $"                join idsObject in ids on {entityLower}.Id equals idsObject",
+                    $"                where {entityLower}.Eid == _global.Eid && {entityLower}.Active",
+                    $"                select {entityLower});",
+                    $"",
+                    $"            return Task.FromResult(_mapper.Map<List<View{prefix}{entityUpperBase}BaseObject>>({entityLower}s));",
+                    "        }",
+                    $""
+               ]);
+            }
 
             if (WithCodigo)
             {
@@ -630,6 +819,7 @@ namespace CodeGenerator
                 ]);
 
                 if (hasView)
+                {
                     content.AddRange([
                         $"        public async Task<View{prefix}{entityUpper}Object> GetFullByCodigo(string codigo)",
                         "        {",
@@ -639,6 +829,17 @@ namespace CodeGenerator
                         "        }",
                         $""
                     ]);
+
+                    content.AddRange([
+                        $"        public async Task<View{prefix}{entityUpperBase}BaseObject> GetBaseByCodigo(string codigo)",
+                        "        {",
+                        $"            IEnumerable<View{prefix}{entityUpperBase}Base> {entityLower}s = await GetViewBaseFilteredAsync(x => x.{entityUpper}Codigo == codigo && x.Eid == _global.Eid && x.Active);",
+                        $"",
+                        $"            return {entityLower}s.FirstOrDefault() ?? throw new ApiException(StatusCodeEnum.NOT_FOUND);",
+                        "        }",
+                        $""
+                    ]);
+                }
             }
 
             if (hasCmm)
@@ -658,19 +859,41 @@ namespace CodeGenerator
                 ]);
 
                 if (hasView)
+                {
                     content.AddRange([
                         $"        public async Task<List<View{prefix}{entityUpper}Object>> GetAllFull(string? cmmKeyword)",
                         "        {",
                         $"            IEnumerable<View{prefix}{entityUpper}Object> {entityLower}s = string.IsNullOrWhiteSpace(cmmKeyword) ?",
                         $"                await GetViewFilteredAsync(x => x.Eid == _global.Eid && x.Active) :",
                         $"                await GetViewFilteredAsync(x => {
-                                (hasPrincipalField ? $"(x.Cmm == null ? x.{entityUpper}.Contains(cmmKeyword) : x.Cmm.Contains(cmmKeyword))" : $"x.Cmm != null && x.Cmm.Contains(cmmKeyword)")
-                            } &&  x.Eid == _global.Eid && x.Active);",
+                                            (hasPrincipalField ?
+                                                $"(x.Cmm == null ? x.{entityUpper}.Contains(cmmKeyword) : x.Cmm.Contains(cmmKeyword))" :
+                                                $"x.Cmm != null && x.Cmm.Contains(cmmKeyword)"
+                                            )
+                                          } &&  x.Eid == _global.Eid && x.Active);",
                         $"",
                         $"            return {entityLower}s.ToList();",
                         "        }",
                         $""
-                        ]);
+                    ]);
+
+                    content.AddRange([
+                        $"        public async Task<List<View{prefix}{entityUpperBase}BaseObject>> GetAllBase(string? cmmKeyword)",
+                        "        {",
+                        $"            IEnumerable<View{prefix}{entityUpperBase}BaseObject> {entityLower}s = string.IsNullOrWhiteSpace(cmmKeyword) ?",
+                        $"                await GetViewBaseFilteredAsync(x => x.Eid == _global.Eid && x.Active) :",
+                        $"                await GetViewBaseFilteredAsync(x => {
+                                            (hasPrincipalField ?
+                                                $"(x.Cmm == null ? x.{entityUpper}.Contains(cmmKeyword) : x.Cmm.Contains(cmmKeyword))" :
+                                                $"x.Cmm != null && x.Cmm.Contains(cmmKeyword)"
+                                            )
+                                          } &&  x.Eid == _global.Eid && x.Active);",
+                        $"",
+                        $"            return {entityLower}s.ToList();",
+                        "        }",
+                        $""
+                    ]);
+                }
             }
             else
             {
@@ -685,6 +908,7 @@ namespace CodeGenerator
                 ]);
 
                 if (hasView)
+                {
                     content.AddRange([
                         $"        public async Task<List<View{prefix}{entityUpper}Object>> GetAllFull()",
                         "        {",
@@ -693,7 +917,18 @@ namespace CodeGenerator
                         $"            return {entityLower}s.ToList();",
                         "        }",
                         $""
-                        ]);
+                    ]);
+
+                    content.AddRange([
+                        $"        public async Task<List<View{prefix}{entityUpperBase}BaseObject>> GetAllBase()",
+                        "        {",
+                        $"            IEnumerable<View{prefix}{entityUpperBase}BaseObject> {entityLower}s = await GetViewBaseFilteredAsync(x => x.Eid == _global.Eid && x.Active);",
+                        $"",
+                        $"            return {entityLower}s.ToList();",
+                        "        }",
+                        $""
+                    ]);
+                }
             }
 
             content.AddRange([

@@ -169,6 +169,7 @@ namespace CodeGenerator
 
             foreach (FileModel fileModel in fileModels)
             {
+                fileModel.Path = fileModel.Path.Replace($"{fileModel.Name}.sql", $"{fileModel.Name.Replace(".", "_")}.sql");
                 if (!File.Exists(fileModel.Path)) continue;
 
                 List<string> viewTemplate = [.. File.ReadAllLines(fileModel.Path)];
