@@ -239,7 +239,7 @@ namespace GenerarCodigo
                         line = line.Replace($" {className}1 {{ get; set; }}", $" {className} {{ get; set; }}");
 
                     content.Add(line);
-                }   
+                }
             }
 
             return (i, content);

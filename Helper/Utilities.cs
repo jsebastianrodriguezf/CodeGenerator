@@ -1,4 +1,5 @@
 ﻿using CodeGenerator.Models;
+using System.Text;
 namespace CodeGenerator.Helper
 {
     public class Utilities
@@ -56,6 +57,32 @@ namespace CodeGenerator.Helper
                 value = value[..(value.Length - (UmReplace.Length + 1))] + UmReplace;
 
             return value;
+        }
+
+        public static string ToKebabCase(string inputString)
+        {
+            StringBuilder kebabCaseString = new StringBuilder();
+            for (int i = 0; i < inputString.Length; i++)
+            {
+                char currentChar = inputString[i];
+                if (Char.IsUpper(currentChar))
+                {
+                    if (i != 0)
+                    {
+                        kebabCaseString.Append('-');
+                    }
+                    kebabCaseString.Append(Char.ToLower(currentChar));
+                }
+                else if (currentChar == '_')
+                {
+                    kebabCaseString.Append('-');
+                }
+                else
+                {
+                    kebabCaseString.Append(currentChar);
+                }
+            }
+            return kebabCaseString.ToString();
         }
     }
 }

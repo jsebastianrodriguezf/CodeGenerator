@@ -662,7 +662,7 @@ namespace CodeGenerator
                 $"        #region Custom Endpoints"
             ]);
 
-            content.AddRange(GetCustomServices(_controllerModel.FirstOrDefault(x => x.Name == $"{entityUpper}Controller"), "Endpoints"));
+            content.AddRange(GetCustomCode(_controllerModel.FirstOrDefault(x => x.Name == $"{entityUpper}Controller"), "Endpoints"));
 
             content.AddRange([
                 $"        #endregion",
@@ -1015,7 +1015,7 @@ namespace CodeGenerator
                 $"        #region Custom Services"
             ]);
 
-            content.AddRange(GetCustomServices(_serviceModel.FirstOrDefault(x => x.Name == $"{entityUpper}Service"), "Services"));
+            content.AddRange(GetCustomCode(_serviceModel.FirstOrDefault(x => x.Name == $"{entityUpper}Service"), "Services"));
 
             content.AddRange([
                 $"        #endregion",
@@ -1026,7 +1026,7 @@ namespace CodeGenerator
             GenerateFile("Services", $"{entityUpper}Service.cs", content);
         }
 
-        private List<string> GetCustomServices(FileModel? fileModel, string regionName)
+        private List<string> GetCustomCode(FileModel? fileModel, string regionName)
         {
             List<string> customLines;
             string startKey = "#region Custom " + regionName;

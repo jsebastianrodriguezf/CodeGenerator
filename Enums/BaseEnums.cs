@@ -9,7 +9,9 @@
             SingleControllerDataBaseGenerator,
             FolderTableGenerator,
             SPsTableGenerator,
-            BaseSPsTableGenerator
+            BaseSPsTableGenerator,
+            SingleControllerCoreDALGenerator,
+            ControllerCoreDALGenerator
         }
     }
 }

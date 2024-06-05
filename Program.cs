@@ -11,12 +11,16 @@ internal class Program
         InputEnum option;
         DatabaseGenerator databaseGenerator;
         ControllerDataBaseGenerator controllerDataBaseGenerator;
+        ControllerCoreDALGenerator controllerCoreDALGenerator;
         FolderTableGenerator folderTableGenerator;
         SPsTableGenerator spsTableGenerator;
+        FileModel fileModel;
+        string path;
+        string entity;
 
         Console.WriteLine("Start ...");
 
-        option = InputEnum.ControllerDataBaseGenerator;
+        option = InputEnum.ControllerCoreDALGenerator;
 
         switch (option)
         {
@@ -31,10 +35,6 @@ internal class Program
                 break;
 
             case InputEnum.SingleControllerDataBaseGenerator:
-                FileModel fileModel;
-                string path;
-                string entity;
-
                 path = "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.Transverse\\SAMMAI.Transverse\\Models\\Objects";
                 entity = "GenFormularioCatalogoEquipo";
 
@@ -92,6 +92,39 @@ internal class Program
                 destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\SPs");
 
                 response = string.Join(Environment.NewLine, spsTableGenerator.GenerateBasicViews());
+
+                break;
+
+            case InputEnum.SingleControllerCoreDALGenerator:
+                path = "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.Transverse\\SAMMAI.Transverse\\Models\\Objects";
+                entity = "GenFormularioCatalogoEquipo";
+
+                fileModel = new FileModel()
+                {
+                    Path = $"{path}\\{entity}Object.cs",
+                    Name = $"{entity}Object",
+                    Extension = "cs"
+                };
+
+                controllerCoreDALGenerator = new ControllerCoreDALGenerator(
+                rootPath: path,
+                destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\CoreDAL",
+                controllerPath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.Core\\SAMMAI.Core\\Controllers",
+                servicePath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.Core\\SAMMAI.Core\\Services\\DAL\\Implementations");
+
+
+                response = controllerCoreDALGenerator.GenerateByEntity(entity, fileModel);
+
+                break;
+
+            case InputEnum.ControllerCoreDALGenerator:
+                controllerCoreDALGenerator = new ControllerCoreDALGenerator(
+                rootPath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.Transverse\\SAMMAI.Transverse\\Models\\Objects",
+                destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\CoreDAL",
+                controllerPath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.Core\\SAMMAI.Core\\Controllers",
+                servicePath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.Core\\SAMMAI.Core\\Services\\DAL\\Implementations");
+
+                response = string.Join(Environment.NewLine, controllerCoreDALGenerator.GenerateForAllEntities());
 
                 break;
 
