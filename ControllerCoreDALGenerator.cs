@@ -19,6 +19,7 @@ namespace CodeGenerator
         private readonly string _destinyPath;
         private readonly List<FileModel> _controllerModel;
         private readonly List<FileModel> _serviceModel;
+        private readonly List<FileModel> _iServiceModel;
         private readonly List<string> _files;
         private readonly List<FileModel> _filesModel;
 
@@ -26,7 +27,8 @@ namespace CodeGenerator
             string rootPath,
             string destityPath,
             string controllerPath,
-            string servicePath)
+            string servicePath,
+            string iServicePath)
         {
             _tables = GetTables();
             _rootPath = rootPath;
@@ -36,6 +38,7 @@ namespace CodeGenerator
 
             _controllerModel = Utilities.GetFilesModel([.. Directory.GetFiles(controllerPath)]);
             _serviceModel = Utilities.GetFilesModel([.. Directory.GetFiles(servicePath)]);
+            _iServiceModel = Utilities.GetFilesModel([.. Directory.GetFiles(iServicePath)]);
 
             Utilities.RegenerateDirectory(_destinyPath);
         }
@@ -341,6 +344,7 @@ namespace CodeGenerator
                 $"using SAMMAI.Transverse.Constants;",
                 $"using SAMMAI.Transverse.Helpers;",
                 $"using SAMMAI.Transverse.Models.DTOs;",
+                $"using SAMMAI.Transverse.Models.Endpoints.Core.{entityUpper};",
                 $"using SAMMAI.Transverse.Models.Response.BaseApi;",
                 $"using static SAMMAI.Core.Utility.Constants.ApiRoutesConstants;",
                 $"",
@@ -381,7 +385,7 @@ namespace CodeGenerator
                 $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
                 $"        public async Task<ActionResult<object>> GetById(int id)",
                 "        {",
-                $"            {prefix}{entityUpper}DTO response = await _{entityLower}Service.GetById(id);",
+                $"            {prefix}{entityUpper}DTO? response = await _{entityLower}Service.GetById(id);",
                 $"",
                 $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                 "        }",
@@ -410,7 +414,7 @@ namespace CodeGenerator
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
                     $"        public async Task<ActionResult<object>> GetFullById(int id)",
                     "        {",
-                    $"            View{prefix}{entityUpper}DTO response = await _{entityLower}Service.GetFullById(id);",
+                    $"            View{prefix}{entityUpper}DTO? response = await _{entityLower}Service.GetFullById(id);",
                     $"",
                     $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                     "        }",
@@ -434,7 +438,7 @@ namespace CodeGenerator
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
                     $"        public async Task<ActionResult<object>> GetBaseById(int id)",
                     "        {",
-                    $"            View{prefix}{entityUpperBase}BaseDTO response = await _{entityLower}Service.GetBaseById(id);",
+                    $"            View{prefix}{entityUpperBase}BaseDTO? response = await _{entityLower}Service.GetBaseById(id);",
                     $"",
                     $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                     "        }",
@@ -545,7 +549,7 @@ namespace CodeGenerator
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
                     $"        public async Task<ActionResult<object>> GetByCode(string code)",
                     "        {",
-                    $"            {prefix}{entityUpper}DTO response = await _{entityLower}Service.GetByCode(code);",
+                    $"            {prefix}{entityUpper}DTO? response = await _{entityLower}Service.GetByCode(code);",
                     $"",
                     $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                     "        }",
@@ -574,7 +578,7 @@ namespace CodeGenerator
                         $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
                         $"        public async Task<ActionResult<object>> GetFullByCode(string code)",
                         "        {",
-                        $"            View{prefix}{entityUpper}DTO response = await _{entityLower}Service.GetFullByCode(code);",
+                        $"            View{prefix}{entityUpper}DTO? response = await _{entityLower}Service.GetFullByCode(code);",
                         $"",
                         $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                         "        }",
@@ -598,7 +602,7 @@ namespace CodeGenerator
                         $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
                         $"        public async Task<ActionResult<object>> GetBaseByCode(string code)",
                         "        {",
-                        $"            View{prefix}{entityUpperBase}BaseDTO response = await _{entityLower}Service.GetBaseByCode(code);",
+                        $"            View{prefix}{entityUpperBase}BaseDTO? response = await _{entityLower}Service.GetBaseByCode(code);",
                         $"",
                         $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                         "        }",
@@ -850,7 +854,11 @@ namespace CodeGenerator
                 $"        #endregion",
                 $"",
                 $"        #region Custom Endpoints",
-                $"",
+            ]);
+
+            content.AddRange(Utilities.GetCustomCode(_controllerModel.FirstOrDefault(x => x.Name == $"{entityUpper}Controller"), "Endpoints"));
+
+            content.AddRange([
                 $"        #endregion",
                 "    }",
                 "}"
@@ -871,20 +879,21 @@ namespace CodeGenerator
 
             content = [
                 $"using SAMMAI.Transverse.Models.DTOs;",
+                $"using SAMMAI.Transverse.Models.Endpoints.Core.{entityUpper};",
                 $"",
                 $"namespace SAMMAI.Core.Services.DAL.Interfaces",
                 "{",
                 $"    public interface I{entityUpper}Service",
                 "    {",
                 $"        #region Base IServices",
-                $"        Task<{prefix}{entityUpper}DTO> GetById(int id);"
+                $"        Task<{prefix}{entityUpper}DTO?> GetById(int id, bool nullable = false);"
             ];
 
             if (hasView)
             {
                 content.AddRange([
-                    $"        Task<View{prefix}{entityUpper}DTO> GetFullById(int id);",
-                    $"        Task<View{prefix}{entityUpperBase}BaseDTO> GetBaseById(int id);"
+                    $"        Task<View{prefix}{entityUpper}DTO?> GetFullById(int id, bool nullable = false);",
+                    $"        Task<View{prefix}{entityUpperBase}BaseDTO?> GetBaseById(int id, bool nullable = false);"
                 ]);
             }
 
@@ -904,14 +913,14 @@ namespace CodeGenerator
             if (WithCodigo)
             {
                 content.AddRange([
-                    $"        Task<{prefix}{entityUpper}DTO> GetByCode(string code);"
+                    $"        Task<{prefix}{entityUpper}DTO?> GetByCode(string code, bool nullable = false);"
                 ]);
 
                 if (hasView)
                 {
                     content.AddRange([
-                        $"        Task<View{prefix}{entityUpper}DTO> GetFullByCode(string code);",
-                        $"        Task<View{prefix}{entityUpperBase}BaseDTO> GetBaseByCode(string code);"
+                        $"        Task<View{prefix}{entityUpper}DTO?> GetFullByCode(string code, bool nullable = false);",
+                        $"        Task<View{prefix}{entityUpperBase}BaseDTO?> GetBaseByCode(string code, bool nullable = false);"
                     ]);
                 }
 
@@ -931,14 +940,14 @@ namespace CodeGenerator
             if (hasCmm)
             {
                 content.AddRange([
-                    $"        Task<List<{prefix}{entityUpper}DTO>> GetAll(string? cmmKeyword);"
+                    $"        Task<List<{prefix}{entityUpper}DTO>> GetAll(string? cmmKeyword = null);"
                 ]);
 
                 if (hasView)
                 {
                     content.AddRange([
-                        $"        Task<List<View{prefix}{entityUpper}DTO>> GetAllFull(string? cmmKeyword);",
-                        $"        Task<List<View{prefix}{entityUpperBase}BaseDTO>> GetAllBase(string? cmmKeyword);",
+                        $"        Task<List<View{prefix}{entityUpper}DTO>> GetAllFull(string? cmmKeyword = null);",
+                        $"        Task<List<View{prefix}{entityUpperBase}BaseDTO>> GetAllBase(string? cmmKeyword = null);",
                     ]);
                 }
             }
@@ -956,13 +965,17 @@ namespace CodeGenerator
                     ]);
                 }
             }
-
+            
             content.AddRange([
                 $"",
                 $"        #endregion",
                 $"",
                 $"        #region Custom IServices",
-                $"",
+            ]);
+
+            content.AddRange(Utilities.GetCustomCode(_iServiceModel.FirstOrDefault(x => x.Name == $"I{entityUpper}Service"), "IServices"));
+
+            content.AddRange([
                 $"        #endregion",
                 "    }",
                 "}"
@@ -983,10 +996,13 @@ namespace CodeGenerator
 
             content.AddRange([
                 $"using AutoMapper;",
+                $"using Microsoft.Extensions.Options;",
                 $"using SAMMAI.Core.Repository;",
                 $"using SAMMAI.Core.Services.DAL.Interfaces;",
                 $"using SAMMAI.Core.Utility.Constants;",
+                $"using SAMMAI.Core.Utility.SettingsFiles;",
                 $"using SAMMAI.Transverse.Models.DTOs;",
+                $"using SAMMAI.Transverse.Models.Endpoints.Core.{entityUpper};",
                 $"",
                 $"namespace SAMMAI.Core.Services.DAL.Implementations",
                 "{",
@@ -995,24 +1011,27 @@ namespace CodeGenerator
                 $"        private readonly ILogger<{entityUpper}Service> _logger;",
                 $"        private readonly IMapper _mapper;",
                 $"        private readonly DataBaseRepository _dataBaseRepository;",
+                $"        private readonly DataBase _sammaiDataBaseOptions;",
                 $"",
                 $"        public {entityUpper}Service(",
                 $"            ILogger<{entityUpper}Service> logger,",
                 $"            IMapper mapper,",
-                $"            DataBaseRepository dataBaseRepository)",
+                $"            DataBaseRepository dataBaseRepository,",
+                $"            IOptions<ProjectSettings> projectSettingsOptions)",
                 "        {",
                 $"            _logger = logger ?? throw new ArgumentNullException(nameof(logger));",
                 $"            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));",
                 $"            _dataBaseRepository = dataBaseRepository ?? throw new ArgumentNullException(nameof(dataBaseRepository));",
+                $"            _sammaiDataBaseOptions = projectSettingsOptions?.Value.SAMMAIMicroservices.DataBase ?? throw new ArgumentNullException(nameof(projectSettingsOptions));",
                 "        }",
                 $"",
                 $"        #region Base Services",
-                $"        public async Task<{prefix}{entityUpper}DTO> GetById(int id)",
+                $"        public async Task<{prefix}{entityUpper}DTO?> GetById(int id, bool nullable = false)",
                 "        {",
-                $"            {prefix}{entityUpper}DTO {entityLower};",
+                $"            {prefix}{entityUpper}DTO? {entityLower};",
                 $"",
-                $"            {entityLower} = await _dataBaseRepository.GetById<{prefix}{entityUpper}DTO>(EntityConstants.{entityUpper}, id) ??",
-                $"                throw new ApiException(StatusCodeEnum.NOT_FOUND);",
+                $"            {entityLower} = await _dataBaseRepository.GetById<{prefix}{entityUpper}DTO>(EntityConstants.{entityUpper}, id);",
+                $"            if ({entityLower} is null && !nullable) throw new ApiException(StatusCodeEnum.NOT_FOUND);",
                 $"",
                 $"            return {entityLower};",
                 "        }",
@@ -1022,22 +1041,22 @@ namespace CodeGenerator
             if (hasView)
             {
                 content.AddRange([
-                    $"        public async Task<View{prefix}{entityUpper}DTO> GetFullById(int id)",
+                    $"        public async Task<View{prefix}{entityUpper}DTO?> GetFullById(int id, bool nullable = false)",
                     "        {",
-                    $"            View{prefix}{entityUpper}DTO {entityLower};",
+                    $"            View{prefix}{entityUpper}DTO? {entityLower};",
                     $"",
-                    $"            {entityLower} = await _dataBaseRepository.GetFullById<View{prefix}{entityUpper}DTO>(EntityConstants.{entityUpper}, id) ??",
-                    $"                throw new ApiException(StatusCodeEnum.NOT_FOUND);",
+                    $"            {entityLower} = await _dataBaseRepository.GetFullById<View{prefix}{entityUpper}DTO>(EntityConstants.{entityUpper}, id);",
+                    $"            if ({entityLower} is null && !nullable) throw new ApiException(StatusCodeEnum.NOT_FOUND);",
                     $"",
                     $"            return {entityLower};",
                     "        }",
                     $"",
-                    $"        public async Task<View{prefix}{entityUpperBase}BaseDTO> GetBaseById(int id)",
+                    $"        public async Task<View{prefix}{entityUpperBase}BaseDTO?> GetBaseById(int id, bool nullable = false)",
                     "        {",
-                    $"            View{prefix}{entityUpperBase}BaseDTO {entityLower};",
+                    $"            View{prefix}{entityUpperBase}BaseDTO? {entityLower};",
                     $"",
-                    $"            {entityLower} = await _dataBaseRepository.GetBaseById<View{prefix}{entityUpperBase}BaseDTO>(EntityConstants.{entityUpper}, id) ??",
-                    $"                throw new ApiException(StatusCodeEnum.NOT_FOUND);",
+                    $"            {entityLower} = await _dataBaseRepository.GetBaseById<View{prefix}{entityUpperBase}BaseDTO>(EntityConstants.{entityUpper}, id);",
+                    $"            if ({entityLower} is null && !nullable) throw new ApiException(StatusCodeEnum.NOT_FOUND);",
                     $"",
                     $"            return {entityLower};",
                     "        }",
@@ -1084,12 +1103,12 @@ namespace CodeGenerator
             if (WithCodigo)
             {
                 content.AddRange([
-                    $"        public async Task<{prefix}{entityUpper}DTO> GetByCode(string code)",
+                    $"        public async Task<{prefix}{entityUpper}DTO?> GetByCode(string code, bool nullable = false)",
                     "        {",
-                    $"            {prefix}{entityUpper}DTO {entityLower};",
+                    $"            {prefix}{entityUpper}DTO? {entityLower};",
                     $"",
-                    $"            {entityLower} = await _dataBaseRepository.GetByCode<{prefix}{entityUpper}DTO>(EntityConstants.{entityUpper}, code) ??",
-                    $"                throw new ApiException(StatusCodeEnum.NOT_FOUND);",
+                    $"            {entityLower} = await _dataBaseRepository.GetByCode<{prefix}{entityUpper}DTO>(EntityConstants.{entityUpper}, code);",
+                    $"            if ({entityLower} is null && !nullable) throw new ApiException(StatusCodeEnum.NOT_FOUND);",
                     $"",
                     $"            return {entityLower};",
                     "        }",
@@ -1099,22 +1118,22 @@ namespace CodeGenerator
                 if (hasView)
                 {
                     content.AddRange([
-                        $"        public async Task<View{prefix}{entityUpper}DTO> GetFullByCode(string code)",
+                        $"        public async Task<View{prefix}{entityUpper}DTO?> GetFullByCode(string code, bool nullable = false)",
                         "        {",
-                        $"            View{prefix}{entityUpper}DTO {entityLower};",
+                        $"            View{prefix}{entityUpper}DTO? {entityLower};",
                         $"",
-                        $"            {entityLower} = await _dataBaseRepository.GetFullByCode<View{prefix}{entityUpper}DTO>(EntityConstants.{entityUpper}, code) ??",
-                        $"                throw new ApiException(StatusCodeEnum.NOT_FOUND);",
+                        $"            {entityLower} = await _dataBaseRepository.GetFullByCode<View{prefix}{entityUpper}DTO>(EntityConstants.{entityUpper}, code);",
+                        $"            if ({entityLower} is null && !nullable) throw new ApiException(StatusCodeEnum.NOT_FOUND);",
                         $"",
                         $"            return {entityLower};",
                         "        }",
                         $"",
-                        $"        public async Task<View{prefix}{entityUpperBase}BaseDTO> GetBaseByCode(string code)",
+                        $"        public async Task<View{prefix}{entityUpperBase}BaseDTO?> GetBaseByCode(string code, bool nullable = false)",
                         "        {",
-                        $"            View{prefix}{entityUpperBase}BaseDTO {entityLower};",
+                        $"            View{prefix}{entityUpperBase}BaseDTO? {entityLower};",
                         $"",
-                        $"            {entityLower} = await _dataBaseRepository.GetBaseByCode<View{prefix}{entityUpperBase}BaseDTO>(EntityConstants.{entityUpper}, code) ??",
-                        $"                throw new ApiException(StatusCodeEnum.NOT_FOUND);",
+                        $"            {entityLower} = await _dataBaseRepository.GetBaseByCode<View{prefix}{entityUpperBase}BaseDTO>(EntityConstants.{entityUpper}, code);",
+                        $"            if ({entityLower} is null && !nullable) throw new ApiException(StatusCodeEnum.NOT_FOUND);",
                         $"",
                         $"            return {entityLower};",
                         "        }",
@@ -1162,7 +1181,7 @@ namespace CodeGenerator
             if (hasCmm)
             {
                 content.AddRange([
-                    $"        public async Task<List<{prefix}{entityUpper}DTO>> GetAll(string? cmmKeyword)",
+                    $"        public async Task<List<{prefix}{entityUpper}DTO>> GetAll(string? cmmKeyword = null)",
                     "        {",
                     $"            List<{prefix}{entityUpper}DTO> {entityLower}s;",
                     $"",
@@ -1176,7 +1195,7 @@ namespace CodeGenerator
                 if (hasView)
                 {
                     content.AddRange([
-                        $"        public async Task<List<View{prefix}{entityUpper}DTO>> GetAllFull(string? cmmKeyword)",
+                        $"        public async Task<List<View{prefix}{entityUpper}DTO>> GetAllFull(string? cmmKeyword = null)",
                         "        {",
                         $"            List<View{prefix}{entityUpper}DTO> {entityLower}s;",
                         $"",
@@ -1185,7 +1204,7 @@ namespace CodeGenerator
                         $"            return {entityLower}s;",
                         "        }",
                         $"",
-                        $"        public async Task<List<View{prefix}{entityUpperBase}BaseDTO>> GetAllBase(string? cmmKeyword)",
+                        $"        public async Task<List<View{prefix}{entityUpperBase}BaseDTO>> GetAllBase(string? cmmKeyword = null)",
                         "        {",
                         $"            List<View{prefix}{entityUpperBase}BaseDTO> {entityLower}s;",
                         $"",
@@ -1239,7 +1258,11 @@ namespace CodeGenerator
                 $"        #endregion",
                 $"",
                 $"        #region Custom Services",
-                $"",
+            ]);
+
+            content.AddRange(Utilities.GetCustomCode(_serviceModel.FirstOrDefault(x => x.Name == $"{entityUpper}Service"), "Services"));
+
+            content.AddRange([
                 $"        #endregion",
                 "    }",
                 "}"
@@ -1295,6 +1318,8 @@ namespace CodeGenerator
                 GenerateFile("DTO", $"{fileModel.Name.Replace("Object", "DTO", StringComparison.CurrentCulture)}.cs", content);
             }
         }
+
+        
 
         private bool IsNotBlackList(string line)
         {

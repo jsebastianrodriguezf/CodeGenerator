@@ -84,5 +84,37 @@ namespace CodeGenerator.Helper
             }
             return kebabCaseString.ToString();
         }
+
+        public static List<string> GetCustomCode(FileModel? fileModel, string regionName)
+        {
+            List<string> customLines;
+            string startKey = "#region Custom " + regionName;
+            const string endKey = "#endregion";
+
+            customLines = [];
+
+            if (fileModel is null)
+                return [""];
+
+            List<string> template = [.. File.ReadAllLines(fileModel.Path)];
+
+            for (int i = 0; i < template.Count; i++)
+            {
+                string line = template[i];
+                if (line.Contains(startKey))
+                {
+                    for (i = i + 1; i < template.Count; i++)
+                    {
+                        line = template[i];
+                        if (line.Contains(endKey))
+                            i = template.Count;
+                        else
+                            customLines.Add(line);
+                    }
+                }
+            }
+
+            return customLines.Count > 0 ? customLines : [""];
+        }
     }
 }
