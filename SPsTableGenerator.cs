@@ -37,6 +37,7 @@ namespace CodeGenerator
             List<string> linesByTable;
             List<string> spRoot;
             List<string> spTableRoot;
+            List<string> allNewLines;
             string line;
             string tableName;
 
@@ -44,6 +45,7 @@ namespace CodeGenerator
             linesByTable = [];
             spTableRoot = [];
             spRoot = [];
+            allNewLines = [];
 
             for (int i = 0; i < template.Count; i++)
             {
@@ -52,7 +54,11 @@ namespace CodeGenerator
                 if (line.StartsWith("print '") && line.EndsWith("'"))
                 {
                     tableName = GetTableName(line);
-                    spTableRoot = ExtractSPsByTable(tableName, linesByTable);
+                    spTableRoot = ExtractSPsByTable(tableName, linesByTable, ref allNewLines);
+
+                    allNewLines.Add("------------------------------------------");
+                    allNewLines.Add($"PRINT '{tableName}'");
+                    allNewLines.Add("------------------------------------------");
 
                     spRoot.AddRange(spTableRoot);
 
@@ -68,6 +74,7 @@ namespace CodeGenerator
             }
 
             Utilities.GenerateFile(_destinyPath, "Roots", "01_All_" + fileModel.Name + ".txt", spRoot);
+            Utilities.GenerateFile(_destinyPath, "AllScripts", "01_All_scripts" + fileModel.Name + ".sql", allNewLines);
         }
 
         private string GetTableName(string line)
@@ -81,7 +88,7 @@ namespace CodeGenerator
             return tableName;
         }
 
-        private List<string> ExtractSPsByTable(string tableName, List<string> templateTable)
+        private List<string> ExtractSPsByTable(string tableName, List<string> templateTable, ref List<string> allNewLines)
         {
             List<string> sp;
             List<string> spRoot;
@@ -89,6 +96,7 @@ namespace CodeGenerator
             string spName;
             string viewName;
             bool isView;
+            bool isSelMSP;
 
             const string separator = "----------------------";
             const string ifExists = "IF  EXISTS (SELECT * FROM ";
@@ -98,6 +106,7 @@ namespace CodeGenerator
             spName = "SPNoName";
             viewName = "VIEWNoName";
             isView = false;
+            isSelMSP = false;
 
             for (int i = 0; i < templateTable.Count; i++)
             {
@@ -116,18 +125,23 @@ namespace CodeGenerator
 
                         List<string> viewContent = sp.GetRange(0, endViewIndex);
 
+                        allNewLines.Add("------------------------------------------");
+                        allNewLines.AddRange(viewContent);
                         Utilities.GenerateFile(_destinyPath, Path.Combine("Views", tableName), viewName, viewContent);
                         spRoot.Add(Path.Combine("Views", tableName, viewName).Replace(@"\", "/"));
 
-                        GenerateBasicView(viewContent, tableName, ref spRoot);
+                        GenerateBasicView(viewContent, tableName, ref spRoot, ref allNewLines);
 
                         sp = sp.GetRange(endViewIndex, sp.Count - endViewIndex);
                     }
 
+                    allNewLines.Add("------------------------------------------");
+                    allNewLines.AddRange(sp);
                     Utilities.GenerateFile(_destinyPath, Path.Combine("StoreProcedures", tableName), spName, sp);
                     spRoot.Add(Path.Combine("StoreProcedures", tableName, spName).Replace(@"\", "/"));
 
                     isView = false;
+                    isSelMSP = false;
                     sp = [];
                     spName = "NoName";
                 }
@@ -140,7 +154,10 @@ namespace CodeGenerator
                         int start = line.LastIndexOf("[dbo].[") + 7;
                         int end = line.LastIndexOf("]");
                         if (start < end)
+                        {
                             spName = line[start..end] + ".sql";
+                            isSelMSP = spName.StartsWith($"sel_{tableName}") && spName.EndsWith($"_m.sql") && spName.Contains('X', StringComparison.CurrentCulture);
+                        }
 
                         if (!isView)
                             isView = spName.StartsWith("view_");
@@ -151,16 +168,91 @@ namespace CodeGenerator
                             spName = string.Empty;
                         }
                     }
+
+                    if (isSelMSP && line.Contains("@p_eid as varchar(50)"))
+                    {
+                        sp[^1] = line + ",";
+                        sp.Add("	@p_cmm VARCHAR(300) = NULL,");
+                        sp.Add("	@p_retorno INT = 1");
+                    }
+
+                    if (isSelMSP && line.Contains("BEGIN"))
+                    {
+                        i += 1;
+                        sp.AddRange(GetSelSP(ref i, tableName, templateTable));
+                        i -= 1;
+                    }
                 }
             }
 
             return spRoot;
         }
 
+        private List<string> GetSelSP(ref int index, string tableName, List<string> template)
+        {
+            List<string> content = [];
+            List<string> originalContent = [];
+            List<string> returnType = ["TABLE", "VIEW", "VIEWBASE"];
+            string line;
+            string nameType;
+
+            for (int i = index; i < template.Count; i++)
+            {
+                line = template[i];
+                index = i;
+                if (line.Contains("END"))
+                    break;
+
+                originalContent.Add("	" + line);
+            }
+
+            for (int t = 0; t < returnType.Count; t++)
+            {
+                nameType = returnType[t];
+
+                content.AddRange([
+                        $"	{(t != 0 ? "ELSE " : "")}IF @p_retorno = {t} -- {nameType}",
+                        $"	BEGIN"
+                    ]);
+
+                for (int i = 0; i < originalContent.Count; i++)
+                {
+                    line = originalContent[i];
+
+                    if (line.Contains($"FROM [view_{tableName}]"))
+                    {
+                        switch (t)
+                        {
+                            case 0:
+                                line = line.Replace($"FROM [view_{tableName}]", $"FROM [{tableName}]");
+                                break;
+                            case 2:
+                                line = line.Replace($"FROM [view_{tableName}]", $"FROM [view_{tableName}_base]");
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+
+                    content.Add(line);
+
+                }
+                content.AddRange([
+                       $"		AND (@p_cmm IS NULL OR [cmm] LIKE '%' + @p_cmm + '%')",
+                       $"		AND ([active] = 1)",
+                       $"	END",
+                       ""
+                   ]);
+            }
+
+            return content;
+        }
+
         public string GenerateBasicViews()
         {
             List<string> spRoot = [];
             List<string> allViewsContent = [];
+            List<string> allNewLines = [];
             List<FileModel> fileModels = Utilities.GetFilesModel([..
                 Directory.GetFileSystemEntries(_rootPath).
                     Select(x =>
@@ -175,7 +267,7 @@ namespace CodeGenerator
                 List<string> viewTemplate = [.. File.ReadAllLines(fileModel.Path)];
                 tableName = fileModel.Name.Replace("view_", "");
 
-                allViewsContent.AddRange(GenerateBasicView(viewTemplate, tableName, ref spRoot));
+                allViewsContent.AddRange(GenerateBasicView(viewTemplate, tableName, ref spRoot, ref allNewLines));
                 allViewsContent.Add("------------------------------------------");
                 allViewsContent.Add($"PRINT 'view_{tableName}_base'");
                 allViewsContent.Add("------------------------------------------");
@@ -189,7 +281,7 @@ namespace CodeGenerator
             return "Ok";
         }
 
-        private List<string> GenerateBasicView(List<string> seedViewContent, string tableName, ref List<string> spRoot)
+        private List<string> GenerateBasicView(List<string> seedViewContent, string tableName, ref List<string> spRoot, ref List<string> allNewLines)
         {
             List<string> basicViewContent = [];
             string tableNameNotDot = tableName.Replace(".", "_");
@@ -249,7 +341,8 @@ namespace CodeGenerator
                 }
             }
 
-
+            allNewLines.Add("------------------------------------------");
+            allNewLines.AddRange(basicViewContent);
             Utilities.GenerateFile(_destinyPath, Path.Combine("Views", tableName), $"{basicViewName}.sql", basicViewContent);
             spRoot.Add(Path.Combine("Views", tableName, $"{basicViewName}.sql").Replace(@"\", "/"));
 

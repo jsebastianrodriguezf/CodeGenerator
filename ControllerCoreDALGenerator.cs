@@ -965,7 +965,7 @@ namespace CodeGenerator
                     ]);
                 }
             }
-            
+
             content.AddRange([
                 $"",
                 $"        #endregion",
@@ -1009,8 +1009,8 @@ namespace CodeGenerator
                 $"    public class {entityUpper}Service : I{entityUpper}Service",
                 "    {",
                 $"        private readonly ILogger<{entityUpper}Service> _logger;",
-                $"        private readonly IMapper _mapper;",
-                $"        private readonly DataBaseRepository _dataBaseRepository;",
+                $"        protected readonly IMapper _mapper;",
+                $"        protected readonly DataBaseRepository _dataBaseRepository;",
                 $"        private readonly DataBase _sammaiDataBaseOptions;",
                 $"",
                 $"        public {entityUpper}Service(",
@@ -1319,7 +1319,7 @@ namespace CodeGenerator
             }
         }
 
-        
+
 
         private bool IsNotBlackList(string line)
         {

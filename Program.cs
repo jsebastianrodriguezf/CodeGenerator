@@ -20,7 +20,7 @@ internal class Program
 
         Console.WriteLine("Start ...");
 
-        option = InputEnum.ControllerCoreDALGenerator;
+        option = InputEnum.SPsTableGenerator;
 
         switch (option)
         {
