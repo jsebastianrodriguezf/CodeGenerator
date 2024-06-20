@@ -1,7 +1,7 @@
 ﻿using CodeGenerator.Helper;
 using CodeGenerator.Models;
 
-namespace CodeGenerator
+namespace CodeGenerator.BLL
 {
     public class SPsTableGenerator
     {
@@ -156,7 +156,7 @@ namespace CodeGenerator
                         if (start < end)
                         {
                             spName = line[start..end] + ".sql";
-                            isSelMSP = spName.StartsWith($"sel_{tableName}") && spName.EndsWith($"_m.sql") && spName.Contains('X', StringComparison.CurrentCulture);
+                            isSelMSP = spName.StartsWith($"sel_{tableName.Replace(".", "_")}") && spName.EndsWith($"_m.sql") && spName.Contains('X', StringComparison.CurrentCulture);
                         }
 
                         if (!isView)
@@ -226,8 +226,11 @@ namespace CodeGenerator
                             case 0:
                                 line = line.Replace($"FROM [view_{tableName}]", $"FROM [{tableName}]");
                                 break;
+                            case 1:
+                                line = line.Replace($"FROM [view_{tableName}]", $"FROM [view_{tableName.Replace(".", "_")}]");
+                                break;
                             case 2:
-                                line = line.Replace($"FROM [view_{tableName}]", $"FROM [view_{tableName}_base]");
+                                line = line.Replace($"FROM [view_{tableName}]", $"FROM [view_{tableName.Replace(".", "_")}_base]");
                                 break;
                             default:
                                 break;

@@ -1,7 +1,7 @@
 ﻿using CodeGenerator.Helper;
 using CodeGenerator.Models;
 
-namespace CodeGenerator
+namespace CodeGenerator.BLL
 {
     public class ControllerDataBaseGenerator
     {

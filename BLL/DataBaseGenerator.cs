@@ -1,7 +1,7 @@
 ﻿using CodeGenerator.Helper;
 using CodeGenerator.Models;
 
-namespace GenerarCodigo
+namespace CodeGenerator.BLL
 {
 
     public class DatabaseGenerator

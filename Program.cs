@@ -1,6 +1,5 @@
-﻿using CodeGenerator;
+﻿using CodeGenerator.BLL;
 using CodeGenerator.Models;
-using GenerarCodigo;
 using static CodeGenerator.Enums.BaseEnums;
 
 internal class Program
@@ -20,7 +19,7 @@ internal class Program
 
         Console.WriteLine("Start ...");
 
-        option = InputEnum.SPsTableGenerator;
+        option = InputEnum.ControllerCoreDALGenerator;
 
         switch (option)
         {
