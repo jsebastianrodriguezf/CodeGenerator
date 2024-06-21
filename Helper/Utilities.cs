@@ -31,6 +31,25 @@ namespace CodeGenerator.Helper
             ];
         }
 
+        public static List<DirectoryModel> GetDirectoriesModel(List<string> directories)
+        {
+            return [
+               .. directories.
+                Select(x =>
+                {
+                    List<string> directory = [.. x.Split("\\")];
+
+                    return new DirectoryModel()
+                    {
+                        Path = x,
+                        Name = directory.Last(),
+                        Files = []
+                    };
+                }).
+                OrderBy(x => x.Name),
+            ];
+        }
+
         public static void GenerateFile(string destinyPath, string directory, string file, List<string> content)
         {
             string pathDirectory;

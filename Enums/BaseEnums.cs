@@ -11,7 +11,8 @@
             SPsTableGenerator,
             BaseSPsTableGenerator,
             SingleControllerCoreDALGenerator,
-            ControllerCoreDALGenerator
+            ControllerCoreDALGenerator,
+            AlterTableGenerator
         }
     }
 }
