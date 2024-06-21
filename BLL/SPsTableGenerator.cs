@@ -185,7 +185,99 @@ namespace CodeGenerator.BLL
                 }
             }
 
+            GenerateUpdateCmmSP(tableName, ref allNewLines, ref spRoot);
+
             return spRoot;
+        }
+
+        private List<string> GenerateUpdateCmmSP(string tableName, ref List<string> allNewLines, ref List<string> spRoot)
+        {
+            string spName;
+            string spNameFile;
+            List<string> sp = [];
+            List<string> updateParent = [];
+            string principalColumn;
+            string parentTableName;
+            string cmmValue;
+
+            if (tableName.StartsWith('_'))
+                return sp;
+
+            spName = $"upd_{tableName.Replace('.', '_')}_cmm";
+            spNameFile = $"{spName}.sql";
+            principalColumn = tableName[4..];
+
+            if (tableName == "ort_reporteTecnico_ot" && principalColumn == "reporteTecnico_ot" ||
+                tableName == "seg_sesionHistorico" && principalColumn == "sesionHistorico")
+                cmmValue = "''";
+            else
+                cmmValue = $"CASE WHEN [{principalColumn}] IN ('', NULL) THEN '' ELSE CONCAT('[', [{principalColumn}], ']') END";
+
+            if (tableName.StartsWith("doc_documento.") || tableName.StartsWith("cat_catalogo."))
+            {
+                parentTableName = tableName.Split(".").First();
+
+                updateParent.AddRange([
+                    $"",
+                    $"	UPDATE [{parentTableName}]",
+                    $"	SET [{parentTableName}].cmm = tabla.cmm,",
+                    $"		id_usuario_modifico = @p_id_usuario_modifico,",
+                    $"		fechaModificacion = GETDATE()",
+                    $"	FROM [{tableName}] tabla",
+                    $"		INNER JOIN @p_ids ids",
+                    $"	ON tabla.id = ids.Id",
+                    $"	WHERE",
+                    $"		tabla.eid = @p_eid",
+                ]);
+            }
+
+            sp.AddRange([
+                $"SET QUOTED_IDENTIFIER OFF",
+                $"GO",
+                $"SET ANSI_NULLS OFF",
+                $"GO",
+                $"",
+                $"IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[{spName}]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[{spName}]",
+                $"GO",
+                $"CREATE PROCEDURE [dbo].[{spName}]",
+                $"	@p_ids AS typ_ids READONLY,",
+                $"	@p_id_usuario_modifico int,",
+                $"	@p_eid varchar(50)",
+                $"AS",
+                $"BEGIN",
+                $"",
+                $"	SET NOCOUNT OFF;",
+                $"	",
+                $"	UPDATE [{tableName}]",
+                $"	SET cmm = {cmmValue},",
+                $"		id_usuario_modifico = @p_id_usuario_modifico,",
+                $"		fechaModificacion = GETDATE()",
+                $"	FROM [{tableName}] tabla",
+                $"		INNER JOIN @p_ids ids",
+                $"	ON tabla.id = ids.Id",
+                $"	WHERE",
+                $"		eid = @p_eid",
+            ]);
+
+            sp.AddRange(updateParent);
+
+            sp.AddRange([
+                $"END",
+                $"GO",
+                $"SET QUOTED_IDENTIFIER OFF ",
+                $"GO",
+                $"SET ANSI_NULLS ON",
+                $"GO",
+                $"",
+            ]);
+
+
+            allNewLines.Add("------------------------------------------");
+            allNewLines.AddRange(sp);
+            Utilities.GenerateFile(_destinyPath, Path.Combine("StoreProcedures", tableName), spNameFile, sp);
+            spRoot.Add(Path.Combine("StoreProcedures", tableName, spNameFile).Replace(@"\", "/"));
+
+            return sp;
         }
 
         private List<string> GetSelSP(ref int index, string tableName, List<string> template)
