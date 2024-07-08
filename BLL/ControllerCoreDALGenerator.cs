@@ -1,4 +1,5 @@
-﻿using CodeGenerator.Helper;
+﻿using CodeGenerator.External;
+using CodeGenerator.Helper;
 using CodeGenerator.Models;
 
 namespace CodeGenerator.BLL
@@ -22,6 +23,8 @@ namespace CodeGenerator.BLL
         private readonly List<FileModel> _iServiceModel;
         private readonly List<string> _files;
         private readonly List<FileModel> _filesModel;
+        private readonly TranstaleService _transtaleService;
+        private readonly TranstaleService _transtaleServiceEs;
 
         public ControllerCoreDALGenerator(
             string rootPath,
@@ -30,7 +33,6 @@ namespace CodeGenerator.BLL
             string servicePath,
             string iServicePath)
         {
-            _tables = GetTables();
             _rootPath = rootPath;
             _destinyPath = destityPath;
             _files = [.. Directory.GetFiles(_rootPath)];
@@ -40,10 +42,15 @@ namespace CodeGenerator.BLL
             _serviceModel = Utilities.GetFilesModel([.. Directory.GetFiles(servicePath)]);
             _iServiceModel = Utilities.GetFilesModel([.. Directory.GetFiles(iServicePath)]);
 
+            _transtaleService = new TranstaleService(Constants.BaseConstants.Languages.English, Constants.BaseConstants.Languages.Spanish);
+            _transtaleServiceEs = new TranstaleService(Constants.BaseConstants.Languages.Spanish, Constants.BaseConstants.Languages.English);
+
+            _tables = GetTables();
+
             Utilities.RegenerateDirectory(_destinyPath);
         }
 
-        private static List<string> GetTables()
+        private List<string> GetTables()
         {
             List<string> tables;
             tables = [
@@ -248,7 +255,21 @@ namespace CodeGenerator.BLL
             ];
 
             tables = tables.
-                Select(table => table.Replace(".", "").Replace("_", "") + "Object").
+                Select(table =>
+                {
+                    string tableTranslated;
+                    string value;
+
+                    value = table.Replace("_", ".");
+                    tableTranslated = string.Empty;
+
+                    foreach (string text in value.Split('.'))
+                    {
+                        tableTranslated += _transtaleServiceEs.Translate(text[..1].ToUpper() + text[1..]).Result;
+                    }
+
+                    return tableTranslated + "Object";
+                }).
                 ToList();
 
             return tables;
@@ -269,7 +290,7 @@ namespace CodeGenerator.BLL
                 if (!_tables.Any(table => table.Equals(file.Name, StringComparison.CurrentCultureIgnoreCase)))
                     continue;
 
-                response = GenerateByEntity(file.Name.Replace("Object", string.Empty), file);
+                response = GenerateByEntity(file.Name[..^"Object".Length], file);
                 if (!string.IsNullOrEmpty(response))
                     responses.Add(response);
 
@@ -304,8 +325,8 @@ namespace CodeGenerator.BLL
                 entityLower = string.Concat(init.ToLower(), entity.AsSpan(4));
 
                 withCodigo =
-                    HasWord(file.Path, $"public string? {entityUpper}Codigo {{ get; set; }}") ||
-                    HasWord(file.Path, $"public string {entityUpper}Codigo {{ get; set; }} = null!;");
+                    HasWord(file.Path, $"public string? {entityUpper}Code {{ get; set; }}") ||
+                    HasWord(file.Path, $"public string {entityUpper}Code {{ get; set; }} = null!;");
 
                 hasPrincipalField =
                     HasWord(file.Path, $"public string? {entityUpper} {{ get; set; }}") ||
@@ -314,10 +335,13 @@ namespace CodeGenerator.BLL
                 hasCmm = HasWord(file.Path, $"public string? Cmm {{ get; set; }}");
                 hasView = HasView(file);
 
+                if (entityLower == "event" || entityLower == "group")
+                    entityLower += "Obj";
+
                 GenerateController(prefix, entityUpper, entityLower, withCodigo, hasView, hasCmm);
-                GenerateIService(prefix, entityUpper, entityLower, withCodigo, hasView, hasCmm);
+                GenerateIService(prefix, entityUpper, withCodigo, hasView, hasCmm);
                 GenerateService(prefix, entityUpper, entityLower, withCodigo, hasView, hasCmm);
-                GenerateDTO(file, prefix, entityUpper, entityLower);
+                GenerateDTO(file);
 
                 return string.Empty;
             }
@@ -373,6 +397,11 @@ namespace CodeGenerator.BLL
                 $"        /// <returns></returns>",
                 $"        /// <remarks>",
                 $"        /// Gets a {entityUpper} by id",
+                $"        /// ",
+                $"        /// Authorization: Private",
+                $"        /// ",
+                $"        ///     Headers:",
+                $"        ///         Authorization: <c>Bearer {{Token}}</c>",
                 $"        /// </remarks>",
                 $"        /// <response code=\"200\">Success: Returns the {entityUpper} object</response>",
                 $"        [PrivateIdentifierFilter]",
@@ -402,6 +431,11 @@ namespace CodeGenerator.BLL
                     $"        /// <returns></returns>",
                     $"        /// <remarks>",
                     $"        /// Gets a full {entityUpper} by id",
+                    $"        /// ",
+                    $"        /// Authorization: Private",
+                    $"        /// ",
+                    $"        ///     Headers:",
+                    $"        ///         Authorization: <c>Bearer {{Token}}</c>",
                     $"        /// </remarks>",
                     $"        /// <response code=\"200\">Success: Returns the full {entityUpper} object</response>",
                     $"        [PrivateIdentifierFilter]",
@@ -426,6 +460,11 @@ namespace CodeGenerator.BLL
                     $"        /// <returns></returns>",
                     $"        /// <remarks>",
                     $"        /// Gets a base {entityUpper} by id",
+                    $"        /// ",
+                    $"        /// Authorization: Private",
+                    $"        /// ",
+                    $"        ///     Headers:",
+                    $"        ///         Authorization: <c>Bearer {{Token}}</c>",
                     $"        /// </remarks>",
                     $"        /// <response code=\"200\">Success: Returns the base {entityUpper} object</response>",
                     $"        [PrivateIdentifierFilter]",
@@ -454,6 +493,11 @@ namespace CodeGenerator.BLL
                 $"        /// <returns></returns>",
                 $"        /// <remarks>",
                 $"        /// Gets a set of {entityUpper} by ids",
+                $"        /// ",
+                $"        /// Authorization: Private",
+                $"        /// ",
+                $"        ///     Headers:",
+                $"        ///         Authorization: <c>Bearer {{Token}}</c>",
                 $"        /// </remarks>",
                 $"        /// <response code=\"200\">Success: Returns a list of {entityUpper} objects</response>",
                 $"        [PrivateIdentifierFilter]",
@@ -483,6 +527,11 @@ namespace CodeGenerator.BLL
                     $"        /// <returns></returns>",
                     $"        /// <remarks>",
                     $"        /// Gets a full set of {entityUpper} by ids",
+                    $"        /// ",
+                    $"        /// Authorization: Private",
+                    $"        /// ",
+                    $"        ///     Headers:",
+                    $"        ///         Authorization: <c>Bearer {{Token}}</c>",
                     $"        /// </remarks>",
                     $"        /// <response code=\"200\">Success: Returns a list of full {entityUpper} objects</response>",
                     $"        [PrivateIdentifierFilter]",
@@ -507,6 +556,11 @@ namespace CodeGenerator.BLL
                     $"        /// <returns></returns>",
                     $"        /// <remarks>",
                     $"        /// Gets a base set of {entityUpper} by ids",
+                    $"        /// ",
+                    $"        /// Authorization: Private",
+                    $"        /// ",
+                    $"        ///     Headers:",
+                    $"        ///         Authorization: <c>Bearer {{Token}}</c>",
                     $"        /// </remarks>",
                     $"        /// <response code=\"200\">Success: Returns a list of base {entityUpper} objects</response>",
                     $"        [PrivateIdentifierFilter]",
@@ -537,6 +591,11 @@ namespace CodeGenerator.BLL
                     $"        /// <returns></returns>",
                     $"        /// <remarks>",
                     $"        /// Gets a {entityUpper} by code",
+                    $"        /// ",
+                    $"        /// Authorization: Private",
+                    $"        /// ",
+                    $"        ///     Headers:",
+                    $"        ///         Authorization: <c>Bearer {{Token}}</c>",
                     $"        /// </remarks>",
                     $"        /// <response code=\"200\">Success: Returns the {entityUpper} object</response>",
                     $"        [PrivateIdentifierFilter]",
@@ -566,6 +625,11 @@ namespace CodeGenerator.BLL
                         $"        /// <returns></returns>",
                         $"        /// <remarks>",
                         $"        /// Gets a full {entityUpper} by code",
+                        $"        /// ",
+                        $"        /// Authorization: Private",
+                        $"        /// ",
+                        $"        ///     Headers:",
+                        $"        ///         Authorization: <c>Bearer {{Token}}</c>",
                         $"        /// </remarks>",
                         $"        /// <response code=\"200\">Success: Returns the full {entityUpper} object</response>",
                         $"        [PrivateIdentifierFilter]",
@@ -590,6 +654,11 @@ namespace CodeGenerator.BLL
                         $"        /// <returns></returns>",
                         $"        /// <remarks>",
                         $"        /// Gets a base {entityUpper} by code",
+                        $"        /// ",
+                        $"        /// Authorization: Private",
+                        $"        /// ",
+                        $"        ///     Headers:",
+                        $"        ///         Authorization: <c>Bearer {{Token}}</c>",
                         $"        /// </remarks>",
                         $"        /// <response code=\"200\">Success: Returns the base {entityUpper} object</response>",
                         $"        [PrivateIdentifierFilter]",
@@ -618,6 +687,11 @@ namespace CodeGenerator.BLL
                     $"        /// <returns></returns>",
                     $"        /// <remarks>",
                     $"        /// Gets a set of {entityUpper} by codes",
+                    $"        /// ",
+                    $"        /// Authorization: Private",
+                    $"        /// ",
+                    $"        ///     Headers:",
+                    $"        ///         Authorization: <c>Bearer {{Token}}</c>",
                     $"        /// </remarks>",
                     $"        /// <response code=\"200\">Success: Returns a list of {entityUpper} objects</response>",
                     $"        [PrivateIdentifierFilter]",
@@ -647,6 +721,11 @@ namespace CodeGenerator.BLL
                         $"        /// <returns></returns>",
                         $"        /// <remarks>",
                         $"        /// Gets a full set of {entityUpper} by codes",
+                        $"        /// ",
+                        $"        /// Authorization: Private",
+                        $"        /// ",
+                        $"        ///     Headers:",
+                        $"        ///         Authorization: <c>Bearer {{Token}}</c>",
                         $"        /// </remarks>",
                         $"        /// <response code=\"200\">Success: Returns a list of full {entityUpper} objects</response>",
                         $"        [PrivateIdentifierFilter]",
@@ -671,6 +750,11 @@ namespace CodeGenerator.BLL
                         $"        /// <returns></returns>",
                         $"        /// <remarks>",
                         $"        /// Gets a base set of {entityUpper} by codes",
+                        $"        /// ",
+                        $"        /// Authorization: Private",
+                        $"        /// ",
+                        $"        ///     Headers:",
+                        $"        ///         Authorization: <c>Bearer {{Token}}</c>",
                         $"        /// </remarks>",
                         $"        /// <response code=\"200\">Success: Returns a list of base {entityUpper} objects</response>",
                         $"        [PrivateIdentifierFilter]",
@@ -702,6 +786,11 @@ namespace CodeGenerator.BLL
                     $"        /// <returns></returns>",
                     $"        /// <remarks>",
                     $"        /// Gets all {entityUpper}",
+                    $"        /// ",
+                    $"        /// Authorization: Private",
+                    $"        /// ",
+                    $"        ///     Headers:",
+                    $"        ///         Authorization: <c>Bearer {{Token}}</c>",
                     $"        /// </remarks>",
                     $"        /// <response code=\"200\">Success: Returns a list of {entityUpper} object</response>",
                     $"        [PrivateIdentifierFilter]",
@@ -730,6 +819,11 @@ namespace CodeGenerator.BLL
                         $"        /// <returns></returns>",
                         $"        /// <remarks>",
                         $"        /// Gets all full {entityUpper}",
+                        $"        /// ",
+                        $"        /// Authorization: Private",
+                        $"        /// ",
+                        $"        ///     Headers:",
+                        $"        ///         Authorization: <c>Bearer {{Token}}</c>",
                         $"        /// </remarks>",
                         $"        /// <response code=\"200\">Success: Returns a full list of {entityUpper} object</response>",
                         $"        [PrivateIdentifierFilter]",
@@ -753,6 +847,11 @@ namespace CodeGenerator.BLL
                         $"        /// <returns></returns>",
                         $"        /// <remarks>",
                         $"        /// Gets all base {entityUpper}",
+                        $"        /// ",
+                        $"        /// Authorization: Private",
+                        $"        /// ",
+                        $"        ///     Headers:",
+                        $"        ///         Authorization: <c>Bearer {{Token}}</c>",
                         $"        /// </remarks>",
                         $"        /// <response code=\"200\">Success: Returns a base list of {entityUpper} object</response>",
                         $"        [PrivateIdentifierFilter]",
@@ -781,6 +880,11 @@ namespace CodeGenerator.BLL
                     $"        /// <returns></returns>",
                     $"        /// <remarks>",
                     $"        /// Gets all {entityUpper}",
+                    $"        /// ",
+                    $"        /// Authorization: Private",
+                    $"        /// ",
+                    $"        ///     Headers:",
+                    $"        ///         Authorization: <c>Bearer {{Token}}</c>",
                     $"        /// </remarks>",
                     $"        /// <response code=\"200\">Success: Returns a list of {entityUpper} object</response>",
                     $"        [PrivateIdentifierFilter]",
@@ -808,6 +912,11 @@ namespace CodeGenerator.BLL
                         $"        /// <returns></returns>",
                         $"        /// <remarks>",
                         $"        /// Gets all full {entityUpper}",
+                        $"        /// ",
+                        $"        /// Authorization: Private",
+                        $"        /// ",
+                        $"        ///     Headers:",
+                        $"        ///         Authorization: <c>Bearer {{Token}}</c>",
                         $"        /// </remarks>",
                         $"        /// <response code=\"200\">Success: Returns a full list of {entityUpper} object</response>",
                         $"        [PrivateIdentifierFilter]",
@@ -830,6 +939,11 @@ namespace CodeGenerator.BLL
                         $"        /// <returns></returns>",
                         $"        /// <remarks>",
                         $"        /// Gets all base {entityUpper}",
+                        $"        /// ",
+                        $"        /// Authorization: Private",
+                        $"        /// ",
+                        $"        ///     Headers:",
+                        $"        ///         Authorization: <c>Bearer {{Token}}</c>",
                         $"        /// </remarks>",
                         $"        /// <response code=\"200\">Success: Returns a base list of {entityUpper} object</response>",
                         $"        [PrivateIdentifierFilter]",
@@ -857,6 +971,7 @@ namespace CodeGenerator.BLL
             ]);
 
             content.AddRange(Utilities.GetCustomCode(_controllerModel.FirstOrDefault(x => x.Name == $"{entityUpper}Controller"), "Endpoints"));
+            //content.AddRange(Utilities.GetCustomCode(_controllerModel.FirstOrDefault(x => x.Name == $"{_transtaleService.Translate(entityUpper).Result}Controller"), "Endpoints"));
 
             content.AddRange([
                 $"        #endregion",
@@ -867,7 +982,7 @@ namespace CodeGenerator.BLL
             GenerateFile("Controllers", $"{entityUpper}Controller.cs", content);
         }
 
-        public void GenerateIService(string prefix, string entityUpper, string entityLower, bool WithCodigo, bool hasView, bool hasCmm)
+        public void GenerateIService(string prefix, string entityUpper, bool WithCodigo, bool hasView, bool hasCmm)
         {
             List<string> content;
             string entityUpperBase;
@@ -974,6 +1089,7 @@ namespace CodeGenerator.BLL
             ]);
 
             content.AddRange(Utilities.GetCustomCode(_iServiceModel.FirstOrDefault(x => x.Name == $"I{entityUpper}Service"), "IServices"));
+            //content.AddRange(Utilities.GetCustomCode(_iServiceModel.FirstOrDefault(x => x.Name == $"I{_transtaleService.Translate(entityUpper).Result}Service"), "IServices"));
 
             content.AddRange([
                 $"        #endregion",
@@ -1003,6 +1119,7 @@ namespace CodeGenerator.BLL
                 $"using SAMMAI.Core.Utility.SettingsFiles;",
                 $"using SAMMAI.Transverse.Models.DTOs;",
                 $"using SAMMAI.Transverse.Models.Endpoints.Core.{entityUpper};",
+                $"using static SAMMAI.Transverse.Constants.ApiRoutes.DataBaseAPI;",
                 $"",
                 $"namespace SAMMAI.Core.Services.DAL.Implementations",
                 "{",
@@ -1030,7 +1147,7 @@ namespace CodeGenerator.BLL
                 "        {",
                 $"            {prefix}{entityUpper}DTO? {entityLower};",
                 $"",
-                $"            {entityLower} = await _dataBaseRepository.GetById<{prefix}{entityUpper}DTO>(EntityConstants.{entityUpper}, id);",
+                $"            {entityLower} = id > 0 ? await _dataBaseRepository.GetById<{prefix}{entityUpper}DTO>({entityUpper}BaseController, id) : null;",
                 $"            if ({entityLower} is null && !nullable) throw new ApiException(StatusCodeEnum.NOT_FOUND);",
                 $"",
                 $"            return {entityLower};",
@@ -1045,7 +1162,7 @@ namespace CodeGenerator.BLL
                     "        {",
                     $"            View{prefix}{entityUpper}DTO? {entityLower};",
                     $"",
-                    $"            {entityLower} = await _dataBaseRepository.GetFullById<View{prefix}{entityUpper}DTO>(EntityConstants.{entityUpper}, id);",
+                    $"            {entityLower} = id > 0 ? await _dataBaseRepository.GetFullById<View{prefix}{entityUpper}DTO>({entityUpper}BaseController, id) : null;",
                     $"            if ({entityLower} is null && !nullable) throw new ApiException(StatusCodeEnum.NOT_FOUND);",
                     $"",
                     $"            return {entityLower};",
@@ -1055,7 +1172,7 @@ namespace CodeGenerator.BLL
                     "        {",
                     $"            View{prefix}{entityUpperBase}BaseDTO? {entityLower};",
                     $"",
-                    $"            {entityLower} = await _dataBaseRepository.GetBaseById<View{prefix}{entityUpperBase}BaseDTO>(EntityConstants.{entityUpper}, id);",
+                    $"            {entityLower} = id > 0 ? await _dataBaseRepository.GetBaseById<View{prefix}{entityUpperBase}BaseDTO>({entityUpper}BaseController, id) : null;",
                     $"            if ({entityLower} is null && !nullable) throw new ApiException(StatusCodeEnum.NOT_FOUND);",
                     $"",
                     $"            return {entityLower};",
@@ -1067,11 +1184,7 @@ namespace CodeGenerator.BLL
             content.AddRange([
                 $"        public async Task<List<{prefix}{entityUpper}DTO>> GetSetByIds(List<int> ids)",
                 "        {",
-                $"            List<{prefix}{entityUpper}DTO> {entityLower}s;",
-                $"",
-                $"            {entityLower}s = await _dataBaseRepository.GetSetByIds<{prefix}{entityUpper}DTO>(EntityConstants.{entityUpper}, ids);",
-                $"",
-                $"            return {entityLower}s;",
+                $"            return ids.Count > 0 ? await _dataBaseRepository.GetSetByIds<{prefix}{entityUpper}DTO>({entityUpper}BaseController, ids) : [];",
                 "        }",
                 $""
             ]);
@@ -1081,20 +1194,12 @@ namespace CodeGenerator.BLL
                 content.AddRange([
                     $"        public async Task<List<View{prefix}{entityUpper}DTO>> GetFullSetByIds(List<int> ids)",
                     "        {",
-                    $"            List<View{prefix}{entityUpper}DTO> {entityLower}s;",
-                    $"",
-                    $"            {entityLower}s = await _dataBaseRepository.GetFullSetByIds<View{prefix}{entityUpper}DTO>(EntityConstants.{entityUpper}, ids);",
-                    $"",
-                    $"            return {entityLower}s;",
+                    $"            return ids.Count > 0 ? await _dataBaseRepository.GetFullSetByIds<View{prefix}{entityUpper}DTO>({entityUpper}BaseController, ids) : [];",
                     "        }",
                     $"",
                     $"        public async Task<List<View{prefix}{entityUpperBase}BaseDTO>> GetBaseSetByIds(List<int> ids)",
                     "        {",
-                    $"            List<View{prefix}{entityUpperBase}BaseDTO> {entityLower}s;",
-                    $"",
-                    $"            {entityLower}s = await _dataBaseRepository.GetBaseSetByIds<View{prefix}{entityUpperBase}BaseDTO>(EntityConstants.{entityUpper}, ids);",
-                    $"",
-                    $"            return {entityLower}s;",
+                    $"            return ids.Count > 0 ? await _dataBaseRepository.GetBaseSetByIds<View{prefix}{entityUpperBase}BaseDTO>({entityUpper}BaseController, ids) : [];",
                     "        }",
                     $""
                 ]);
@@ -1107,7 +1212,7 @@ namespace CodeGenerator.BLL
                     "        {",
                     $"            {prefix}{entityUpper}DTO? {entityLower};",
                     $"",
-                    $"            {entityLower} = await _dataBaseRepository.GetByCode<{prefix}{entityUpper}DTO>(EntityConstants.{entityUpper}, code);",
+                    $"            {entityLower} = await _dataBaseRepository.GetByCode<{prefix}{entityUpper}DTO>({entityUpper}BaseController, code);",
                     $"            if ({entityLower} is null && !nullable) throw new ApiException(StatusCodeEnum.NOT_FOUND);",
                     $"",
                     $"            return {entityLower};",
@@ -1122,7 +1227,7 @@ namespace CodeGenerator.BLL
                         "        {",
                         $"            View{prefix}{entityUpper}DTO? {entityLower};",
                         $"",
-                        $"            {entityLower} = await _dataBaseRepository.GetFullByCode<View{prefix}{entityUpper}DTO>(EntityConstants.{entityUpper}, code);",
+                        $"            {entityLower} = await _dataBaseRepository.GetFullByCode<View{prefix}{entityUpper}DTO>({entityUpper}BaseController, code);",
                         $"            if ({entityLower} is null && !nullable) throw new ApiException(StatusCodeEnum.NOT_FOUND);",
                         $"",
                         $"            return {entityLower};",
@@ -1132,7 +1237,7 @@ namespace CodeGenerator.BLL
                         "        {",
                         $"            View{prefix}{entityUpperBase}BaseDTO? {entityLower};",
                         $"",
-                        $"            {entityLower} = await _dataBaseRepository.GetBaseByCode<View{prefix}{entityUpperBase}BaseDTO>(EntityConstants.{entityUpper}, code);",
+                        $"            {entityLower} = await _dataBaseRepository.GetBaseByCode<View{prefix}{entityUpperBase}BaseDTO>({entityUpper}BaseController, code);",
                         $"            if ({entityLower} is null && !nullable) throw new ApiException(StatusCodeEnum.NOT_FOUND);",
                         $"",
                         $"            return {entityLower};",
@@ -1144,11 +1249,7 @@ namespace CodeGenerator.BLL
                 content.AddRange([
                     $"        public async Task<List<{prefix}{entityUpper}DTO>> GetSetByCodes(List<string> codes)",
                     "        {",
-                    $"            List<{prefix}{entityUpper}DTO> {entityLower}s;",
-                    $"",
-                    $"            {entityLower}s = await _dataBaseRepository.GetSetByCodes<{prefix}{entityUpper}DTO>(EntityConstants.{entityUpper}, codes);",
-                    $"",
-                    $"            return {entityLower}s;",
+                    $"            return codes.Count > 0 ? await _dataBaseRepository.GetSetByCodes<{prefix}{entityUpper}DTO>({entityUpper}BaseController, codes) : [];",
                     "        }",
                     $""
                 ]);
@@ -1158,20 +1259,12 @@ namespace CodeGenerator.BLL
                     content.AddRange([
                         $"        public async Task<List<View{prefix}{entityUpper}DTO>> GetFullSetByCodes(List<string> codes)",
                         "        {",
-                        $"            List<View{prefix}{entityUpper}DTO> {entityLower}s;",
-                        $"",
-                        $"            {entityLower}s = await _dataBaseRepository.GetFullSetByCodes<View{prefix}{entityUpper}DTO>(EntityConstants.{entityUpper}, codes);",
-                        $"",
-                        $"            return {entityLower}s;",
+                        $"            return codes.Count > 0 ? await _dataBaseRepository.GetFullSetByCodes<View{prefix}{entityUpper}DTO>({entityUpper}BaseController, codes) : [];",
                         "        }",
                         $"",
                         $"        public async Task<List<View{prefix}{entityUpperBase}BaseDTO>> GetBaseSetByCodes(List<string> codes)",
                         "        {",
-                        $"            List<View{prefix}{entityUpperBase}BaseDTO> {entityLower}s;",
-                        $"",
-                        $"            {entityLower}s = await _dataBaseRepository.GetBaseSetByCodes<View{prefix}{entityUpperBase}BaseDTO>(EntityConstants.{entityUpper}, codes);",
-                        $"",
-                        $"            return {entityLower}s;",
+                        $"            return codes.Count > 0 ? await _dataBaseRepository.GetBaseSetByCodes<View{prefix}{entityUpperBase}BaseDTO>({entityUpper}BaseController, codes) : [];",
                         "        }",
                         $""
                     ]);
@@ -1183,11 +1276,7 @@ namespace CodeGenerator.BLL
                 content.AddRange([
                     $"        public async Task<List<{prefix}{entityUpper}DTO>> GetAll(string? cmmKeyword = null)",
                     "        {",
-                    $"            List<{prefix}{entityUpper}DTO> {entityLower}s;",
-                    $"",
-                    $"            {entityLower}s = await _dataBaseRepository.GetAll<{prefix}{entityUpper}DTO>(EntityConstants.{entityUpper}, cmmKeyword);",
-                    $"",
-                    $"            return {entityLower}s;",
+                    $"            return await _dataBaseRepository.GetAll<{prefix}{entityUpper}DTO>({entityUpper}BaseController, cmmKeyword);",
                     "        }",
                     $""
                 ]);
@@ -1197,20 +1286,12 @@ namespace CodeGenerator.BLL
                     content.AddRange([
                         $"        public async Task<List<View{prefix}{entityUpper}DTO>> GetAllFull(string? cmmKeyword = null)",
                         "        {",
-                        $"            List<View{prefix}{entityUpper}DTO> {entityLower}s;",
-                        $"",
-                        $"            {entityLower}s = await _dataBaseRepository.GetAllFull<View{prefix}{entityUpper}DTO>(EntityConstants.{entityUpper}, cmmKeyword);",
-                        $"",
-                        $"            return {entityLower}s;",
+                        $"            return await _dataBaseRepository.GetAllFull<View{prefix}{entityUpper}DTO>({entityUpper}BaseController, cmmKeyword);",
                         "        }",
                         $"",
                         $"        public async Task<List<View{prefix}{entityUpperBase}BaseDTO>> GetAllBase(string? cmmKeyword = null)",
                         "        {",
-                        $"            List<View{prefix}{entityUpperBase}BaseDTO> {entityLower}s;",
-                        $"",
-                        $"            {entityLower}s = await _dataBaseRepository.GetAllBase<View{prefix}{entityUpperBase}BaseDTO>(EntityConstants.{entityUpper}, cmmKeyword);",
-                        $"",
-                        $"            return {entityLower}s;",
+                        $"            return await _dataBaseRepository.GetAllBase<View{prefix}{entityUpperBase}BaseDTO>({entityUpper}BaseController, cmmKeyword);",
                         "        }"
                     ]);
                 }
@@ -1220,11 +1301,7 @@ namespace CodeGenerator.BLL
                 content.AddRange([
                    $"        public async Task<List<{prefix}{entityUpper}DTO>> GetAll()",
                     "        {",
-                    $"            List<{prefix}{entityUpper}DTO> {entityLower}s;",
-                    $"",
-                    $"            {entityLower}s = await _dataBaseRepository.GetAll<{prefix}{entityUpper}DTO>(EntityConstants.{entityUpper});",
-                    $"",
-                    $"            return {entityLower}s;",
+                    $"            return await _dataBaseRepository.GetAll<{prefix}{entityUpper}DTO>({entityUpper}BaseController);",
                     "        }",
                     $""
                ]);
@@ -1234,20 +1311,12 @@ namespace CodeGenerator.BLL
                     content.AddRange([
                         $"        public async Task<List<View{prefix}{entityUpper}DTO>> GetAllFull()",
                         "        {",
-                        $"            List<View{prefix}{entityUpper}DTO> {entityLower}s;",
-                        $"",
-                        $"            {entityLower}s = await _dataBaseRepository.GetAllFull<View{prefix}{entityUpper}DTO>(EntityConstants.{entityUpper});",
-                        $"",
-                        $"            return {entityLower}s;",
+                        $"            return await _dataBaseRepository.GetAllFull<View{prefix}{entityUpper}DTO>({entityUpper}BaseController);",
                         "        }",
                         $"",
                         $"        public async Task<List<View{prefix}{entityUpperBase}BaseDTO>> GetAllBase()",
                         "        {",
-                        $"            List<View{prefix}{entityUpperBase}BaseDTO> {entityLower}s;",
-                        $"",
-                        $"            {entityLower}s = await _dataBaseRepository.GetAllBase<View{prefix}{entityUpperBase}BaseDTO>(EntityConstants.{entityUpper});",
-                        $"",
-                        $"            return {entityLower}s;",
+                        $"            return await _dataBaseRepository.GetAllBase<View{prefix}{entityUpperBase}BaseDTO>({entityUpper}BaseController);",
                         "        }"
                     ]);
                 }
@@ -1261,6 +1330,7 @@ namespace CodeGenerator.BLL
             ]);
 
             content.AddRange(Utilities.GetCustomCode(_serviceModel.FirstOrDefault(x => x.Name == $"{entityUpper}Service"), "Services"));
+            //content.AddRange(Utilities.GetCustomCode(_serviceModel.FirstOrDefault(x => x.Name == $"{_transtaleService.Translate(entityUpper).Result}Service"), "Services"));
 
             content.AddRange([
                 $"        #endregion",
@@ -1271,7 +1341,7 @@ namespace CodeGenerator.BLL
             GenerateFile("Services", $"{entityUpper}Service.cs", content);
         }
 
-        public void GenerateDTO(FileModel file, string prefix, string entityUpper, string entityLower)
+        public void GenerateDTO(FileModel file)
         {
             List<string> template;
             List<string> content;
@@ -1296,7 +1366,7 @@ namespace CodeGenerator.BLL
                 content = [
                     $"namespace SAMMAI.Transverse.Models.DTOs",
                     "{",
-                    $"    public class {fileModel.Name.Replace("Object", "DTO", StringComparison.CurrentCulture)}",
+                    $"    public class {fileModel.Name[..^"Object".Length]}DTO",
                     "    {"
                 ];
 
@@ -1315,11 +1385,9 @@ namespace CodeGenerator.BLL
                     "}"
                 ]);
 
-                GenerateFile("DTO", $"{fileModel.Name.Replace("Object", "DTO", StringComparison.CurrentCulture)}.cs", content);
+                GenerateFile("DTOs", $"{fileModel.Name[..^"Object".Length]}DTO.cs", content);
             }
         }
-
-
 
         private bool IsNotBlackList(string line)
         {
@@ -1333,19 +1401,27 @@ namespace CodeGenerator.BLL
                         !line.Contains(" Active { get; set; }") &&
                         !line.Contains(" public byte[]") &&
                         !line.Contains(" public string? Clave { get; set; }") &&
-                        !line.Contains(" Multiempresa { get; set; }");
+                        !line.Contains(" Multiempresa { get; set; }") &&
+                        !line.Contains(" IdUserModifier { get; set; }") &&
+                        !line.Contains(" IdUserCreator { get; set; }") &&
+                        !line.Contains(" DateModification { get; set; }") &&
+                        !line.Contains(" DateCreation { get; set; }") &&
+                        !line.Contains(" public byte[]") &&
+                        !line.Contains(" public string? Password { get; set; }") &&
+                        !line.Contains(" Multicompany { get; set; }");
+
         }
 
         public string GenerateDI(string entity)
         {
-            string service = $"{entity.AsSpan(3).ToString().Replace("Object", string.Empty)}Service";
-            return $"services.AddScoped<I{service}, {service}> ();";
+            string service = $"{entity.AsSpan(3).ToString()[..^"Object".Length]}Service";
+            return $"services.AddScoped<Services.DAL.Interfaces.I{service}, Services.DAL.Implementations.{service}> ();";
         }
 
         public string GenerateConstants(string entity)
         {
-            string constant = entity.AsSpan(3).ToString().Replace("Object", string.Empty);
-            return $"public const string {constant} = \"{constant.Substring(0, 1).ToLower() + constant.Substring(1)}\";";
+            string constant = entity.AsSpan(3).ToString()[..^"Object".Length];
+            return $"public const string {constant} = \"{Utilities.ToKebabCase(constant)}\";";
         }
 
         public List<string> GenerateMapByEntity(string entity)

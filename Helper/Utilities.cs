@@ -1,5 +1,6 @@
 ﻿using CodeGenerator.Models;
 using System.Text;
+using System.Text.Json;
 namespace CodeGenerator.Helper
 {
     public class Utilities
@@ -134,6 +135,21 @@ namespace CodeGenerator.Helper
             }
 
             return customLines.Count > 0 ? customLines : [""];
+        }
+
+        public static T MapJsonFile<T>(string path)
+        {
+            string jsonString;
+            T json;
+
+            jsonString = File.ReadAllText(path);
+            json = JsonSerializer.Deserialize<T>(jsonString, new JsonSerializerOptions()
+            {
+                PropertyNameCaseInsensitive = true
+            }) ??
+                throw new ArgumentNullException(nameof(MapJsonFile));
+
+            return json;
         }
     }
 }

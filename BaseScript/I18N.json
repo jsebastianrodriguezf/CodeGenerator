@@ -234,7 +234,7 @@
     },
     {
       "Spanish": "Costear",
-      "English": "PayFor"
+      "English": "Payfor"
     },
     {
       "Spanish": "Actividad",
@@ -290,7 +290,7 @@
     },
     {
       "Spanish": "Localizacion",
-      "English": "Location"
+      "English": "Localization"
     },
     {
       "Spanish": "Costo",
@@ -314,7 +314,7 @@
     },
     {
       "Spanish": "Tempario",
-      "English": "MaintenanceRoutine"
+      "English": "Maintenanceroutine"
     },
     {
       "Spanish": "Prueba",
@@ -350,7 +350,7 @@
     },
     {
       "Spanish": "Repuesto",
-      "English": "SparePart"
+      "English": "Sparepart"
     },
     {
       "Spanish": "Vigente",
@@ -502,7 +502,7 @@
     },
     {
       "Spanish": "Activo",
-      "English": "Asset"
+      "English": "Alive"
     },
     {
       "Spanish": "Reemplazo",
@@ -510,7 +510,7 @@
     },
     {
       "Spanish": "Repuesto1",
-      "English": "SparePart"
+      "English": "Sparepart1"
     },
     {
       "Spanish": "Version",
@@ -522,11 +522,11 @@
     },
     {
       "Spanish": "Cargo",
-      "English": "Position"
+      "English": "Jobtitle"
     },
     {
       "Spanish": "Repuestos",
-      "English": "SpareParts"
+      "English": "Spareparts"
     },
     {
       "Spanish": "Incluye",
@@ -562,7 +562,7 @@
     },
     {
       "Spanish": "Tipotarifa",
-      "English": "RateType"
+      "English": "Ratetype"
     },
     {
       "Spanish": "Rango",
@@ -898,7 +898,7 @@
     },
     {
       "Spanish": "Rentabilidad",
-      "English": "CostEffectiveness"
+      "English": "Costeffectiveness"
     },
     {
       "Spanish": "Trm",
@@ -914,7 +914,7 @@
     },
     {
       "Spanish": "Motivoestado",
-      "English": "ReasonState"
+      "English": "Reasonstate"
     },
     {
       "Spanish": "Planeado",
@@ -986,7 +986,7 @@
     },
     {
       "Spanish": "Cotizacion",
-      "English": "Quote"
+      "English": "Quotation"
     },
     {
       "Spanish": "Validez",
@@ -1102,7 +1102,7 @@
     },
     {
       "Spanish": "Ot",
-      "English": "Ot"
+      "English": "Workorder"
     },
     {
       "Spanish": "Diagnostico",
@@ -1210,7 +1210,7 @@
     },
     {
       "Spanish": "Medio",
-      "English": "Way"
+      "English": "Medium"
     },
     {
       "Spanish": "Traslado",
@@ -1258,7 +1258,7 @@
     },
     {
       "Spanish": "Ejecucionfinal",
-      "English": "FinalExecution"
+      "English": "Finalexecution"
     },
     {
       "Spanish": "De",
@@ -1302,7 +1302,7 @@
     },
     {
       "Spanish": "Activa",
-      "English": "Active"
+      "English": "Enabled"
     },
     {
       "Spanish": "Flujo",
@@ -1354,11 +1354,11 @@
     },
     {
       "Spanish": "Porciva",
-      "English": "PorcIva"
+      "English": "Porciva"
     },
     {
       "Spanish": "Porcdto",
-      "English": "PorcDto"
+      "English": "Porcdto"
     },
     {
       "Spanish": "Urgente",
@@ -1390,7 +1390,7 @@
     },
     {
       "Spanish": "Porcdescuento",
-      "English": "PorcDiscount"
+      "English": "Porcdiscount"
     },
     {
       "Spanish": "Cant",
@@ -1554,7 +1554,7 @@
     },
     {
       "Spanish": "Multa",
-      "English": "PenaltyFee"
+      "English": "Penaltyfee"
     },
     {
       "Spanish": "Ultima",
@@ -1590,7 +1590,7 @@
     },
     {
       "Spanish": "Marcha",
-      "English": "IntoOperation"
+      "English": "Intooperation"
     },
     {
       "Spanish": "Actual",
@@ -1646,7 +1646,7 @@
     },
     {
       "Spanish": "Seguimiento",
-      "English": "FollowUp"
+      "English": "Followup"
     },
     {
       "Spanish": "Filtro",
@@ -1698,7 +1698,7 @@
     },
     {
       "Spanish": "Archivo",
-      "English": "Archive"
+      "English": "File"
     },
     {
       "Spanish": "Objeto",
@@ -1830,7 +1830,7 @@
     },
     {
       "Spanish": "Archivobinario",
-      "English": "BinaryFile"
+      "English": "Binaryfile"
     },
     {
       "Spanish": "Codigoacceso",
@@ -2066,7 +2066,7 @@
     },
     {
       "Spanish": "Fechainicio",
-      "English": "StartDate"
+      "English": "Startdate"
     },
     {
       "Spanish": "Proyectada",
@@ -2122,7 +2122,7 @@
     },
     {
       "Spanish": "Factorexito",
-      "English": "SuccessFactor"
+      "English": "Successfactor"
     },
     {
       "Spanish": "Sesion",
@@ -2382,7 +2382,7 @@
     },
     {
       "Spanish": "Codigorecursiva",
-      "English": "RecursiveCode"
+      "English": "Recursivecode"
     },
     {
       "Spanish": "Nit",
@@ -2426,7 +2426,7 @@
     },
     {
       "Spanish": "Checklist",
-      "English": "CheckList"
+      "English": "Checklist"
     },
     {
       "Spanish": "Toda",
@@ -2462,7 +2462,7 @@
     },
     {
       "Spanish": "Multiempresa",
-      "English": "MultiCompany"
+      "English": "Multicompany"
     },
     {
       "Spanish": "Base",
@@ -2502,7 +2502,23 @@
     },
     {
       "Spanish": "Repuestosalquilable",
-      "English": "RentableSpareParts"
+      "English": "Rentablespareparts"
+    },
+    {
+      "Spanish": "Inverse",
+      "English": "Inverse"
+    },
+    {
+      "Spanish": "Navigation",
+      "English": "Navigation"
+    },
+    {
+      "Spanish": "Asociar",
+      "English": "Associate"
+    },
+    {
+      "Spanish": "Hash",
+      "English": "Hash"
     }
   ]
 }

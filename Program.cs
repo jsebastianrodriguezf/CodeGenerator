@@ -9,6 +9,8 @@ internal class Program
         string response;
         InputEnum option;
         DatabaseGenerator databaseGenerator;
+        TranslateEFModelGenerator translateEFModelGenerator;
+        I18NDictionaryGenerator i18NDictionaryGenerator;
         ControllerDataBaseGenerator controllerDataBaseGenerator;
         ControllerCoreDALGenerator controllerCoreDALGenerator;
         FolderTableGenerator folderTableGenerator;
@@ -20,17 +22,38 @@ internal class Program
 
         Console.WriteLine("Start ...");
 
-        option = InputEnum.AlterTableGenerator;
+        option = InputEnum.I18NDictionaryGenerator;
 
         switch (option)
         {
             case InputEnum.DatabaseGenerator:
                 databaseGenerator = new DatabaseGenerator(
                     conextName: "SAMMAIPrincipalContext",
-                    rootPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\Models",
+                    rootPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\ModelsTranslated",
                     destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\Result");
 
                 response = databaseGenerator.Generate();
+
+                break;
+
+            case InputEnum.TranslateEFModelGenerator:
+                translateEFModelGenerator = new TranslateEFModelGenerator(
+                    conextName: "SAMMAIPrincipalContext",
+                    rootPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\Models",
+                    destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\ModelsTranslated");
+
+                response = translateEFModelGenerator.Generate();
+
+                break;
+
+            case InputEnum.I18NDictionaryGenerator:
+                i18NDictionaryGenerator = new I18NDictionaryGenerator(
+                    contextName: "SAMMAIPrincipalContext",
+                    rootPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\Models",
+                    destinyPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\I18N");
+
+                i18NDictionaryGenerator.FullFillDictionary();
+                response = "ok";
 
                 break;
 

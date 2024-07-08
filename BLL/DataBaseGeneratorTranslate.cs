@@ -3,6 +3,7 @@ using CodeGenerator.Models;
 
 namespace CodeGenerator.BLL
 {
+
     public class DatabaseGeneratorTranslate
     {
         private readonly string _contextName;
