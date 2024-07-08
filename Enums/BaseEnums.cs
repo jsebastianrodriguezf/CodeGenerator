@@ -5,6 +5,8 @@
         public enum InputEnum
         {
             DatabaseGenerator,
+            TranslateEFModelGenerator,
+            I18NDictionaryGenerator,
             ControllerDataBaseGenerator,
             SingleControllerDataBaseGenerator,
             FolderTableGenerator,

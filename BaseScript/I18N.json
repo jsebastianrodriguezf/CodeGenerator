@@ -1,0 +1,2524 @@
+{
+  "Dictionary": [
+    {
+      "Spanish": "Id",
+      "English": "Id"
+    },
+    {
+      "Spanish": "Uid",
+      "English": "Uid"
+    },
+    {
+      "Spanish": "Eid",
+      "English": "Eid"
+    },
+    {
+      "Spanish": "Active",
+      "English": "Active"
+    },
+    {
+      "Spanish": "Alq",
+      "English": "Alq"
+    },
+    {
+      "Spanish": "Detallealquiler",
+      "English": "RentalDetail"
+    },
+    {
+      "Spanish": "Itemdocumento",
+      "English": "Itemdocument"
+    },
+    {
+      "Spanish": "Usuario",
+      "English": "User"
+    },
+    {
+      "Spanish": "Modifico",
+      "English": "Modifier"
+    },
+    {
+      "Spanish": "Creo",
+      "English": "Creator"
+    },
+    {
+      "Spanish": "Modificacion",
+      "English": "Modification"
+    },
+    {
+      "Spanish": "Fecha",
+      "English": "Date"
+    },
+    {
+      "Spanish": "Creacion",
+      "English": "Creation"
+    },
+    {
+      "Spanish": "Cmm",
+      "English": "Cmm"
+    },
+    {
+      "Spanish": "Detalle",
+      "English": "Detail"
+    },
+    {
+      "Spanish": "Liquidacion",
+      "English": "Clearance"
+    },
+    {
+      "Spanish": "Codigo",
+      "English": "Code"
+    },
+    {
+      "Spanish": "Cantidad",
+      "English": "Amount"
+    },
+    {
+      "Spanish": "Dias",
+      "English": "Days"
+    },
+    {
+      "Spanish": "Inicio",
+      "English": "Start"
+    },
+    {
+      "Spanish": "Fh",
+      "English": "Dh"
+    },
+    {
+      "Spanish": "Fin",
+      "English": "End"
+    },
+    {
+      "Spanish": "Item",
+      "English": "Item"
+    },
+    {
+      "Spanish": "Documento",
+      "English": "Document"
+    },
+    {
+      "Spanish": "Alquiler",
+      "English": "Rental"
+    },
+    {
+      "Spanish": "Saldo",
+      "English": "Balance"
+    },
+    {
+      "Spanish": "Movimiento",
+      "English": "Transfer"
+    },
+    {
+      "Spanish": "Horometro",
+      "English": "Horometer"
+    },
+    {
+      "Spanish": "Tarifa",
+      "English": "Fee"
+    },
+    {
+      "Spanish": "Evento",
+      "English": "Event"
+    },
+    {
+      "Spanish": "Historico",
+      "English": "Historical"
+    },
+    {
+      "Spanish": "Estado",
+      "English": "State"
+    },
+    {
+      "Spanish": "Equipo",
+      "English": "Equipment"
+    },
+    {
+      "Spanish": "Periodo",
+      "English": "Period"
+    },
+    {
+      "Spanish": "Tipo",
+      "English": "Type"
+    },
+    {
+      "Spanish": "Incluidas",
+      "English": "Included"
+    },
+    {
+      "Spanish": "Horas",
+      "English": "Hours"
+    },
+    {
+      "Spanish": "Incluida",
+      "English": "Included"
+    },
+    {
+      "Spanish": "Valor",
+      "English": "Value"
+    },
+    {
+      "Spanish": "Aplicacion",
+      "English": "Application"
+    },
+    {
+      "Spanish": "Aplicacion1",
+      "English": "Application"
+    },
+    {
+      "Spanish": "Atributo",
+      "English": "Attribute"
+    },
+    {
+      "Spanish": "Cat",
+      "English": "Cat"
+    },
+    {
+      "Spanish": "Unidad",
+      "English": "Unit"
+    },
+    {
+      "Spanish": "Opcion",
+      "English": "Option"
+    },
+    {
+      "Spanish": "Catalogo",
+      "English": "Catalog"
+    },
+    {
+      "Spanish": "Inventario",
+      "English": "Inventory"
+    },
+    {
+      "Spanish": "Precio",
+      "English": "Price"
+    },
+    {
+      "Spanish": "Venta",
+      "English": "Sale"
+    },
+    {
+      "Spanish": "Tiempo",
+      "English": "Time"
+    },
+    {
+      "Spanish": "Consecucion",
+      "English": "Lead"
+    },
+    {
+      "Spanish": "Es",
+      "English": "Is"
+    },
+    {
+      "Spanish": "Nacional",
+      "English": "National"
+    },
+    {
+      "Spanish": "Familia",
+      "English": "Family"
+    },
+    {
+      "Spanish": "Subtipo",
+      "English": "Subtype"
+    },
+    {
+      "Spanish": "Impuesto",
+      "English": "Tax"
+    },
+    {
+      "Spanish": "Descripcion",
+      "English": "Description"
+    },
+    {
+      "Spanish": "Bloquear",
+      "English": "Block"
+    },
+    {
+      "Spanish": "Costear",
+      "English": "Payfor"
+    },
+    {
+      "Spanish": "Actividad",
+      "English": "Activity"
+    },
+    {
+      "Spanish": "Productiva",
+      "English": "Productive"
+    },
+    {
+      "Spanish": "Duracion",
+      "English": "Duration"
+    },
+    {
+      "Spanish": "Estimada",
+      "English": "Dear"
+    },
+    {
+      "Spanish": "Procedimiento",
+      "English": "Procedure"
+    },
+    {
+      "Spanish": "Garantia",
+      "English": "Warranty"
+    },
+    {
+      "Spanish": "Bodega",
+      "English": "Storage"
+    },
+    {
+      "Spanish": "Disponible",
+      "English": "Available"
+    },
+    {
+      "Spanish": "Existencia",
+      "English": "Existence"
+    },
+    {
+      "Spanish": "Reservado",
+      "English": "Reserved"
+    },
+    {
+      "Spanish": "Minima",
+      "English": "Minimum"
+    },
+    {
+      "Spanish": "En",
+      "English": "In"
+    },
+    {
+      "Spanish": "Ordenes",
+      "English": "Orders"
+    },
+    {
+      "Spanish": "Localizacion",
+      "English": "Localization"
+    },
+    {
+      "Spanish": "Costo",
+      "English": "Cost"
+    },
+    {
+      "Spanish": "Maxima",
+      "English": "Maxima"
+    },
+    {
+      "Spanish": "Meses",
+      "English": "Months"
+    },
+    {
+      "Spanish": "Maneja",
+      "English": "Drive"
+    },
+    {
+      "Spanish": "Marca",
+      "English": "Brand"
+    },
+    {
+      "Spanish": "Tempario",
+      "English": "Maintenanceroutine"
+    },
+    {
+      "Spanish": "Prueba",
+      "English": "Test"
+    },
+    {
+      "Spanish": "Check",
+      "English": "Check"
+    },
+    {
+      "Spanish": "List",
+      "English": "List"
+    },
+    {
+      "Spanish": "Lista",
+      "English": "List"
+    },
+    {
+      "Spanish": "Dto",
+      "English": "Disc"
+    },
+    {
+      "Spanish": "Porc",
+      "English": "Perc"
+    },
+    {
+      "Spanish": "Otro",
+      "English": "Other"
+    },
+    {
+      "Spanish": "Producto",
+      "English": "Product"
+    },
+    {
+      "Spanish": "Repuesto",
+      "English": "Sparepart"
+    },
+    {
+      "Spanish": "Vigente",
+      "English": "Current"
+    },
+    {
+      "Spanish": "Peso",
+      "English": "Weight"
+    },
+    {
+      "Spanish": "Taller",
+      "English": "Workshop"
+    },
+    {
+      "Spanish": "Ciclico",
+      "English": "Cyclic"
+    },
+    {
+      "Spanish": "Detiene",
+      "English": "stop"
+    },
+    {
+      "Spanish": "Equipos",
+      "English": "Equipments"
+    },
+    {
+      "Spanish": "Detencion",
+      "English": "Detention"
+    },
+    {
+      "Spanish": "Todo",
+      "English": "All"
+    },
+    {
+      "Spanish": "Factura",
+      "English": "Bill"
+    },
+    {
+      "Spanish": "Tropicalizacion",
+      "English": "Tropicalization"
+    },
+    {
+      "Spanish": "Servicio",
+      "English": "Service"
+    },
+    {
+      "Spanish": "Proyectar",
+      "English": "Project"
+    },
+    {
+      "Spanish": "Incluir",
+      "English": "Include"
+    },
+    {
+      "Spanish": "Menores",
+      "English": "Minors"
+    },
+    {
+      "Spanish": "Ajuste",
+      "English": "Adjustment"
+    },
+    {
+      "Spanish": "Modo",
+      "English": "Mode"
+    },
+    {
+      "Spanish": "Hijo",
+      "English": "Son"
+    },
+    {
+      "Spanish": "Estandar",
+      "English": "Standard"
+    },
+    {
+      "Spanish": "Orden",
+      "English": "Order"
+    },
+    {
+      "Spanish": "Tropicalizada",
+      "English": "Tropicalized"
+    },
+    {
+      "Spanish": "Sistema",
+      "English": "System"
+    },
+    {
+      "Spanish": "Padre",
+      "English": "Parent"
+    },
+    {
+      "Spanish": "Dimension",
+      "English": "Dimension"
+    },
+    {
+      "Spanish": "Aplica",
+      "English": "Apply"
+    },
+    {
+      "Spanish": "X",
+      "English": "X"
+    },
+    {
+      "Spanish": "Y",
+      "English": "Y"
+    },
+    {
+      "Spanish": "Z",
+      "English": "Z"
+    },
+    {
+      "Spanish": "Descuento",
+      "English": "Discount"
+    },
+    {
+      "Spanish": "Porcentaje",
+      "English": "Percentage"
+    },
+    {
+      "Spanish": "Privado",
+      "English": "Private"
+    },
+    {
+      "Spanish": "Moneda",
+      "English": "Currency"
+    },
+    {
+      "Spanish": "Compra",
+      "English": "Purchase"
+    },
+    {
+      "Spanish": "Para",
+      "English": "For"
+    },
+    {
+      "Spanish": "Fabricante",
+      "English": "Maker"
+    },
+    {
+      "Spanish": "Tercero",
+      "English": "Third"
+    },
+    {
+      "Spanish": "Posicion",
+      "English": "Position"
+    },
+    {
+      "Spanish": "Componente",
+      "English": "Component"
+    },
+    {
+      "Spanish": "Activo",
+      "English": "Alive"
+    },
+    {
+      "Spanish": "Reemplazo",
+      "English": "Replacement"
+    },
+    {
+      "Spanish": "Repuesto1",
+      "English": "Sparepart1"
+    },
+    {
+      "Spanish": "Version",
+      "English": "Version"
+    },
+    {
+      "Spanish": "Soporte",
+      "English": "Support"
+    },
+    {
+      "Spanish": "Cargo",
+      "English": "Jobtitle"
+    },
+    {
+      "Spanish": "Repuestos",
+      "English": "Spareparts"
+    },
+    {
+      "Spanish": "Incluye",
+      "English": "Includes"
+    },
+    {
+      "Spanish": "Externo",
+      "English": "External"
+    },
+    {
+      "Spanish": "Por",
+      "English": "By"
+    },
+    {
+      "Spanish": "Minimo",
+      "English": "Minimum"
+    },
+    {
+      "Spanish": "Estrategia",
+      "English": "Strategy"
+    },
+    {
+      "Spanish": "Prioridad",
+      "English": "Priority"
+    },
+    {
+      "Spanish": "Zona",
+      "English": "Zone"
+    },
+    {
+      "Spanish": "Elemento",
+      "English": "Element"
+    },
+    {
+      "Spanish": "Tipotarifa",
+      "English": "Ratetype"
+    },
+    {
+      "Spanish": "Rango",
+      "English": "Range"
+    },
+    {
+      "Spanish": "Afecta",
+      "English": "Affects"
+    },
+    {
+      "Spanish": "Produccion",
+      "English": "Production"
+    },
+    {
+      "Spanish": "Uso",
+      "English": "Use"
+    },
+    {
+      "Spanish": "Seccion",
+      "English": "Section"
+    },
+    {
+      "Spanish": "Config",
+      "English": "Settings"
+    },
+    {
+      "Spanish": "Cnt",
+      "English": "Cnt"
+    },
+    {
+      "Spanish": "Contrato",
+      "English": "Contract"
+    },
+    {
+      "Spanish": "Proveedor",
+      "English": "Supplier"
+    },
+    {
+      "Spanish": "Frecuencia",
+      "English": "Frequency"
+    },
+    {
+      "Spanish": "Cada",
+      "English": "Each"
+    },
+    {
+      "Spanish": "N",
+      "English": "N"
+    },
+    {
+      "Spanish": "Dia",
+      "English": "Day"
+    },
+    {
+      "Spanish": "Trabajo",
+      "English": "Job"
+    },
+    {
+      "Spanish": "A",
+      "English": "To"
+    },
+    {
+      "Spanish": "Aproximar",
+      "English": "Approximate"
+    },
+    {
+      "Spanish": "Ff",
+      "English": "Dd"
+    },
+    {
+      "Spanish": "Habil",
+      "English": "Available"
+    },
+    {
+      "Spanish": "Proyeccion",
+      "English": "Projection"
+    },
+    {
+      "Spanish": "Configuracion",
+      "English": "Setting"
+    },
+    {
+      "Spanish": "Intervalo",
+      "English": "Interval"
+    },
+    {
+      "Spanish": "Visita",
+      "English": "Visit"
+    },
+    {
+      "Spanish": "Promedio",
+      "English": "Average"
+    },
+    {
+      "Spanish": "Coordinador",
+      "English": "Coordinator"
+    },
+    {
+      "Spanish": "Inicial",
+      "English": "Initial"
+    },
+    {
+      "Spanish": "Numero",
+      "English": "Number"
+    },
+    {
+      "Spanish": "Total",
+      "English": "Total"
+    },
+    {
+      "Spanish": "Presupuesto",
+      "English": "Budget"
+    },
+    {
+      "Spanish": "Cumplimiento",
+      "English": "Compliance"
+    },
+    {
+      "Spanish": "Condiciones",
+      "English": "Conditions"
+    },
+    {
+      "Spanish": "Solicitud",
+      "English": "Request"
+    },
+    {
+      "Spanish": "Departamento",
+      "English": "Department"
+    },
+    {
+      "Spanish": "Consumida",
+      "English": "Consumed"
+    },
+    {
+      "Spanish": "Notas",
+      "English": "Grades"
+    },
+    {
+      "Spanish": "Sucursal",
+      "English": "Branch"
+    },
+    {
+      "Spanish": "Fija",
+      "English": "Fixed"
+    },
+    {
+      "Spanish": "Corrimiento",
+      "English": "Motion"
+    },
+    {
+      "Spanish": "Original",
+      "English": "Original"
+    },
+    {
+      "Spanish": "Pagos",
+      "English": "Payments"
+    },
+    {
+      "Spanish": "Respuestum",
+      "English": "Response"
+    },
+    {
+      "Spanish": "Respuesta",
+      "English": "Response"
+    },
+    {
+      "Spanish": "Limite",
+      "English": "Limit"
+    },
+    {
+      "Spanish": "Creada",
+      "English": "Created"
+    },
+    {
+      "Spanish": "Correo",
+      "English": "Mail"
+    },
+    {
+      "Spanish": "Recordatorio",
+      "English": "Reminder"
+    },
+    {
+      "Spanish": "Columna",
+      "English": "Column"
+    },
+    {
+      "Spanish": "Columna1",
+      "English": "Column"
+    },
+    {
+      "Spanish": "Tamano",
+      "English": "Size"
+    },
+    {
+      "Spanish": "Nuleable",
+      "English": "Nullable"
+    },
+    {
+      "Spanish": "Unico",
+      "English": "Only"
+    },
+    {
+      "Spanish": "Tabla",
+      "English": "Table"
+    },
+    {
+      "Spanish": "Foranea",
+      "English": "Foreigner"
+    },
+    {
+      "Spanish": "Com",
+      "English": "Com"
+    },
+    {
+      "Spanish": "Comision",
+      "English": "Commission"
+    },
+    {
+      "Spanish": "Maximo",
+      "English": "Maximum"
+    },
+    {
+      "Spanish": "Nivelnegocio",
+      "English": "BusinessLevel"
+    },
+    {
+      "Spanish": "Condicion",
+      "English": "Condition"
+    },
+    {
+      "Spanish": "Dis",
+      "English": "Dis"
+    },
+    {
+      "Spanish": "Hora",
+      "English": "Hour"
+    },
+    {
+      "Spanish": "Hh",
+      "English": "Hh"
+    },
+    {
+      "Spanish": "Motivo",
+      "English": "Reason"
+    },
+    {
+      "Spanish": "Falla",
+      "English": "Failure"
+    },
+    {
+      "Spanish": "Causa",
+      "English": "Cause"
+    },
+    {
+      "Spanish": "Deteccion",
+      "English": "Detection"
+    },
+    {
+      "Spanish": "Metodo",
+      "English": "Method"
+    },
+    {
+      "Spanish": "Cliente",
+      "English": "Client"
+    },
+    {
+      "Spanish": "Auxiliar",
+      "English": "Assistant"
+    },
+    {
+      "Spanish": "Unitario",
+      "English": "Unitary"
+    },
+    {
+      "Spanish": "Observaciones",
+      "English": "Observations"
+    },
+    {
+      "Spanish": "Registro",
+      "English": "Record"
+    },
+    {
+      "Spanish": "Responsable",
+      "English": "Responsible"
+    },
+    {
+      "Spanish": "Varada",
+      "English": "Grounding"
+    },
+    {
+      "Spanish": "Obra",
+      "English": "Work"
+    },
+    {
+      "Spanish": "Final",
+      "English": "Final"
+    },
+    {
+      "Spanish": "Esperado",
+      "English": "Expected"
+    },
+    {
+      "Spanish": "Centro",
+      "English": "Center"
+    },
+    {
+      "Spanish": "Doc",
+      "English": "Doc"
+    },
+    {
+      "Spanish": "Libre",
+      "English": "Free"
+    },
+    {
+      "Spanish": "Texto",
+      "English": "Text"
+    },
+    {
+      "Spanish": "Costeo",
+      "English": "Costing"
+    },
+    {
+      "Spanish": "Prefijo",
+      "English": "Prefix"
+    },
+    {
+      "Spanish": "Subtotal",
+      "English": "Subtotal"
+    },
+    {
+      "Spanish": "Iva",
+      "English": "Iva"
+    },
+    {
+      "Spanish": "Rentabilidad",
+      "English": "Costeffectiveness"
+    },
+    {
+      "Spanish": "Trm",
+      "English": "Trm"
+    },
+    {
+      "Spanish": "Sugerida",
+      "English": "Suggested"
+    },
+    {
+      "Spanish": "Cierre",
+      "English": "Closing"
+    },
+    {
+      "Spanish": "Motivoestado",
+      "English": "Reasonstate"
+    },
+    {
+      "Spanish": "Planeado",
+      "English": "Planned"
+    },
+    {
+      "Spanish": "Asignado",
+      "English": "Assigned"
+    },
+    {
+      "Spanish": "Identificador",
+      "English": "Identifier"
+    },
+    {
+      "Spanish": "Mes",
+      "English": "Month"
+    },
+    {
+      "Spanish": "Vencido",
+      "English": "Defeated"
+    },
+    {
+      "Spanish": "Devolucion",
+      "English": "Return"
+    },
+    {
+      "Spanish": "Ejecuta",
+      "English": "Execute"
+    },
+    {
+      "Spanish": "Comentario",
+      "English": "Comment"
+    },
+    {
+      "Spanish": "Recordar",
+      "English": "Remember"
+    },
+    {
+      "Spanish": "Tarea",
+      "English": "Task"
+    },
+    {
+      "Spanish": "Cerrada",
+      "English": "Closed"
+    },
+    {
+      "Spanish": "Contacto",
+      "English": "Contact"
+    },
+    {
+      "Spanish": "Con",
+      "English": "With"
+    },
+    {
+      "Spanish": "Relevante",
+      "English": "Relevant"
+    },
+    {
+      "Spanish": "Reporte",
+      "English": "Report"
+    },
+    {
+      "Spanish": "Tecnico",
+      "English": "Technical"
+    },
+    {
+      "Spanish": "Finalizado",
+      "English": "Finalized"
+    },
+    {
+      "Spanish": "Cotizacion",
+      "English": "Quotation"
+    },
+    {
+      "Spanish": "Validez",
+      "English": "Validity"
+    },
+    {
+      "Spanish": "Encabezado",
+      "English": "Header"
+    },
+    {
+      "Spanish": "Aiu",
+      "English": "Aiu"
+    },
+    {
+      "Spanish": "Procentaje",
+      "English": "Percentage"
+    },
+    {
+      "Spanish": "I",
+      "English": "I"
+    },
+    {
+      "Spanish": "U",
+      "English": "U"
+    },
+    {
+      "Spanish": "Asesor",
+      "English": "Adviser"
+    },
+    {
+      "Spanish": "Email",
+      "English": "EMail"
+    },
+    {
+      "Spanish": "Telefono",
+      "English": "Phone"
+    },
+    {
+      "Spanish": "Imprimir",
+      "English": "Print"
+    },
+    {
+      "Spanish": "Entradum",
+      "English": "Entrance"
+    },
+    {
+      "Spanish": "Entrada",
+      "English": "Entrance"
+    },
+    {
+      "Spanish": "Entrega",
+      "English": "Delivery"
+    },
+    {
+      "Spanish": "Direccion",
+      "English": "Address"
+    },
+    {
+      "Spanish": "Asunto",
+      "English": "Subject"
+    },
+    {
+      "Spanish": "Solicitante",
+      "English": "Applicant"
+    },
+    {
+      "Spanish": "Recibe",
+      "English": "Receives"
+    },
+    {
+      "Spanish": "Transportador",
+      "English": "Conveyor"
+    },
+    {
+      "Spanish": "Evaluacion",
+      "English": "Assessment"
+    },
+    {
+      "Spanish": "Encuestada",
+      "English": "Respondent"
+    },
+    {
+      "Spanish": "Persona",
+      "English": "Person"
+    },
+    {
+      "Spanish": "Encuesta",
+      "English": "Survey"
+    },
+    {
+      "Spanish": "Gasto",
+      "English": "Expense"
+    },
+    {
+      "Spanish": "Concepto",
+      "English": "Concept"
+    },
+    {
+      "Spanish": "Consignado",
+      "English": "Consigned"
+    },
+    {
+      "Spanish": "Pregunta",
+      "English": "Question"
+    },
+    {
+      "Spanish": "Pago",
+      "English": "Pay"
+    },
+    {
+      "Spanish": "Forma",
+      "English": "Shape"
+    },
+    {
+      "Spanish": "Ot",
+      "English": "Workorder"
+    },
+    {
+      "Spanish": "Diagnostico",
+      "English": "Diagnosis"
+    },
+    {
+      "Spanish": "Fax",
+      "English": "Fax"
+    },
+    {
+      "Spanish": "Ubicacion",
+      "English": "Location"
+    },
+    {
+      "Spanish": "Compromiso",
+      "English": "Commitment"
+    },
+    {
+      "Spanish": "Trabajos",
+      "English": "Jobs"
+    },
+    {
+      "Spanish": "Recomendaciones",
+      "English": "Recommendations"
+    },
+    {
+      "Spanish": "Compromisos",
+      "English": "Commitments"
+    },
+    {
+      "Spanish": "Fabrica",
+      "English": "Factory"
+    },
+    {
+      "Spanish": "Reclamacion",
+      "English": "Claim"
+    },
+    {
+      "Spanish": "Distribuidor",
+      "English": "Distributor"
+    },
+    {
+      "Spanish": "Segun",
+      "English": "According"
+    },
+    {
+      "Spanish": "Centros",
+      "English": "Centers"
+    },
+    {
+      "Spanish": "Distribuye",
+      "English": "Distribute"
+    },
+    {
+      "Spanish": "Cancelacion",
+      "English": "Cancellation"
+    },
+    {
+      "Spanish": "Proyecto",
+      "English": "Project"
+    },
+    {
+      "Spanish": "Nombre",
+      "English": "Name"
+    },
+    {
+      "Spanish": "Calidad",
+      "English": "Quality"
+    },
+    {
+      "Spanish": "Ejecutore",
+      "English": "Executor"
+    },
+    {
+      "Spanish": "Ejecutores",
+      "English": "Executors"
+    },
+    {
+      "Spanish": "Entregable",
+      "English": "Deliverable"
+    },
+    {
+      "Spanish": "Etapa",
+      "English": "Stage"
+    },
+    {
+      "Spanish": "Requisicion",
+      "English": "Requisition"
+    },
+    {
+      "Spanish": "Salidum",
+      "English": "Dispatch"
+    },
+    {
+      "Spanish": "Salida",
+      "English": "Dispatch"
+    },
+    {
+      "Spanish": "Telefonica",
+      "English": "Telephone"
+    },
+    {
+      "Spanish": "Solucion",
+      "English": "Solution"
+    },
+    {
+      "Spanish": "Medio",
+      "English": "Medium"
+    },
+    {
+      "Spanish": "Traslado",
+      "English": "Transfer"
+    },
+    {
+      "Spanish": "Origen",
+      "English": "Origin"
+    },
+    {
+      "Spanish": "Destino",
+      "English": "Destination"
+    },
+    {
+      "Spanish": "Indicador",
+      "English": "Indicator"
+    },
+    {
+      "Spanish": "Edita",
+      "English": "Edit"
+    },
+    {
+      "Spanish": "Puede",
+      "English": "Can"
+    },
+    {
+      "Spanish": "Regresar",
+      "English": "Return"
+    },
+    {
+      "Spanish": "Color",
+      "English": "Color"
+    },
+    {
+      "Spanish": "Obligatorio",
+      "English": "Mandatory"
+    },
+    {
+      "Spanish": "Perfil",
+      "English": "Profile"
+    },
+    {
+      "Spanish": "Sp",
+      "English": "Sp"
+    },
+    {
+      "Spanish": "Ejecucionfinal",
+      "English": "Finalexecution"
+    },
+    {
+      "Spanish": "De",
+      "English": "Of"
+    },
+    {
+      "Spanish": "Lunes",
+      "English": "Monday"
+    },
+    {
+      "Spanish": "Ini",
+      "English": "Ini"
+    },
+    {
+      "Spanish": "Martes",
+      "English": "Tuesday"
+    },
+    {
+      "Spanish": "Miercoles",
+      "English": "Wednesday"
+    },
+    {
+      "Spanish": "Jueves",
+      "English": "Thursday"
+    },
+    {
+      "Spanish": "Viernes",
+      "English": "Friday"
+    },
+    {
+      "Spanish": "Sabado",
+      "English": "Saturday"
+    },
+    {
+      "Spanish": "Domingo",
+      "English": "Sunday"
+    },
+    {
+      "Spanish": "Festivo",
+      "English": "Holiday"
+    },
+    {
+      "Spanish": "Activa",
+      "English": "Enabled"
+    },
+    {
+      "Spanish": "Flujo",
+      "English": "Flow"
+    },
+    {
+      "Spanish": "Restrictivo",
+      "English": "Restrictive"
+    },
+    {
+      "Spanish": "Resultado",
+      "English": "Result"
+    },
+    {
+      "Spanish": "Items",
+      "English": "Items"
+    },
+    {
+      "Spanish": "Replicar",
+      "English": "Replicate"
+    },
+    {
+      "Spanish": "Atributos",
+      "English": "Attributes"
+    },
+    {
+      "Spanish": "Actividades",
+      "English": "Activities"
+    },
+    {
+      "Spanish": "Incoterm",
+      "English": "Incoterm"
+    },
+    {
+      "Spanish": "Ordinales",
+      "English": "Ordinals"
+    },
+    {
+      "Spanish": "Festivas",
+      "English": "Holidays"
+    },
+    {
+      "Spanish": "Nocturnas",
+      "English": "Nocturnal"
+    },
+    {
+      "Spanish": "Ejecutado",
+      "English": "Executed"
+    },
+    {
+      "Spanish": "Porciva",
+      "English": "Porciva"
+    },
+    {
+      "Spanish": "Porcdto",
+      "English": "Porcdto"
+    },
+    {
+      "Spanish": "Urgente",
+      "English": "Urgent"
+    },
+    {
+      "Spanish": "Vencimiento",
+      "English": "Expiration"
+    },
+    {
+      "Spanish": "Afecto",
+      "English": "Affect"
+    },
+    {
+      "Spanish": "Superior",
+      "English": "Superior"
+    },
+    {
+      "Spanish": "Listaprecio",
+      "English": "Pricelist"
+    },
+    {
+      "Spanish": "Vrbase",
+      "English": "Vrbase"
+    },
+    {
+      "Spanish": "Vrenlista",
+      "English": "Vrenlist"
+    },
+    {
+      "Spanish": "Porcdescuento",
+      "English": "Porcdiscount"
+    },
+    {
+      "Spanish": "Cant",
+      "English": "Qty"
+    },
+    {
+      "Spanish": "Margen",
+      "English": "Margin"
+    },
+    {
+      "Spanish": "Pendiente",
+      "English": "Pending"
+    },
+    {
+      "Spanish": "Olvidar",
+      "English": "Forget"
+    },
+    {
+      "Spanish": "Preguntum",
+      "English": "Question"
+    },
+    {
+      "Spanish": "Planeada",
+      "English": "Planned"
+    },
+    {
+      "Spanish": "Ejecutada",
+      "English": "Executed"
+    },
+    {
+      "Spanish": "Consecutivo",
+      "English": "Consecutive"
+    },
+    {
+      "Spanish": "Programar",
+      "English": "Schedule"
+    },
+    {
+      "Spanish": "Planeadas",
+      "English": "Planned"
+    },
+    {
+      "Spanish": "Cargar",
+      "English": "Add"
+    },
+    {
+      "Spanish": "Ver",
+      "English": "See"
+    },
+    {
+      "Spanish": "Val",
+      "English": "Val"
+    },
+    {
+      "Spanish": "Despacho",
+      "English": "Dispatch"
+    },
+    {
+      "Spanish": "Sol",
+      "English": "Req"
+    },
+    {
+      "Spanish": "Cerrar",
+      "English": "Close"
+    },
+    {
+      "Spanish": "Cobro",
+      "English": "Payment"
+    },
+    {
+      "Spanish": "Mostrar",
+      "English": "Show"
+    },
+    {
+      "Spanish": "Valores",
+      "English": "Values"
+    },
+    {
+      "Spanish": "Ejecutados",
+      "English": "Executed"
+    },
+    {
+      "Spanish": "Adjuntos",
+      "English": "Attachments"
+    },
+    {
+      "Spanish": "App",
+      "English": "App"
+    },
+    {
+      "Spanish": "Archivos",
+      "English": "Files"
+    },
+    {
+      "Spanish": "Lectura",
+      "English": "Reading"
+    },
+    {
+      "Spanish": "Avance",
+      "English": "Advance"
+    },
+    {
+      "Spanish": "Mayor",
+      "English": "Major"
+    },
+    {
+      "Spanish": "Ser",
+      "English": "Be"
+    },
+    {
+      "Spanish": "Menor",
+      "English": "Minor"
+    },
+    {
+      "Spanish": "Equ",
+      "English": "Equ"
+    },
+    {
+      "Spanish": "Analisis",
+      "English": "Analysis"
+    },
+    {
+      "Spanish": "Efecto",
+      "English": "Effect"
+    },
+    {
+      "Spanish": "Campana",
+      "English": "Bell"
+    },
+    {
+      "Spanish": "Fechafin",
+      "English": "EndDate"
+    },
+    {
+      "Spanish": "Ciclo",
+      "English": "Cycle"
+    },
+    {
+      "Spanish": "Afectar",
+      "English": "Affect"
+    },
+    {
+      "Spanish": "Reparacion",
+      "English": "Repair"
+    },
+    {
+      "Spanish": "Reiniciar",
+      "English": "Restart"
+    },
+    {
+      "Spanish": "Nciclo",
+      "English": "Ncycle"
+    },
+    {
+      "Spanish": "By",
+      "English": "By"
+    },
+    {
+      "Spanish": "Stand",
+      "English": "Stand"
+    },
+    {
+      "Spanish": "Multa",
+      "English": "Penaltyfee"
+    },
+    {
+      "Spanish": "Ultima",
+      "English": "Last"
+    },
+    {
+      "Spanish": "Solicitada",
+      "English": "Requested"
+    },
+    {
+      "Spanish": "Alquilada",
+      "English": "Rented"
+    },
+    {
+      "Spanish": "Estadoalquiler",
+      "English": "StateRental"
+    },
+    {
+      "Spanish": "Serializado",
+      "English": "Serialized"
+    },
+    {
+      "Spanish": "Facturado",
+      "English": "Invoiced"
+    },
+    {
+      "Spanish": "Serial",
+      "English": "Serial"
+    },
+    {
+      "Spanish": "Puesta",
+      "English": "Put"
+    },
+    {
+      "Spanish": "Marcha",
+      "English": "Intooperation"
+    },
+    {
+      "Spanish": "Actual",
+      "English": "Current"
+    },
+    {
+      "Spanish": "Importacion",
+      "English": "Import"
+    },
+    {
+      "Spanish": "Cancelada",
+      "English": "Cancelled"
+    },
+    {
+      "Spanish": "Comprador",
+      "English": "Buyer"
+    },
+    {
+      "Spanish": "Prestamo",
+      "English": "Loan"
+    },
+    {
+      "Spanish": "Dependiente",
+      "English": "Dependent"
+    },
+    {
+      "Spanish": "Overhall",
+      "English": "Overhall"
+    },
+    {
+      "Spanish": "Cobrar",
+      "English": "Charge"
+    },
+    {
+      "Spanish": "Esperada",
+      "English": "Expected"
+    },
+    {
+      "Spanish": "Entrego",
+      "English": "Delivered"
+    },
+    {
+      "Spanish": "Trazabilidad",
+      "English": "Traceability"
+    },
+    {
+      "Spanish": "Errore",
+      "English": "Error"
+    },
+    {
+      "Spanish": "Error",
+      "English": "Error"
+    },
+    {
+      "Spanish": "Seguimiento",
+      "English": "Followup"
+    },
+    {
+      "Spanish": "Filtro",
+      "English": "Filter"
+    },
+    {
+      "Spanish": "Independiente",
+      "English": "Independent"
+    },
+    {
+      "Spanish": "Gas",
+      "English": "Gas"
+    },
+    {
+      "Spanish": "Aprobo",
+      "English": "Approve"
+    },
+    {
+      "Spanish": "Samm",
+      "English": "Samm"
+    },
+    {
+      "Spanish": "Accesos",
+      "English": "Access"
+    },
+    {
+      "Spanish": "Gen",
+      "English": "Gen"
+    },
+    {
+      "Spanish": "Ip",
+      "English": "Ip"
+    },
+    {
+      "Spanish": "Notificacion",
+      "English": "Notification"
+    },
+    {
+      "Spanish": "Accion",
+      "English": "Action"
+    },
+    {
+      "Spanish": "Integracion",
+      "English": "Integration"
+    },
+    {
+      "Spanish": "Punto",
+      "English": "Point"
+    },
+    {
+      "Spanish": "Archivo",
+      "English": "File"
+    },
+    {
+      "Spanish": "Objeto",
+      "English": "Object"
+    },
+    {
+      "Spanish": "Binario",
+      "English": "Binary"
+    },
+    {
+      "Spanish": "Principal",
+      "English": "Main"
+    },
+    {
+      "Spanish": "Link",
+      "English": "Link"
+    },
+    {
+      "Spanish": "Salidas",
+      "English": "Dispatchments"
+    },
+    {
+      "Spanish": "Rojo",
+      "English": "Red"
+    },
+    {
+      "Spanish": "Usa",
+      "English": "Uses"
+    },
+    {
+      "Spanish": "Sugerir",
+      "English": "Suggest"
+    },
+    {
+      "Spanish": "Ocultar",
+      "English": "Disguise"
+    },
+    {
+      "Spanish": "Modulo",
+      "English": "Module"
+    },
+    {
+      "Spanish": "Relacion",
+      "English": "Relationship"
+    },
+    {
+      "Spanish": "Formulario",
+      "English": "Form"
+    },
+    {
+      "Spanish": "Defecto",
+      "English": "Default"
+    },
+    {
+      "Spanish": "Dato",
+      "English": "Data"
+    },
+    {
+      "Spanish": "Expresion",
+      "English": "Expression"
+    },
+    {
+      "Spanish": "Regular",
+      "English": "Regular"
+    },
+    {
+      "Spanish": "Grilla",
+      "English": "Grid"
+    },
+    {
+      "Spanish": "Envio",
+      "English": "Shipment"
+    },
+    {
+      "Spanish": "Enviado",
+      "English": "Sent"
+    },
+    {
+      "Spanish": "Enviar",
+      "English": "Send"
+    },
+    {
+      "Spanish": "Empresa",
+      "English": "Company"
+    },
+    {
+      "Spanish": "Administrativo",
+      "English": "Administrative"
+    },
+    {
+      "Spanish": "Adicional",
+      "English": "Additional"
+    },
+    {
+      "Spanish": "Plantilla",
+      "English": "Template"
+    },
+    {
+      "Spanish": "Adjunto",
+      "English": "Attach"
+    },
+    {
+      "Spanish": "Mensajes",
+      "English": "Messages"
+    },
+    {
+      "Spanish": "Reintento",
+      "English": "Retry"
+    },
+    {
+      "Spanish": "Adjuntar",
+      "English": "Attach"
+    },
+    {
+      "Spanish": "Remitente",
+      "English": "Sender"
+    },
+    {
+      "Spanish": "Familium",
+      "English": "Family"
+    },
+    {
+      "Spanish": "Firma",
+      "English": "Signature"
+    },
+    {
+      "Spanish": "Idobjeto",
+      "English": "IdOject"
+    },
+    {
+      "Spanish": "Archivobinario",
+      "English": "Binaryfile"
+    },
+    {
+      "Spanish": "Codigoacceso",
+      "English": "AccessCode"
+    },
+    {
+      "Spanish": "Duplicar",
+      "English": "Duplicate"
+    },
+    {
+      "Spanish": "Intermedias",
+      "English": "Intermediate"
+    },
+    {
+      "Spanish": "Eliminar",
+      "English": "Eliminate"
+    },
+    {
+      "Spanish": "Monedum",
+      "English": "Currency"
+    },
+    {
+      "Spanish": "Abreviatura",
+      "English": "Abbreviation"
+    },
+    {
+      "Spanish": "Cambio",
+      "English": "Change"
+    },
+    {
+      "Spanish": "Datos",
+      "English": "Data"
+    },
+    {
+      "Spanish": "Recurso",
+      "English": "Resource"
+    },
+    {
+      "Spanish": "Grupo",
+      "English": "Group"
+    },
+    {
+      "Spanish": "Reintentar",
+      "English": "Retry"
+    },
+    {
+      "Spanish": "Servidor",
+      "English": "Server"
+    },
+    {
+      "Spanish": "Certificado",
+      "English": "Certificate"
+    },
+    {
+      "Spanish": "Puerto",
+      "English": "Port"
+    },
+    {
+      "Spanish": "Credenciales",
+      "English": "Credentials"
+    },
+    {
+      "Spanish": "Gsuite",
+      "English": "GSuite"
+    },
+    {
+      "Spanish": "Cuenta",
+      "English": "Account"
+    },
+    {
+      "Spanish": "Tiene",
+      "English": "Has"
+    },
+    {
+      "Spanish": "Desplazamiento",
+      "English": "Displacement"
+    },
+    {
+      "Spanish": "Nivel",
+      "English": "Level"
+    },
+    {
+      "Spanish": "Geo",
+      "English": "Geo"
+    },
+    {
+      "Spanish": "Longitud",
+      "English": "Length"
+    },
+    {
+      "Spanish": "Latitud",
+      "English": "Latitude"
+    },
+    {
+      "Spanish": "Gui",
+      "English": "Gui"
+    },
+    {
+      "Spanish": "Ayudum",
+      "English": "Help"
+    },
+    {
+      "Spanish": "Ayuda",
+      "English": "Help"
+    },
+    {
+      "Spanish": "Bloque",
+      "English": "Block"
+    },
+    {
+      "Spanish": "Home",
+      "English": "Home"
+    },
+    {
+      "Spanish": "Control",
+      "English": "Control"
+    },
+    {
+      "Spanish": "Url",
+      "English": "Url"
+    },
+    {
+      "Spanish": "Busqueda",
+      "English": "Search"
+    },
+    {
+      "Spanish": "Nuevo",
+      "English": "New"
+    },
+    {
+      "Spanish": "Generico",
+      "English": "Generic"
+    },
+    {
+      "Spanish": "Actualizacion",
+      "English": "Update"
+    },
+    {
+      "Spanish": "Campo",
+      "English": "Field"
+    },
+    {
+      "Spanish": "Html",
+      "English": "Html"
+    },
+    {
+      "Spanish": "Funcionalidad",
+      "English": "Functionality"
+    },
+    {
+      "Spanish": "Tab",
+      "English": "Tab"
+    },
+    {
+      "Spanish": "Resultados",
+      "English": "Results"
+    },
+    {
+      "Spanish": "Idae",
+      "English": "Idae"
+    },
+    {
+      "Spanish": "K",
+      "English": "K"
+    },
+    {
+      "Spanish": "V",
+      "English": "V"
+    },
+    {
+      "Spanish": "Lic",
+      "English": "Lic"
+    },
+    {
+      "Spanish": "Parametro",
+      "English": "Parameter"
+    },
+    {
+      "Spanish": "Xdefecto",
+      "English": "Xdefault"
+    },
+    {
+      "Spanish": "Licencia",
+      "English": "License"
+    },
+    {
+      "Spanish": "Parte",
+      "English": "Part"
+    },
+    {
+      "Spanish": "Licencium",
+      "English": "License"
+    },
+    {
+      "Spanish": "Clave",
+      "English": "Password"
+    },
+    {
+      "Spanish": "Atencion",
+      "English": "Attention"
+    },
+    {
+      "Spanish": "Canal",
+      "English": "Channel"
+    },
+    {
+      "Spanish": "Ort",
+      "English": "Ort"
+    },
+    {
+      "Spanish": "Solicitudes",
+      "English": "Requests"
+    },
+    {
+      "Spanish": "Programacion",
+      "English": "Programming"
+    },
+    {
+      "Spanish": "Desde",
+      "English": "From"
+    },
+    {
+      "Spanish": "Vale",
+      "English": "Vale"
+    },
+    {
+      "Spanish": "Pro",
+      "English": "Pro"
+    },
+    {
+      "Spanish": "Detallada",
+      "English": "Detailed"
+    },
+    {
+      "Spanish": "Fechainicio",
+      "English": "Startdate"
+    },
+    {
+      "Spanish": "Proyectada",
+      "English": "Projected"
+    },
+    {
+      "Spanish": "Real",
+      "English": "Real"
+    },
+    {
+      "Spanish": "Terminacion",
+      "English": "Termination"
+    },
+    {
+      "Spanish": "Ejecutor",
+      "English": "Executor"
+    },
+    {
+      "Spanish": "Hito",
+      "English": "Milestone"
+    },
+    {
+      "Spanish": "Predecesora",
+      "English": "Predecessor"
+    },
+    {
+      "Spanish": "Fisico",
+      "English": "Physical"
+    },
+    {
+      "Spanish": "Horario",
+      "English": "Schedule"
+    },
+    {
+      "Spanish": "Revisado",
+      "English": "Reviewed"
+    },
+    {
+      "Spanish": "Aprobado",
+      "English": "Approved"
+    },
+    {
+      "Spanish": "Revision",
+      "English": "Revision"
+    },
+    {
+      "Spanish": "Aprobacion",
+      "English": "Approval"
+    },
+    {
+      "Spanish": "Completado",
+      "English": "Filled"
+    },
+    {
+      "Spanish": "Factorexito",
+      "English": "Successfactor"
+    },
+    {
+      "Spanish": "Sesion",
+      "English": "Session"
+    },
+    {
+      "Spanish": "Festivos",
+      "English": "Holidays"
+    },
+    {
+      "Spanish": "Propio",
+      "English": "Own"
+    },
+    {
+      "Spanish": "Rol",
+      "English": "Role"
+    },
+    {
+      "Spanish": "Rep",
+      "English": "Rep"
+    },
+    {
+      "Spanish": "Serie",
+      "English": "Serie"
+    },
+    {
+      "Spanish": "Categorium",
+      "English": "Category"
+    },
+    {
+      "Spanish": "Categoria",
+      "English": "Category"
+    },
+    {
+      "Spanish": "Titulo",
+      "English": "Title"
+    },
+    {
+      "Spanish": "Cabecera",
+      "English": "Header"
+    },
+    {
+      "Spanish": "Seccion1",
+      "English": "Section1"
+    },
+    {
+      "Spanish": "Seccion2",
+      "English": "Section2"
+    },
+    {
+      "Spanish": "Seccion3",
+      "English": "Section3"
+    },
+    {
+      "Spanish": "Seccion4",
+      "English": "Section4"
+    },
+    {
+      "Spanish": "Seccion5",
+      "English": "Section5"
+    },
+    {
+      "Spanish": "Seccion6",
+      "English": "Section6"
+    },
+    {
+      "Spanish": "Seccion7",
+      "English": "Section7"
+    },
+    {
+      "Spanish": "Seccion8",
+      "English": "Section8"
+    },
+    {
+      "Spanish": "Formato",
+      "English": "Format"
+    },
+    {
+      "Spanish": "Graficos",
+      "English": "Graphics"
+    },
+    {
+      "Spanish": "Basica",
+      "English": "Basic"
+    },
+    {
+      "Spanish": "Seg",
+      "English": "Seg"
+    },
+    {
+      "Spanish": "Comercial",
+      "English": "Commercial"
+    },
+    {
+      "Spanish": "Botones",
+      "English": "Buttons"
+    },
+    {
+      "Spanish": "Mensaje",
+      "English": "Message"
+    },
+    {
+      "Spanish": "Peticion",
+      "English": "Request"
+    },
+    {
+      "Spanish": "Exitosa",
+      "English": "Successful"
+    },
+    {
+      "Spanish": "Intentos",
+      "English": "Attempts"
+    },
+    {
+      "Spanish": "Fallidos",
+      "English": "Failed"
+    },
+    {
+      "Spanish": "Ingresos",
+      "English": "Income"
+    },
+    {
+      "Spanish": "Ultimo",
+      "English": "Last"
+    },
+    {
+      "Spanish": "Ingreso",
+      "English": "Income"
+    },
+    {
+      "Spanish": "Fallido",
+      "English": "Failed"
+    },
+    {
+      "Spanish": "Intento",
+      "English": "Tried"
+    },
+    {
+      "Spanish": "Profesion",
+      "English": "Profession"
+    },
+    {
+      "Spanish": "Acceso",
+      "English": "Access"
+    },
+    {
+      "Spanish": "Cambiar",
+      "English": "Change"
+    },
+    {
+      "Spanish": "Recargo",
+      "English": "Surcharge"
+    },
+    {
+      "Spanish": "Sexo",
+      "English": "Sex"
+    },
+    {
+      "Spanish": "Identificacion",
+      "English": "Identification"
+    },
+    {
+      "Spanish": "Preferencias",
+      "English": "Preferences"
+    },
+    {
+      "Spanish": "Habilitado",
+      "English": "Enabled"
+    },
+    {
+      "Spanish": "Dispositivo",
+      "English": "Device"
+    },
+    {
+      "Spanish": "Syn",
+      "English": "Syn"
+    },
+    {
+      "Spanish": "Local",
+      "English": "Local"
+    },
+    {
+      "Spanish": "Enlace",
+      "English": "Link"
+    },
+    {
+      "Spanish": "Llave",
+      "English": "Key"
+    },
+    {
+      "Spanish": "Consumir",
+      "English": "Consume"
+    },
+    {
+      "Spanish": "Integrar",
+      "English": "Integrate"
+    },
+    {
+      "Spanish": "Reintentos",
+      "English": "Retries"
+    },
+    {
+      "Spanish": "Codigos",
+      "English": "Codes"
+    },
+    {
+      "Spanish": "Autenticar",
+      "English": "Authenticate"
+    },
+    {
+      "Spanish": "Autenticacion",
+      "English": "Authentication"
+    },
+    {
+      "Spanish": "Token",
+      "English": "Token"
+    },
+    {
+      "Spanish": "Response",
+      "English": "Response"
+    },
+    {
+      "Spanish": "Estructura",
+      "English": "Structure"
+    },
+    {
+      "Spanish": "Tabla1",
+      "English": "Table"
+    },
+    {
+      "Spanish": "Tax",
+      "English": "Tax"
+    },
+    {
+      "Spanish": "Tax",
+      "English": "Tax"
+    },
+    {
+      "Spanish": "Obj",
+      "English": "Obj"
+    },
+    {
+      "Spanish": "Ter",
+      "English": "Ter"
+    },
+    {
+      "Spanish": "Movil",
+      "English": "Mobile"
+    },
+    {
+      "Spanish": "Naturaleza",
+      "English": "Nature"
+    },
+    {
+      "Spanish": "Sector",
+      "English": "Sector"
+    },
+    {
+      "Spanish": "Codigorecursiva",
+      "English": "Recursivecode"
+    },
+    {
+      "Spanish": "Nit",
+      "English": "Nit"
+    },
+    {
+      "Spanish": "Website",
+      "English": "Website"
+    },
+    {
+      "Spanish": "Representante",
+      "English": "Representative"
+    },
+    {
+      "Spanish": "Corto",
+      "English": "Short"
+    },
+    {
+      "Spanish": "Propia",
+      "English": "Own"
+    },
+    {
+      "Spanish": "Clasificacion",
+      "English": "Classification"
+    },
+    {
+      "Spanish": "Prospecto",
+      "English": "Prospect"
+    },
+    {
+      "Spanish": "Dato1",
+      "English": "Data"
+    },
+    {
+      "Spanish": "Alquileres",
+      "English": "Rentals"
+    },
+    {
+      "Spanish": "Preliquidar",
+      "English": "Preliquidate"
+    },
+    {
+      "Spanish": "Checklist",
+      "English": "Checklist"
+    },
+    {
+      "Spanish": "Toda",
+      "English": "All"
+    },
+    {
+      "Spanish": "Ids",
+      "English": "Ids"
+    },
+    {
+      "Spanish": "Opciones",
+      "English": "Options"
+    },
+    {
+      "Spanish": "Textos",
+      "English": "Texts"
+    },
+    {
+      "Spanish": "Variable",
+      "English": "Variable"
+    },
+    {
+      "Spanish": "Documentos",
+      "English": "Documents"
+    },
+    {
+      "Spanish": "Recursiva",
+      "English": "Recursive"
+    },
+    {
+      "Spanish": "View",
+      "English": "View"
+    },
+    {
+      "Spanish": "Multiempresa",
+      "English": "Multicompany"
+    },
+    {
+      "Spanish": "Base",
+      "English": "Base"
+    },
+    {
+      "Spanish": "Resaltado",
+      "English": "Highlighted"
+    },
+    {
+      "Spanish": "Sub",
+      "English": "Sub"
+    },
+    {
+      "Spanish": "Cmm1",
+      "English": "Cmm1"
+    },
+    {
+      "Spanish": "Programadum",
+      "English": "Scheduled"
+    },
+    {
+      "Spanish": "Sin",
+      "English": "Without"
+    },
+    {
+      "Spanish": "Ejecucion",
+      "English": "Execution"
+    },
+    {
+      "Spanish": "Tablas",
+      "English": "Tables"
+    },
+    {
+      "Spanish": "Columnas",
+      "English": "Columns"
+    },
+    {
+      "Spanish": "Repuestosalquilable",
+      "English": "Rentablespareparts"
+    },
+    {
+      "Spanish": "Inverse",
+      "English": "Inverse"
+    },
+    {
+      "Spanish": "Navigation",
+      "English": "Navigation"
+    },
+    {
+      "Spanish": "Asociar",
+      "English": "Associate"
+    },
+    {
+      "Spanish": "Hash",
+      "English": "Hash"
+    }
+  ]
+}
