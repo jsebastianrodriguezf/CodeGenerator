@@ -1174,7 +1174,7 @@
     },
     {
       "Spanish": "Ejecutore",
-      "English": "Executor"
+      "English": "Executors"
     },
     {
       "Spanish": "Ejecutores",
@@ -1638,7 +1638,7 @@
     },
     {
       "Spanish": "Errore",
-      "English": "Error"
+      "English": "Errors"
     },
     {
       "Spanish": "Error",
@@ -2519,6 +2519,22 @@
     {
       "Spanish": "Hash",
       "English": "Hash"
+    },
+    {
+      "Spanish": "Errores",
+      "English": "Errors"
+    },
+    {
+      "Spanish": "Todas",
+      "English": "All"
+    },
+    {
+      "Spanish": "Programada",
+      "English": "Scheduled"
+    },
+    {
+      "Spanish": "Repuestosalquilables",
+      "English": "Rentablespareparts"
     }
   ]
 }

@@ -88,7 +88,7 @@ namespace CodeGenerator.BLL
             foreach (FileModel file in _filesModel.Where(x => x.Name != _contextName))
             {
                 name = Utilities.GetRealName(file.Name);
-                content.Add($"{prespace}public virtual DbSet<{name}> {name}s {{ get; set; }}");
+                content.Add($"{prespace}public virtual DbSet<{name}> {name} {{ get; set; }}");
             }
 
             return content;

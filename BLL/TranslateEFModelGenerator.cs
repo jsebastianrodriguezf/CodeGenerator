@@ -156,7 +156,7 @@ namespace CodeGenerator.BLL
                 className = line[startIndex..endIndex];
                 classNameTranslated = Translate(className);
 
-                line = $"    public virtual DbSet<{classNameTranslated}> {classNameTranslated}s {{ get; set; }}";
+                line = $"    public virtual DbSet<{classNameTranslated}> {classNameTranslated} {{ get; set; }}";
             }
 
             return line;

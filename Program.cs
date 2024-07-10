@@ -22,7 +22,7 @@ internal class Program
 
         Console.WriteLine("Start ...");
 
-        option = InputEnum.I18NDictionaryGenerator;
+        option = InputEnum.DatabaseGenerator;
 
         switch (option)
         {

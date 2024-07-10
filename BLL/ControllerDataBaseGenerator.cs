@@ -38,7 +38,10 @@ namespace CodeGenerator.BLL
             List<string> responses = [];
             string response;
 
-            List<FileModel> files = _filesModel.Where(x => x.Name.Substring(3, 1) == x.Name.Substring(3, 1).ToUpper()).ToList();
+            List<FileModel> files = _filesModel.Where(x =>
+                x.Name.Substring(3, 1) == x.Name.Substring(3, 1).ToUpper() || (!x.Name.StartsWith("View") &&
+                x.Name.Substring(0, 2) != x.Name.Substring(0, 2).ToUpper() &&
+                !(x.Name == "IdaeObject" || x.Name == "ErrorsObject"))).ToList();
             List<string> contentDI = [];
             List<string> contentMappers = [];
             List<string> constants = [];
@@ -71,13 +74,27 @@ namespace CodeGenerator.BLL
             bool hasView;
             bool hasCmm;
             bool hasPrincipalField;
+            bool isStandardTable;
 
             try
             {
                 prefix = entity[..3];
                 init = entity.Substring(3, 1);
-                entityUpper = string.Concat(init.ToUpper(), entity.AsSpan(4));
-                entityLower = string.Concat(init.ToLower(), entity.AsSpan(4));
+
+                isStandardTable = init.Equals(init.ToUpper(), StringComparison.CurrentCulture);
+
+                if (isStandardTable)
+                {
+                    entityUpper = string.Concat(init.ToUpper(), entity.AsSpan(4));
+                    entityLower = string.Concat(init.ToLower(), entity.AsSpan(4));
+                }
+                else
+                {
+                    prefix = string.Empty;
+                    init = entity[..1];
+                    entityUpper = string.Concat(init.ToUpper(), entity.AsSpan(1));
+                    entityLower = string.Concat(init.ToLower(), entity.AsSpan(1));
+                }
 
                 withCode =
                     HasWord(file.Path, $"public string? {entityUpper}Code {{ get; set; }}") ||
@@ -93,8 +110,8 @@ namespace CodeGenerator.BLL
                 if (entityLower == "event" || entityLower == "group")
                     entityLower += "Obj";
 
-                GenerateController(prefix, entityUpper, entityLower, withCode, hasView, hasCmm);
-                GenerateService(prefix, entityUpper, entityLower, withCode, hasView, hasCmm, hasPrincipalField);
+                GenerateController(prefix, entityUpper, entityLower, withCode, hasView, hasCmm, isStandardTable);
+                GenerateService(prefix, entityUpper, entityLower, withCode, hasView, hasCmm, hasPrincipalField, isStandardTable);
 
                 return string.Empty;
             }
@@ -104,7 +121,7 @@ namespace CodeGenerator.BLL
             }
         }
 
-        public void GenerateController(string prefix, string entityUpper, string entityLower, bool WithCode, bool hasView, bool hasCmm)
+        public void GenerateController(string prefix, string entityUpper, string entityLower, bool WithCode, bool hasView, bool hasCmm, bool isStandardTable)
         {
             List<string> content;
             string controllerRoute;
@@ -708,49 +725,20 @@ namespace CodeGenerator.BLL
                 $"",
                 $"            return NoContent();",
                 "        }",
-                $"",
-                $"        /// <summary>",
-                $"        /// Activate or inactivate a {entityUpper} by id",
-                $"        /// </summary>",
-                $"        /// <param name=\"id\"></param>",
-                $"        /// <param name=\"isActive\"></param>",
-                $"        /// <returns></returns>",
-                $"        /// <remarks>",
-                $"        /// Activate or inactivate a {entityUpper} by id",
-                $"        /// ",
-                $"        /// Authorization: Private",
-                $"        /// ",
-                $"        ///     Headers:",
-                $"        ///         Authorization: <c>Bearer {{Token}}</c>",
-                $"        /// </remarks>",
-                $"        /// <response code=\"200\">Success</response>",
-                $"        [IdentifierFilter]",
-                $"        [HttpPatch]",
-                $"        [Route(\"{{id}}/active/{{isActive}}\")]",
-                $"        [Produces(GeneralConstants.ContentType.Json)]",
-                $"        [ProducesResponseType((int)StatusCodeEnum.OK)]",
-                $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.NOT_FOUND)]",
-                $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
-                $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
-                $"        public async Task<ActionResult<object>> SetActiveById(int id, bool isActive)",
-                "        {",
-                $"            await _{entityLower}Service.SetActiveById(id, isActive);",
-                $"",
-                $"            return Ok();",
-                "        }",
-                $""
             ]);
 
-            if (WithCode)
+            if (isStandardTable)
+            {
                 content.AddRange([
+                    $"",
                     $"        /// <summary>",
-                    $"        /// Activate or inactivate a {entityUpper} by code",
+                    $"        /// Activate or inactivate a {entityUpper} by id",
                     $"        /// </summary>",
-                    $"        /// <param name=\"code\"></param>",
+                    $"        /// <param name=\"id\"></param>",
                     $"        /// <param name=\"isActive\"></param>",
                     $"        /// <returns></returns>",
                     $"        /// <remarks>",
-                    $"        /// Activate or inactivate a {entityUpper} by code",
+                    $"        /// Activate or inactivate a {entityUpper} by id",
                     $"        /// ",
                     $"        /// Authorization: Private",
                     $"        /// ",
@@ -760,19 +748,54 @@ namespace CodeGenerator.BLL
                     $"        /// <response code=\"200\">Success</response>",
                     $"        [IdentifierFilter]",
                     $"        [HttpPatch]",
-                    $"        [Route(\"code/{{code}}/active/{{isActive}}\")]",
+                    $"        [Route(\"{{id}}/active/{{isActive}}\")]",
                     $"        [Produces(GeneralConstants.ContentType.Json)]",
                     $"        [ProducesResponseType((int)StatusCodeEnum.OK)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.NOT_FOUND)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
-                    $"        public async Task<ActionResult<object>> SetActiveByCode(string code, bool isActive)",
+                    $"        public async Task<ActionResult<object>> SetActiveById(int id, bool isActive)",
                     "        {",
-                    $"            await _{entityLower}Service.SetActiveByCode(code, isActive);",
+                    $"            await _{entityLower}Service.SetActiveById(id, isActive);",
                     $"",
                     $"            return Ok();",
-                    "        }"
-            ]);
+                    "        }",
+                    $""
+                ]);
+
+                if (WithCode)
+                    content.AddRange([
+                        $"        /// <summary>",
+                        $"        /// Activate or inactivate a {entityUpper} by code",
+                        $"        /// </summary>",
+                        $"        /// <param name=\"code\"></param>",
+                        $"        /// <param name=\"isActive\"></param>",
+                        $"        /// <returns></returns>",
+                        $"        /// <remarks>",
+                        $"        /// Activate or inactivate a {entityUpper} by code",
+                        $"        /// ",
+                        $"        /// Authorization: Private",
+                        $"        /// ",
+                        $"        ///     Headers:",
+                        $"        ///         Authorization: <c>Bearer {{Token}}</c>",
+                        $"        /// </remarks>",
+                        $"        /// <response code=\"200\">Success</response>",
+                        $"        [IdentifierFilter]",
+                        $"        [HttpPatch]",
+                        $"        [Route(\"code/{{code}}/active/{{isActive}}\")]",
+                        $"        [Produces(GeneralConstants.ContentType.Json)]",
+                        $"        [ProducesResponseType((int)StatusCodeEnum.OK)]",
+                        $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.NOT_FOUND)]",
+                        $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
+                        $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
+                        $"        public async Task<ActionResult<object>> SetActiveByCode(string code, bool isActive)",
+                        "        {",
+                        $"            await _{entityLower}Service.SetActiveByCode(code, isActive);",
+                        $"",
+                        $"            return Ok();",
+                        "        }"
+                    ]);
+            }
 
             content.AddRange([
                 $"        #endregion",
@@ -792,7 +815,7 @@ namespace CodeGenerator.BLL
             GenerateFile("Controllers", $"{entityUpper}Controller.cs", content);
         }
 
-        public void GenerateService(string prefix, string entityUpper, string entityLower, bool WithCode, bool hasView, bool hasCmm, bool hasPrincipalField)
+        public void GenerateService(string prefix, string entityUpper, string entityLower, bool WithCode, bool hasView, bool hasCmm, bool hasPrincipalField, bool isStandardTable)
         {
             List<string> content;
             string viewGenerics;
@@ -847,7 +870,7 @@ namespace CodeGenerator.BLL
                 $"        #region Base Services",
                 $"        public async Task<{prefix}{entityUpper}Object> GetById(int id)",
                 "        {",
-                $"            IEnumerable<{prefix}{entityUpper}> {entityLower}s = await GetFilteredAsync(x => x.Id == id && x.Eid == _global.Eid && x.Active);",
+                $"            IEnumerable<{prefix}{entityUpper}> {entityLower}s = await GetFilteredAsync(x => x.Id == id{(isStandardTable ? " && x.Eid == _global.Eid && x.Active" : "")});",
                 $"",
                 $"            return {entityLower}s.FirstOrDefault() ?? throw new ApiException(StatusCodeEnum.NOT_FOUND);",
                 "        }",
@@ -885,7 +908,14 @@ namespace CodeGenerator.BLL
                 $"            {entityLower}s = (",
                 $"                from {entityLower} in _context.Set<{prefix}{entityUpper}>()",
                 $"                join idsObject in ids on {entityLower}.Id equals idsObject",
-                $"                where {entityLower}.Eid == _global.Eid && {entityLower}.Active",
+            ]);
+
+            if (isStandardTable)
+                content.AddRange([
+                    $"                where {entityLower}.Eid == _global.Eid && {entityLower}.Active",
+                ]);
+
+            content.AddRange([
                 $"                select {entityLower});",
                 $"",
                 $"            return Task.FromResult(_mapper.Map<List<{prefix}{entityUpper}Object>>({entityLower}s));",
@@ -933,7 +963,7 @@ namespace CodeGenerator.BLL
                 content.AddRange([
                     $"        public async Task<{prefix}{entityUpper}Object> GetByCode(string code)",
                     "        {",
-                    $"            IEnumerable<{prefix}{entityUpper}> {entityLower}s = await GetFilteredAsync(x => x.{entityUpper}Code == code && x.Eid == _global.Eid && x.Active);",
+                    $"            IEnumerable<{prefix}{entityUpper}> {entityLower}s = await GetFilteredAsync(x => x.{entityUpper}Code == code{(isStandardTable ? " && x.Eid == _global.Eid && x.Active" : "")});",
                     $"",
                     $"            return {entityLower}s.FirstOrDefault() ?? throw new ApiException(StatusCodeEnum.NOT_FOUND);",
                     "        }",
@@ -1043,9 +1073,9 @@ namespace CodeGenerator.BLL
                     $"            IEnumerable<{prefix}{entityUpper}Object> {entityLower}s;",
                     $"",
                     $"            if (string.IsNullOrWhiteSpace(foreignKey))",
-                    $"                {entityLower}s = await GetFilteredAsync(x => x.Eid == _global.Eid && x.Active);",
+                    $"                {entityLower}s = await {(isStandardTable ? "GetFilteredAsync(x => x.Eid == _global.Eid && x.Active)" : "GetAll()")};",
                     "            else",
-                    $"                {entityLower}s = await _generalService.GetData<{prefix}{entityUpper}, {prefix}{entityUpper}>(foreignKey, foreignValue, cmmKeyword);",
+                    $"                {entityLower}s = await _generalService.GetData<{prefix}{entityUpper}, {prefix}{entityUpper}>(foreignKey, foreignValue);",
                     $"",
                     $"           return {entityLower}s.ToList();",
                     "        }",
@@ -1062,7 +1092,7 @@ namespace CodeGenerator.BLL
                         $"            if (string.IsNullOrWhiteSpace(foreignKey))",
                         $"                {entityLower}s = await GetViewFilteredAsync(x => x.Eid == _global.Eid && x.Active);",
                         "            else",
-                        $"                {entityLower}s = await _generalService.GetData<{prefix}{entityUpper}, View{prefix}{entityUpper}>(foreignKey, foreignValue, cmmKeyword);",
+                        $"                {entityLower}s = await _generalService.GetData<{prefix}{entityUpper}, View{prefix}{entityUpper}>(foreignKey, foreignValue);",
                         $"",
                         $"           return {entityLower}s.ToList();",
                         "        }",
@@ -1077,7 +1107,7 @@ namespace CodeGenerator.BLL
                         $"            if (string.IsNullOrWhiteSpace(foreignKey))",
                         "                 {entityLower}s = await GetViewBaseFilteredAsync(x => x.Eid == _global.Eid && x.Active);",
                         "            else",
-                        $"                 {entityLower}s = await _generalService.GetData<{prefix}{entityUpper}, View{prefix}{entityUpperBase}Base>(foreignKey, foreignValue, cmmKeyword);",
+                        $"                 {entityLower}s = await _generalService.GetData<{prefix}{entityUpper}, View{prefix}{entityUpperBase}Base>(foreignKey, foreignValue);",
                         $"",
                         $"            return {entityLower}s.ToList();",
                         "        }",
@@ -1089,14 +1119,21 @@ namespace CodeGenerator.BLL
             content.AddRange([
                 $"        public async Task<{prefix}{entityUpper}Object> Insert({prefix}{entityUpper}Object input)",
                 "        {",
-                $"            input.Eid = _global.Eid;",
-                $"            input.Uid = _global.Uid;",
-                $"            input.IdUserCreator = _global.IdUser;",
-                $"            input.IdUserModifier = _global.IdUser;",
-                $"            input.DateCreation = DateTime.Now;",
-                $"            input.DateModification = input.DateCreation;",
-                $"            input.Active = true;",
-                $"",
+            ]);
+
+            if (isStandardTable)
+                content.AddRange([
+                    $"            input.Eid = _global.Eid;",
+                    $"            input.Uid = _global.Uid;",
+                    $"            input.IdUserCreator = _global.IdUser;",
+                    $"            input.IdUserModifier = _global.IdUser;",
+                    $"            input.DateCreation = DateTime.Now;",
+                    $"            input.DateModification = input.DateCreation;",
+                    $"            input.Active = true;",
+                    $"",
+                ]);
+
+            content.AddRange([
                 $"            {prefix}{entityUpper}Object? {entityLower} = await AddAsync(_mapper.Map<{prefix}{entityUpper}>(input));",
                 $"",
                 $"            if ({entityLower} != null)",
@@ -1111,45 +1148,35 @@ namespace CodeGenerator.BLL
                 $"",
                 $"            await GetById(input.Id);",
                 $"",
-                $"            input.Eid = _global.Eid;",
-                $"            input.Uid = _global.Uid;",
-                $"            input.IdUserModifier = _global.IdUser;",
-                $"            input.DateModification = DateTime.Now;",
-                $"            input.Active = true;",
-                $"",
+            ]);
+
+            if (isStandardTable)
+                content.AddRange([
+                    $"            input.Eid = _global.Eid;",
+                    $"            input.Uid = _global.Uid;",
+                    $"            input.IdUserModifier = _global.IdUser;",
+                    $"            input.DateModification = DateTime.Now;",
+                    $"            input.Active = true;",
+                    $"",
+                ]);
+
+            content.AddRange([
                 $"            {entityLower}Object = await UpdateAsync(_mapper.Map<{prefix}{entityUpper}>(input));",
                 $"",
                 $"            if ({entityLower}Object is null)",
                 $"                throw new ApiException(StatusCodeEnum.BAD_REQUEST);",
                 "        }",
-                $"",
-                $"        public async Task SetActiveById(int id, bool active)",
-                "        {",
-                $"            {prefix}{entityUpper}Object {entityLower}Object;",
-                $"",
-                $"            {entityLower}Object = await GetById(id);",
-                $"",
-                $"            {entityLower}Object.Eid = _global.Eid;",
-                $"            {entityLower}Object.Uid = _global.Uid;",
-                $"            {entityLower}Object.IdUserModifier = _global.IdUser;",
-                $"            {entityLower}Object.DateModification = DateTime.Now;",
-                $"            {entityLower}Object.Active = active;",
-                $"",
-                $"            {entityLower}Object = await UpdateAsync(_mapper.Map<{prefix}{entityUpper}>({entityLower}Object));",
-                $"",
-                $"            if ({entityLower}Object is null)",
-                $"                throw new ApiException(StatusCodeEnum.BAD_REQUEST);",
-                "        }",
-                $""
-            ]);
+                ]);
 
-            if (WithCode)
+            if (isStandardTable)
+            {
                 content.AddRange([
-                    $"        public async Task SetActiveByCode(string code, bool active)",
+                    $"",
+                    $"        public async Task SetActiveById(int id, bool active)",
                     "        {",
                     $"            {prefix}{entityUpper}Object {entityLower}Object;",
                     $"",
-                    $"            {entityLower}Object = await GetByCode(code);",
+                    $"            {entityLower}Object = await GetById(id);",
                     $"",
                     $"            {entityLower}Object.Eid = _global.Eid;",
                     $"            {entityLower}Object.Uid = _global.Uid;",
@@ -1162,7 +1189,30 @@ namespace CodeGenerator.BLL
                     $"            if ({entityLower}Object is null)",
                     $"                throw new ApiException(StatusCodeEnum.BAD_REQUEST);",
                     "        }",
+                    $""
                 ]);
+
+                if (WithCode)
+                    content.AddRange([
+                        $"        public async Task SetActiveByCode(string code, bool active)",
+                        "        {",
+                        $"            {prefix}{entityUpper}Object {entityLower}Object;",
+                        $"",
+                        $"            {entityLower}Object = await GetByCode(code);",
+                        $"",
+                        $"            {entityLower}Object.Eid = _global.Eid;",
+                        $"            {entityLower}Object.Uid = _global.Uid;",
+                        $"            {entityLower}Object.IdUserModifier = _global.IdUser;",
+                        $"            {entityLower}Object.DateModification = DateTime.Now;",
+                        $"            {entityLower}Object.Active = active;",
+                        $"",
+                        $"            {entityLower}Object = await UpdateAsync(_mapper.Map<{prefix}{entityUpper}>({entityLower}Object));",
+                        $"",
+                        $"            if ({entityLower}Object is null)",
+                        $"                throw new ApiException(StatusCodeEnum.BAD_REQUEST);",
+                        "        }",
+                    ]);
+            }
 
             content.AddRange([
                 $"        #endregion",
@@ -1184,7 +1234,23 @@ namespace CodeGenerator.BLL
 
         public string GenerateDI(string entity)
         {
-            return $"services.AddTransient<{entity.AsSpan(3).ToString().Replace("Object", string.Empty)}Service>();";
+            string init;
+            string entityUpper;
+
+            entity = entity[..^"Object".Length];
+            init = entity.Substring(3, 1);
+
+            if (init.Equals(init.ToUpper(), StringComparison.CurrentCulture))
+            {
+                entityUpper = string.Concat(init.ToUpper(), entity.AsSpan(4));
+            }
+            else
+            {
+                init = entity[..1];
+                entityUpper = string.Concat(init.ToUpper(), entity.AsSpan(1));
+            }
+
+            return $"services.AddTransient<{entityUpper}Service>();";
         }
 
         public List<string> GenerateMapByEntity(string entity)
@@ -1202,7 +1268,23 @@ namespace CodeGenerator.BLL
 
         public string GenerateConstants(string entity)
         {
-            string constant = entity.AsSpan(3).ToString()[..^"Object".Length];
+            string init;
+            string entityUpper;
+
+            entity = entity[..^"Object".Length];
+            init = entity.Substring(3, 1);
+
+            if (init.Equals(init.ToUpper(), StringComparison.CurrentCulture))
+            {
+                entityUpper = string.Concat(init.ToUpper(), entity.AsSpan(4));
+            }
+            else
+            {
+                init = entity[..1];
+                entityUpper = string.Concat(init.ToUpper(), entity.AsSpan(1));
+            }
+
+            string constant = entityUpper;
             return $"public const string {constant}BaseController = \"{Utilities.ToKebabCase(constant)}\";";
         }
 
