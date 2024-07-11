@@ -22,7 +22,7 @@ internal class Program
 
         Console.WriteLine("Start ...");
 
-        option = InputEnum.DatabaseGenerator;
+        option = InputEnum.ControllerCoreDALGenerator;
 
         switch (option)
         {
@@ -59,7 +59,7 @@ internal class Program
 
             case InputEnum.SingleControllerDataBaseGenerator:
                 path = "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.Transverse\\SAMMAI.Transverse\\Models\\Objects";
-                entity = "GenFormularioCatalogoEquipo";
+                entity = "SegPreference";
 
                 fileModel = new FileModel()
                 {
