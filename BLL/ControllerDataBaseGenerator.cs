@@ -134,16 +134,9 @@ namespace CodeGenerator.BLL
 
             controllerRoute = "$\"{BaseApi}/" + $"{Utilities.ToKebabCase(entityUpper).ToLower()}\"";
 
-            content = [
-                $"using Microsoft.AspNetCore.Mvc;",
-                $"using SAMMAI.DataBase.Services.Implementations;",
-                $"using SAMMAI.DataBase.Utility.ActionFilters;",
-                $"using SAMMAI.Transverse.Constants;",
-                $"using SAMMAI.Transverse.Helpers;",
-                $"using SAMMAI.Transverse.Models.Endpoints.DataBase.{entityUpper};",
-                $"using SAMMAI.Transverse.Models.Response.BaseApi;",
-                $"using static SAMMAI.DataBase.Utility.Constants.ApiRoutesConstants;",
-                $"using static SAMMAI.Transverse.Constants.ApiRoutes.DataBaseAPI;",
+            content = GetNamespacesController(entityUpper);
+
+            content.AddRange([
                 $"",
                 $"namespace SAMMAI.DataBase.Controllers",
                 "{",
@@ -192,7 +185,7 @@ namespace CodeGenerator.BLL
                 $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                 "        }",
                 $""
-            ];
+            ]);
 
             if (hasView)
             {
@@ -469,7 +462,7 @@ namespace CodeGenerator.BLL
                     $"        /// Gets all {entityUpper}",
                     $"        /// </summary>",
                     $"        /// <param name=\"cmmKeyword\">Search by cmm</param>",
-                    $"        /// <param name=\"foreignKey\">Search by foreign column</param>",
+                    $"        /// <param name=\"idForeignKey\">Search by foreign column</param>",
                     $"        /// <param name=\"foreignValue\">Search the foreign column with this value</param>",
                     $"        /// <returns></returns>",
                     $"        /// <remarks>",
@@ -488,9 +481,9 @@ namespace CodeGenerator.BLL
                     $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<{prefix}{entityUpper}Object>>), (int)StatusCodeEnum.OK)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
-                    $"        public async Task<ActionResult<object>> GetAll([FromQuery] string? cmmKeyword = null, [FromQuery] string? foreignKey = null, [FromQuery] int foreignValue = 0)",
+                    $"        public async Task<ActionResult<object>> GetAll([FromQuery] string? cmmKeyword = null, [FromQuery] int? idForeignKey = null, [FromQuery] int foreignValue = 0)",
                     "        {",
-                    $"            List<{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAll(cmmKeyword, foreignKey, foreignValue);",
+                    $"            List<{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAll(cmmKeyword, idForeignKey, foreignValue);",
                     $"",
                     $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                     "        }",
@@ -504,7 +497,7 @@ namespace CodeGenerator.BLL
                         $"        /// Gets all full {entityUpper}",
                         $"        /// </summary>",
                         $"        /// <param name=\"cmmKeyword\">Search by cmm</param>",
-                        $"        /// <param name=\"foreignKey\">Search by foreign column</param>",
+                        $"        /// <param name=\"idForeignKey\">Search by foreign column</param>",
                         $"        /// <param name=\"foreignValue\">Search the foreign column with this value</param>",
                         $"        /// <returns></returns>",
                         $"        /// <remarks>",
@@ -523,9 +516,9 @@ namespace CodeGenerator.BLL
                         $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<View{prefix}{entityUpper}Object>>), (int)StatusCodeEnum.OK)]",
                         $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                         $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
-                        $"        public async Task<ActionResult<object>> GetAllFull([FromQuery] string? cmmKeyword = null, [FromQuery] string? foreignKey = null, [FromQuery] int foreignValue = 0)",
+                        $"        public async Task<ActionResult<object>> GetAllFull([FromQuery] string? cmmKeyword = null, [FromQuery] int? idForeignKey = null, [FromQuery] int foreignValue = 0)",
                         "        {",
-                        $"            List<View{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAllFull(cmmKeyword, foreignKey, foreignValue);",
+                        $"            List<View{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAllFull(cmmKeyword, idForeignKey, foreignValue);",
                         $"",
                         $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                         "        }",
@@ -537,7 +530,7 @@ namespace CodeGenerator.BLL
                         $"        /// Gets all base {entityUpper}",
                         $"        /// </summary>",
                         $"        /// <param name=\"cmmKeyword\">Search by cmm</param>",
-                        $"        /// <param name=\"foreignKey\">Search by foreign column</param>",
+                        $"        /// <param name=\"idForeignKey\">Search by foreign column</param>",
                         $"        /// <param name=\"foreignValue\">Search the foreign column with this value</param>",
                         $"        /// <returns></returns>",
                         $"        /// <remarks>",
@@ -556,9 +549,9 @@ namespace CodeGenerator.BLL
                         $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<View{prefix}{entityUpperBase}BaseObject>>), (int)StatusCodeEnum.OK)]",
                         $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                         $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
-                        $"        public async Task<ActionResult<object>> GetAllBase([FromQuery] string? cmmKeyword = null, [FromQuery] string? foreignKey = null, [FromQuery] int foreignValue = 0)",
+                        $"        public async Task<ActionResult<object>> GetAllBase([FromQuery] string? cmmKeyword = null, [FromQuery] int? idForeignKey = null, [FromQuery] int foreignValue = 0)",
                         "        {",
-                        $"            List<View{prefix}{entityUpperBase}BaseObject> response = await _{entityLower}Service.GetAllBase(cmmKeyword, foreignKey, foreignValue);",
+                        $"            List<View{prefix}{entityUpperBase}BaseObject> response = await _{entityLower}Service.GetAllBase(cmmKeyword, idForeignKey, foreignValue);",
                         $"",
                         $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                         "        }",
@@ -572,7 +565,7 @@ namespace CodeGenerator.BLL
                     $"        /// <summary>",
                     $"        /// Gets all {entityUpper}",
                     $"        /// </summary>",
-                    $"        /// <param name=\"foreignKey\">Search by foreign column</param>",
+                    $"        /// <param name=\"idForeignKey\">Search by foreign column</param>",
                     $"        /// <param name=\"foreignValue\">Search the foreign column with this value</param>",
                     $"        /// <returns></returns>",
                     $"        /// <remarks>",
@@ -591,9 +584,9 @@ namespace CodeGenerator.BLL
                     $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<{prefix}{entityUpper}Object>>), (int)StatusCodeEnum.OK)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
-                    $"        public async Task<ActionResult<object>> GetAll([FromQuery] string? foreignKey = null, [FromQuery] int foreignValue = 0)",
+                    $"        public async Task<ActionResult<object>> GetAll([FromQuery] int? idForeignKey = null, [FromQuery] int foreignValue = 0)",
                     "        {",
-                    $"            List<{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAll(foreignKey, foreignValue);",
+                    $"            List<{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAll(idForeignKey, foreignValue);",
                     $"",
                     $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                     "        }",
@@ -606,7 +599,7 @@ namespace CodeGenerator.BLL
                         $"        /// <summary>",
                         $"        /// Gets all full {entityUpper}",
                         $"        /// </summary>",
-                        $"        /// <param name=\"foreignKey\">Search by foreign column</param>",
+                        $"        /// <param name=\"idForeignKey\">Search by foreign column</param>",
                         $"        /// <param name=\"foreignValue\">Search the foreign column with this value</param>",
                         $"        /// <returns></returns>",
                         $"        /// <remarks>",
@@ -625,9 +618,9 @@ namespace CodeGenerator.BLL
                         $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<View{prefix}{entityUpper}Object>>), (int)StatusCodeEnum.OK)]",
                         $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                         $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
-                        $"        public async Task<ActionResult<object>> GetAllFull([FromQuery] string? foreignKey = null, [FromQuery] int foreignValue = 0)",
+                        $"        public async Task<ActionResult<object>> GetAllFull([FromQuery] int? idForeignKey = null, [FromQuery] int foreignValue = 0)",
                         "        {",
-                        $"            List<View{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAllFull(foreignKey, foreignValue);",
+                        $"            List<View{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAllFull(idForeignKey, foreignValue);",
                         $"",
                         $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                         "        }",
@@ -638,7 +631,7 @@ namespace CodeGenerator.BLL
                         $"        /// <summary>",
                         $"        /// Gets all base {entityUpper}",
                         $"        /// </summary>",
-                        $"        /// <param name=\"foreignKey\">Search by foreign column</param>",
+                        $"        /// <param name=\"idForeignKey\">Search by foreign column</param>",
                         $"        /// <param name=\"foreignValue\">Search the foreign column with this value</param>",
                         $"        /// <returns></returns>",
                         $"        /// <remarks>",
@@ -657,9 +650,9 @@ namespace CodeGenerator.BLL
                         $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<View{prefix}{entityUpperBase}BaseObject>>), (int)StatusCodeEnum.OK)]",
                         $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                         $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
-                        $"        public async Task<ActionResult<object>> GetAllBase([FromQuery] string? foreignKey = null, [FromQuery] int foreignValue = 0)",
+                        $"        public async Task<ActionResult<object>> GetAllBase([FromQuery] int? idForeignKey = null, [FromQuery] int foreignValue = 0)",
                         "        {",
-                        $"            List<View{prefix}{entityUpperBase}BaseObject> response = await _{entityLower}Service.GetAllBase(foreignKey, foreignValue);",
+                        $"            List<View{prefix}{entityUpperBase}BaseObject> response = await _{entityLower}Service.GetAllBase(idForeignKey, foreignValue);",
                         $"",
                         $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                         "        }",
@@ -750,7 +743,7 @@ namespace CodeGenerator.BLL
                     $"        [HttpPatch]",
                     $"        [Route(\"{{id}}/active/{{isActive}}\")]",
                     $"        [Produces(GeneralConstants.ContentType.Json)]",
-                    $"        [ProducesResponseType((int)StatusCodeEnum.OK)]",
+                    $"        [ProducesResponseType(typeof(BaseSuccessApiResponse), (int)StatusCodeEnum.OK)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.NOT_FOUND)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
@@ -758,7 +751,7 @@ namespace CodeGenerator.BLL
                     "        {",
                     $"            await _{entityLower}Service.SetActiveById(id, isActive);",
                     $"",
-                    $"            return Ok();",
+                    $"            return Ok(ResponseHelper.SetSuccessResponse());",
                     "        }",
                     $""
                 ]);
@@ -784,7 +777,7 @@ namespace CodeGenerator.BLL
                         $"        [HttpPatch]",
                         $"        [Route(\"code/{{code}}/active/{{isActive}}\")]",
                         $"        [Produces(GeneralConstants.ContentType.Json)]",
-                        $"        [ProducesResponseType((int)StatusCodeEnum.OK)]",
+                        $"        [ProducesResponseType(typeof(BaseSuccessApiResponse), (int)StatusCodeEnum.OK)]",
                         $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.NOT_FOUND)]",
                         $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                         $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
@@ -792,7 +785,7 @@ namespace CodeGenerator.BLL
                         "        {",
                         $"            await _{entityLower}Service.SetActiveByCode(code, isActive);",
                         $"",
-                        $"            return Ok();",
+                        $"            return Ok(ResponseHelper.SetSuccessResponse());",
                         "        }"
                     ]);
             }
@@ -830,17 +823,9 @@ namespace CodeGenerator.BLL
                 $"View{prefix}{entityUpper}, View{prefix}{entityUpperBase}Base" :
                 $"{prefix}{entityUpper}, {prefix}{entityUpper}";
 
-            content = [
-                $"using AutoMapper;",
-                $"using Microsoft.Data.SqlClient;",
-                $"using SAMMAI.DataBase.Repository.Context;",
-                $"using SAMMAI.DataBase.Repository.Entities;",
-                $"using SAMMAI.DataBase.Repository.Manager;",
-                $"using SAMMAI.DataBase.Repository.StorePrecedure.Entities;",
-                $"using SAMMAI.Transverse.Helpers;",
-                $"using SAMMAI.Transverse.Models.Endpoints.DataBase.{entityUpper};",
-                $"using System.Data;",
-                $"using static SAMMAI.Transverse.Constants.GeneralConstants;",
+            content = GetNamespacesService(entityUpper);
+
+            content.AddRange([
                 $"",
                 $"namespace SAMMAI.DataBase.Services.Implementations",
                 "{",
@@ -875,7 +860,7 @@ namespace CodeGenerator.BLL
                 $"            return {entityLower}s.FirstOrDefault() ?? throw new ApiException(StatusCodeEnum.NOT_FOUND);",
                 "        }",
                 $""
-            ];
+            ]);
 
             if (hasView)
             {
@@ -997,11 +982,11 @@ namespace CodeGenerator.BLL
             if (hasCmm)
             {
                 content.AddRange([
-                    $"        public async Task<List<{prefix}{entityUpper}Object>> GetAll(string? cmmKeyword, string? foreignKey = null, int foreignValue = 0)",
+                    $"        public async Task<List<{prefix}{entityUpper}Object>> GetAll(string? cmmKeyword, int? idForeignKey = null, int foreignValue = 0)",
                     "        {",
                     $"            IEnumerable<{prefix}{entityUpper}Object> {entityLower}s;",
                     $"",
-                    $"            if (string.IsNullOrWhiteSpace(foreignKey))",
+                    $"            if ((idForeignKey ?? 0) == 0)",
                     $"                {entityLower}s = string.IsNullOrWhiteSpace(cmmKeyword) ?",
                     $"                    await GetFilteredAsync(x => x.Eid == _global.Eid && x.Active) :",
                     $"                    await GetFilteredAsync(x => {
@@ -1011,7 +996,7 @@ namespace CodeGenerator.BLL
                                            )
                                          } &&  x.Eid == _global.Eid && x.Active);",
                     "            else",
-                    $"                {entityLower}s = await _generalService.GetData<{prefix}{entityUpper}, {prefix}{entityUpper}>(foreignKey, foreignValue, cmmKeyword);",
+                    $"                {entityLower}s = await _generalService.GetData<{prefix}{entityUpper}, {prefix}{entityUpper}>((int)idForeignKey!, foreignValue, cmmKeyword);",
                     $"",
                     $"           return {entityLower}s.ToList();",
                     "        }",
@@ -1021,11 +1006,11 @@ namespace CodeGenerator.BLL
                 if (hasView)
                 {
                     content.AddRange([
-                        $"        public async Task<List<View{prefix}{entityUpper}Object>> GetAllFull(string? cmmKeyword, string? foreignKey = null, int foreignValue = 0)",
+                        $"        public async Task<List<View{prefix}{entityUpper}Object>> GetAllFull(string? cmmKeyword, int? idForeignKey = null, int foreignValue = 0)",
                         "        {",
                         $"            IEnumerable<View{prefix}{entityUpper}Object> {entityLower}s;",
                         $"",
-                        $"            if (string.IsNullOrWhiteSpace(foreignKey))",
+                        $"            if ((idForeignKey ?? 0) == 0)",
                         $"                {entityLower}s = string.IsNullOrWhiteSpace(cmmKeyword) ?",
                         $"                    await GetViewFilteredAsync(x => x.Eid == _global.Eid && x.Active) :",
                         $"                    await GetViewFilteredAsync(x => {
@@ -1035,7 +1020,7 @@ namespace CodeGenerator.BLL
                                                 )
                                               } &&  x.Eid == _global.Eid && x.Active);",
                         "            else",
-                        $"                {entityLower}s = await _generalService.GetData<{prefix}{entityUpper}, View{prefix}{entityUpper}>(foreignKey, foreignValue, cmmKeyword);",
+                        $"                {entityLower}s = await _generalService.GetData<{prefix}{entityUpper}, View{prefix}{entityUpper}>((int)idForeignKey!, foreignValue, cmmKeyword);",
                         $"",
                         $"           return {entityLower}s.ToList();",
                         "        }",
@@ -1043,11 +1028,11 @@ namespace CodeGenerator.BLL
                     ]);
 
                     content.AddRange([
-                        $"        public async Task<List<View{prefix}{entityUpperBase}BaseObject>> GetAllBase(string? cmmKeyword, string? foreignKey = null, int foreignValue = 0)",
+                        $"        public async Task<List<View{prefix}{entityUpperBase}BaseObject>> GetAllBase(string? cmmKeyword, int? idForeignKey = null, int foreignValue = 0)",
                         "        {",
                         $"            IEnumerable<View{prefix}{entityUpperBase}BaseObject> {entityLower}s;",
                         $"",
-                        $"            if (string.IsNullOrWhiteSpace(foreignKey))",
+                        $"            if ((idForeignKey ?? 0) == 0)",
                         $"                {entityLower}s = string.IsNullOrWhiteSpace(cmmKeyword) ?",
                         $"                    await GetViewBaseFilteredAsync(x => x.Eid == _global.Eid && x.Active) :",
                         $"                    await GetViewBaseFilteredAsync(x => {
@@ -1057,7 +1042,7 @@ namespace CodeGenerator.BLL
                                                 )
                                               } &&  x.Eid == _global.Eid && x.Active);",
                         "            else",
-                        $"                {entityLower}s = await _generalService.GetData<{prefix}{entityUpper}, View{prefix}{entityUpperBase}Base>(foreignKey, foreignValue, cmmKeyword);",
+                        $"                {entityLower}s = await _generalService.GetData<{prefix}{entityUpper}, View{prefix}{entityUpperBase}Base>((int)idForeignKey!, foreignValue, cmmKeyword);",
                         $"",
                         $"           return {entityLower}s.ToList();",
                         "        }",
@@ -1068,14 +1053,14 @@ namespace CodeGenerator.BLL
             else
             {
                 content.AddRange([
-                    $"        public async Task<List<{prefix}{entityUpper}Object>> GetAll(string? foreignKey = null, int foreignValue = 0)",
+                    $"        public async Task<List<{prefix}{entityUpper}Object>> GetAll(int? idForeignKey = null, int foreignValue = 0)",
                     "        {",
                     $"            IEnumerable<{prefix}{entityUpper}Object> {entityLower}s;",
                     $"",
-                    $"            if (string.IsNullOrWhiteSpace(foreignKey))",
+                    $"            if ((idForeignKey ?? 0) == 0)",
                     $"                {entityLower}s = await {(isStandardTable ? "GetFilteredAsync(x => x.Eid == _global.Eid && x.Active)" : "GetAll()")};",
                     "            else",
-                    $"                {entityLower}s = await _generalService.GetData<{prefix}{entityUpper}, {prefix}{entityUpper}>(foreignKey, foreignValue);",
+                    $"                {entityLower}s = await _generalService.GetData<{prefix}{entityUpper}, {prefix}{entityUpper}>((int)idForeignKey!, foreignValue);",
                     $"",
                     $"           return {entityLower}s.ToList();",
                     "        }",
@@ -1085,14 +1070,14 @@ namespace CodeGenerator.BLL
                 if (hasView)
                 {
                     content.AddRange([
-                        $"        public async Task<List<View{prefix}{entityUpper}Object>> GetAllFull(string? foreignKey = null, int foreignValue = 0)",
+                        $"        public async Task<List<View{prefix}{entityUpper}Object>> GetAllFull(int? idForeignKey = null, int foreignValue = 0)",
                         "        {",
                         $"            IEnumerable<View{prefix}{entityUpper}Object> {entityLower}s;",
                         $"",
-                        $"            if (string.IsNullOrWhiteSpace(foreignKey))",
+                        $"            if ((idForeignKey ?? 0) == 0)",
                         $"                {entityLower}s = await GetViewFilteredAsync(x => x.Eid == _global.Eid && x.Active);",
                         "            else",
-                        $"                {entityLower}s = await _generalService.GetData<{prefix}{entityUpper}, View{prefix}{entityUpper}>(foreignKey, foreignValue);",
+                        $"                {entityLower}s = await _generalService.GetData<{prefix}{entityUpper}, View{prefix}{entityUpper}>((int)idForeignKey!, foreignValue);",
                         $"",
                         $"           return {entityLower}s.ToList();",
                         "        }",
@@ -1100,14 +1085,14 @@ namespace CodeGenerator.BLL
                     ]);
 
                     content.AddRange([
-                        $"        public async Task<List<View{prefix}{entityUpperBase}BaseObject>> GetAllBase(string? foreignKey = null, int foreignValue = 0)",
+                        $"        public async Task<List<View{prefix}{entityUpperBase}BaseObject>> GetAllBase(int? idForeignKey = null, int foreignValue = 0)",
                         "        {",
                         $"            IEnumerable<View{prefix}{entityUpperBase}BaseObject> {entityLower}s;",
                         $"",
-                        $"            if (string.IsNullOrWhiteSpace(foreignKey))",
+                        $"            if ((idForeignKey ?? 0) == 0)",
                         "                 {entityLower}s = await GetViewBaseFilteredAsync(x => x.Eid == _global.Eid && x.Active);",
                         "            else",
-                        $"                 {entityLower}s = await _generalService.GetData<{prefix}{entityUpper}, View{prefix}{entityUpperBase}Base>(foreignKey, foreignValue);",
+                        $"                 {entityLower}s = await _generalService.GetData<{prefix}{entityUpper}, View{prefix}{entityUpperBase}Base>((int)idForeignKey!, foreignValue);",
                         $"",
                         $"            return {entityLower}s.ToList();",
                         "        }",
@@ -1312,6 +1297,55 @@ namespace CodeGenerator.BLL
 
         private void GenerateFile(string directory, string file, List<string> content)
             => Utilities.GenerateFile(_destinyPath, directory, file, content);
+
+        private List<string> GetNamespacesController(string entityUpper)
+        {
+            List<string> content;
+            List<string> defaultNamespaces;
+
+            defaultNamespaces = [
+                $"using Microsoft.AspNetCore.Mvc;",
+                $"using SAMMAI.DataBase.Services.Implementations;",
+                $"using SAMMAI.DataBase.Utility.ActionFilters;",
+                $"using SAMMAI.Transverse.Constants;",
+                $"using SAMMAI.Transverse.Helpers;",
+                $"using SAMMAI.Transverse.Models.Response.BaseApi;",
+                $"using static SAMMAI.DataBase.Utility.Constants.ApiRoutesConstants;",
+                $"using static SAMMAI.Transverse.Constants.ApiRoutes.DataBaseAPI;",
+            ];
+
+            content = Utilities.GetNamespaces(_controllerModel.FirstOrDefault(x => x.Name == $"{entityUpper}Controller"));
+
+            if (content.Count == 0)
+                content = defaultNamespaces;
+
+            return content;
+        }
+
+        private List<string> GetNamespacesService(string entityUpper)
+        {
+            List<string> content;
+            List<string> defaultNamespaces;
+
+            defaultNamespaces = [
+                $"using AutoMapper;",
+                $"using Microsoft.Data.SqlClient;",
+                $"using SAMMAI.DataBase.Repository.Context;",
+                $"using SAMMAI.DataBase.Repository.Entities;",
+                $"using SAMMAI.DataBase.Repository.Manager;",
+                $"using SAMMAI.DataBase.Repository.StorePrecedure.Entities;",
+                $"using SAMMAI.Transverse.Helpers;",
+                $"using static SAMMAI.Transverse.Constants.GeneralConstants;",
+                $"using System.Data;",
+            ];
+
+            content = Utilities.GetNamespaces(_serviceModel.FirstOrDefault(x => x.Name == $"{entityUpper}Service"));
+
+            if (content.Count == 0)
+                content = defaultNamespaces;
+
+            return content;
+        }
         #endregion
     }
 }

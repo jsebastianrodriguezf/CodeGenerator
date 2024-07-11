@@ -361,16 +361,9 @@ namespace CodeGenerator.BLL
             if (_filesModel.Any(x => x.Name == $"View{prefix}{entityUpper}sBaseObject"))
                 entityUpperBase += "s";
 
-            content = [
-                $"using Microsoft.AspNetCore.Mvc;",
-                $"using SAMMAI.Core.Services.DAL.Interfaces;",
-                $"using SAMMAI.Core.Utility.ActionFilters;",
-                $"using SAMMAI.Transverse.Constants;",
-                $"using SAMMAI.Transverse.Helpers;",
-                $"using SAMMAI.Transverse.Models.DTOs;",
-                $"using SAMMAI.Transverse.Models.Endpoints.Core.{entityUpper};",
-                $"using SAMMAI.Transverse.Models.Response.BaseApi;",
-                $"using static SAMMAI.Core.Utility.Constants.ApiRoutesConstants;",
+            content = GetNamespacesController(entityUpper);
+
+            content.AddRange([
                 $"",
                 $"namespace SAMMAI.Core.Controllers",
                 "{",
@@ -419,7 +412,7 @@ namespace CodeGenerator.BLL
                 $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                 "        }",
                 $""
-            ];
+            ]);
 
             if (hasView)
             {
@@ -992,9 +985,9 @@ namespace CodeGenerator.BLL
             if (_filesModel.Any(x => x.Name == $"View{prefix}{entityUpper}sBaseObject"))
                 entityUpperBase += "s";
 
-            content = [
-                $"using SAMMAI.Transverse.Models.DTOs;",
-                $"using SAMMAI.Transverse.Models.Endpoints.Core.{entityUpper};",
+            content = GetNamespacesIService(entityUpper);
+
+            content.AddRange([
                 $"",
                 $"namespace SAMMAI.Core.Services.DAL.Interfaces",
                 "{",
@@ -1002,7 +995,7 @@ namespace CodeGenerator.BLL
                 "    {",
                 $"        #region Base IServices",
                 $"        Task<{prefix}{entityUpper}DTO?> GetById(int id, bool nullable = false);"
-            ];
+            ]);
 
             if (hasView)
             {
@@ -1110,16 +1103,9 @@ namespace CodeGenerator.BLL
             if (_filesModel.Any(x => x.Name == $"View{prefix}{entityUpper}sBaseObject"))
                 entityUpperBase += "s";
 
+            content = GetNamespacesService(entityUpper);
+
             content.AddRange([
-                $"using AutoMapper;",
-                $"using Microsoft.Extensions.Options;",
-                $"using SAMMAI.Core.Repository;",
-                $"using SAMMAI.Core.Services.DAL.Interfaces;",
-                $"using SAMMAI.Core.Utility.Constants;",
-                $"using SAMMAI.Core.Utility.SettingsFiles;",
-                $"using SAMMAI.Transverse.Models.DTOs;",
-                $"using SAMMAI.Transverse.Models.Endpoints.Core.{entityUpper};",
-                $"using static SAMMAI.Transverse.Constants.ApiRoutes.DataBaseAPI;",
                 $"",
                 $"namespace SAMMAI.Core.Services.DAL.Implementations",
                 "{",
@@ -1460,6 +1446,74 @@ namespace CodeGenerator.BLL
 
         private void GenerateFile(string directory, string file, List<string> content)
             => Utilities.GenerateFile(_destinyPath, directory, file, content);
+
+        private List<string> GetNamespacesController(string entityUpper)
+        {
+            List<string> content;
+            List<string> defaultNamespaces;
+
+            defaultNamespaces = [
+                $"using Microsoft.AspNetCore.Mvc;",
+                $"using SAMMAI.Core.Services.DAL.Interfaces;",
+                $"using SAMMAI.Core.Utility.ActionFilters;",
+                $"using SAMMAI.Transverse.Constants;",
+                $"using SAMMAI.Transverse.Helpers;",
+                $"using SAMMAI.Transverse.Models.DTOs;",
+                $"using SAMMAI.Transverse.Models.Endpoints.Core.{entityUpper};",
+                $"using SAMMAI.Transverse.Models.Response.BaseApi;",
+                $"using static SAMMAI.Core.Utility.Constants.ApiRoutesConstants;",
+            ];
+
+            content = Utilities.GetNamespaces(_controllerModel.FirstOrDefault(x => x.Name == $"{entityUpper}Controller"));
+
+            if (content.Count == 0)
+                content = defaultNamespaces;
+
+            return content;
+        }
+
+        private List<string> GetNamespacesIService(string entityUpper)
+        {
+            List<string> content;
+            List<string> defaultNamespaces;
+
+            defaultNamespaces = [
+                $"using SAMMAI.Transverse.Models.DTOs;",
+                $"using SAMMAI.Transverse.Models.Endpoints.Core.{entityUpper};",
+            ];
+
+            content = Utilities.GetNamespaces(_iServiceModel.FirstOrDefault(x => x.Name == $"I{entityUpper}Service"));
+
+            if (content.Count == 0)
+                content = defaultNamespaces;
+
+            return content;
+        }
+
+        private List<string> GetNamespacesService(string entityUpper)
+        {
+            List<string> content;
+            List<string> defaultNamespaces;
+
+            defaultNamespaces = [
+                $"using AutoMapper;",
+                $"using Microsoft.Extensions.Options;",
+                $"using SAMMAI.Core.Repository;",
+                $"using SAMMAI.Core.Services.DAL.Interfaces;",
+                $"using SAMMAI.Core.Utility.Constants;",
+                $"using SAMMAI.Core.Utility.SettingsFiles;",
+                $"using SAMMAI.Transverse.Models.DTOs;",
+                $"using SAMMAI.Transverse.Models.Endpoints.Core.{entityUpper};",
+                $"using static SAMMAI.Transverse.Constants.ApiRoutes.DataBaseAPI;",
+            ];
+
+            content = Utilities.GetNamespaces(_serviceModel.FirstOrDefault(x => x.Name == $"{entityUpper}Service"));
+
+            if (content.Count == 0)
+                content = defaultNamespaces;
+
+            return content;
+        }
         #endregion
     }
 }

@@ -137,6 +137,30 @@ namespace CodeGenerator.Helper
             return customLines.Count > 0 ? customLines : [""];
         }
 
+        public static List<string> GetNamespaces(FileModel? fileModel)
+        {
+            List<string> template;
+            List<string> customLines;
+            const string namespaceKey = "namespace";
+
+            if (fileModel is null) return [];
+
+            template = [.. File.ReadAllLines(fileModel.Path)];
+            customLines = [];
+
+            for (int i = 0; i < template.Count; i++)
+            {
+                string line = template[i];
+
+                if (template[i + 1].StartsWith(namespaceKey))
+                    i = template.Count;
+                else
+                    customLines.Add(line);
+            }
+
+            return customLines;
+        }
+
         public static T MapJsonFile<T>(string path)
         {
             string jsonString;
