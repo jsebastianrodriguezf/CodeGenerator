@@ -144,16 +144,11 @@ namespace CodeGenerator.BLL
                 $"    [ApiController]",
                 $"    public class {entityUpper}Controller : ControllerBase",
                 "    {",
-                $"        private readonly ILogger<{entityUpper}Controller> _logger;",
-                $"        private readonly {entityUpper}Service _{entityLower}Service;",
-                $"",
-                $"        public {entityUpper}Controller(",
-                $"            ILogger<{entityUpper}Controller> logger,",
-                $"            {entityUpper}Service {entityLower}Service)",
-                "        {",
-                $"            _logger = logger ?? throw new ArgumentNullException(nameof(logger));",
-                $"            _{entityLower}Service = {entityLower}Service ?? throw new ArgumentNullException(nameof({entityLower}Service));",
-                "        }",
+            ]);
+
+            content.AddRange(GetConstructorController(entityUpper, entityLower));
+
+            content.AddRange([
                 $"",
                 $"        #region Base Endpoints",
                 $"        /// <summary>",
@@ -831,26 +826,11 @@ namespace CodeGenerator.BLL
                 "{",
                 $"    public class {entityUpper}Service : BaseRepository<{prefix}{entityUpper}, {viewGenerics}, SAMMAIContext>",
                 "    {",
-                $"        private readonly ILogger<{entityUpper}Service> _logger;",
-                $"        private readonly SAMMAIContext _context;",
-                $"        private readonly Global _global;",
-                $"        private readonly IMapper _mapper;",
-                $"        private readonly GeneralService _generalService;",
-                $"",
-                $"        public {entityUpper}Service(",
-                $"            ILogger<{entityUpper}Service> logger,",
-                $"            SAMMAIContext context,",
-                $"            Global global,",
-                $"            IMapper mapper,",
-                $"            GeneralService generalService)",
-                $"            : base(context, global)",
-                "        {",
-                $"            _logger = logger ?? throw new ArgumentNullException(nameof(logger));",
-                $"            _context = context ?? throw new ArgumentNullException(nameof(context));",
-                $"            _global = global ?? throw new ArgumentNullException(nameof(global));",
-                $"            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));",
-                $"            _generalService = generalService ?? throw new ArgumentNullException(nameof(generalService));",
-                "        }",
+            ]);
+
+            content.AddRange(GetConstructorService(entityUpper, entityLower));
+
+            content.AddRange([
                 $"",
                 $"        #region Base Services",
                 $"        public async Task<{prefix}{entityUpper}Object> GetById(int id)",
@@ -994,11 +974,11 @@ namespace CodeGenerator.BLL
                                                $"(x.Cmm == null ? x.{entityUpper}.Contains(cmmKeyword) : x.Cmm.Contains(cmmKeyword))" :
                                                $"x.Cmm != null && x.Cmm.Contains(cmmKeyword)"
                                            )
-                                         } &&  x.Eid == _global.Eid && x.Active);",
+                                         } && x.Eid == _global.Eid && x.Active);",
                     "            else",
                     $"                {entityLower}s = await _generalService.GetData<{prefix}{entityUpper}, {prefix}{entityUpper}>((int)idForeignKey!, foreignValue, cmmKeyword);",
                     $"",
-                    $"           return {entityLower}s.ToList();",
+                    $"            return {entityLower}s.ToList();",
                     "        }",
                     $""
                 ]);
@@ -1018,11 +998,11 @@ namespace CodeGenerator.BLL
                                                     $"(x.Cmm == null ? x.{entityUpper}.Contains(cmmKeyword) : x.Cmm.Contains(cmmKeyword))" :
                                                     $"x.Cmm != null && x.Cmm.Contains(cmmKeyword)"
                                                 )
-                                              } &&  x.Eid == _global.Eid && x.Active);",
+                                              } && x.Eid == _global.Eid && x.Active);",
                         "            else",
                         $"                {entityLower}s = await _generalService.GetData<{prefix}{entityUpper}, View{prefix}{entityUpper}>((int)idForeignKey!, foreignValue, cmmKeyword);",
                         $"",
-                        $"           return {entityLower}s.ToList();",
+                        $"            return {entityLower}s.ToList();",
                         "        }",
                         $""
                     ]);
@@ -1040,11 +1020,11 @@ namespace CodeGenerator.BLL
                                                     $"(x.Cmm == null ? x.{entityUpper}.Contains(cmmKeyword) : x.Cmm.Contains(cmmKeyword))" :
                                                     $"x.Cmm != null && x.Cmm.Contains(cmmKeyword)"
                                                 )
-                                              } &&  x.Eid == _global.Eid && x.Active);",
+                                              } && x.Eid == _global.Eid && x.Active);",
                         "            else",
                         $"                {entityLower}s = await _generalService.GetData<{prefix}{entityUpper}, View{prefix}{entityUpperBase}Base>((int)idForeignKey!, foreignValue, cmmKeyword);",
                         $"",
-                        $"           return {entityLower}s.ToList();",
+                        $"            return {entityLower}s.ToList();",
                         "        }",
                         $""
                     ]);
@@ -1062,7 +1042,7 @@ namespace CodeGenerator.BLL
                     "            else",
                     $"                {entityLower}s = await _generalService.GetData<{prefix}{entityUpper}, {prefix}{entityUpper}>((int)idForeignKey!, foreignValue);",
                     $"",
-                    $"           return {entityLower}s.ToList();",
+                    $"            return {entityLower}s.ToList();",
                     "        }",
                     $""
                 ]);
@@ -1079,7 +1059,7 @@ namespace CodeGenerator.BLL
                         "            else",
                         $"                {entityLower}s = await _generalService.GetData<{prefix}{entityUpper}, View{prefix}{entityUpper}>((int)idForeignKey!, foreignValue);",
                         $"",
-                        $"           return {entityLower}s.ToList();",
+                        $"            return {entityLower}s.ToList();",
                         "        }",
                         $""
                     ]);
@@ -1314,10 +1294,7 @@ namespace CodeGenerator.BLL
                 $"using static SAMMAI.Transverse.Constants.ApiRoutes.DataBaseAPI;",
             ];
 
-            content = Utilities.GetNamespaces(_controllerModel.FirstOrDefault(x => x.Name == $"{entityUpper}Controller"));
-
-            if (content.Count == 0)
-                content = defaultNamespaces;
+            content = Utilities.GetNamespaces(_controllerModel.FirstOrDefault(x => x.Name == $"{entityUpper}Controller"), defaultNamespaces);
 
             return content;
         }
@@ -1329,20 +1306,86 @@ namespace CodeGenerator.BLL
 
             defaultNamespaces = [
                 $"using AutoMapper;",
-                $"using Microsoft.Data.SqlClient;",
                 $"using SAMMAI.DataBase.Repository.Context;",
                 $"using SAMMAI.DataBase.Repository.Entities;",
                 $"using SAMMAI.DataBase.Repository.Manager;",
-                $"using SAMMAI.DataBase.Repository.StorePrecedure.Entities;",
-                $"using SAMMAI.Transverse.Helpers;",
-                $"using static SAMMAI.Transverse.Constants.GeneralConstants;",
                 $"using System.Data;",
             ];
 
-            content = Utilities.GetNamespaces(_serviceModel.FirstOrDefault(x => x.Name == $"{entityUpper}Service"));
+            content = Utilities.GetNamespaces(_serviceModel.FirstOrDefault(x => x.Name == $"{entityUpper}Service"), defaultNamespaces);
 
-            if (content.Count == 0)
-                content = defaultNamespaces;
+            return content;
+        }
+
+        private List<string> GetConstructorController(string entityUpper, string entityLower)
+        {
+            List<string> content;
+            List<string> defaultProperties;
+            List<string> defaultParameters;
+            List<string> defaultContent;
+
+            string constructorMethod = $"        public {entityUpper}Controller(";
+
+            defaultProperties = [
+                $"        private readonly ILogger<{entityUpper}Controller> _logger;",
+                $"        private readonly {entityUpper}Service _{entityLower}Service;",
+            ];
+
+            defaultParameters = [
+                $"            ILogger<{entityUpper}Controller> logger,",
+                $"            {entityUpper}Service {entityLower}Service,",
+            ];
+
+            defaultContent = [
+                $"            _logger = logger ?? throw new ArgumentNullException(nameof(logger));",
+                $"            _{entityLower}Service = {entityLower}Service ?? throw new ArgumentNullException(nameof({entityLower}Service));",
+            ];
+
+            content = Utilities.GetConstructor(
+                _controllerModel.FirstOrDefault(x => x.Name == $"{entityUpper}Controller"),
+                constructorMethod, defaultProperties, defaultParameters, defaultContent);
+
+
+            return content;
+        }
+
+        private List<string> GetConstructorService(string entityUpper, string entityLower)
+        {
+            List<string> content;
+            List<string> defaultProperties;
+            List<string> defaultParameters;
+            List<string> defaultContent;
+
+            string constructorMethod = $"        public {entityUpper}Service(";
+
+            defaultProperties = [
+                $"        private readonly ILogger<{entityUpper}Service> _logger;",
+                $"        private readonly SAMMAIContext _context;",
+                $"        private readonly Global _global;",
+                $"        private readonly IMapper _mapper;",
+                $"        private readonly GeneralService _generalService;",
+            ];
+
+            defaultParameters = [
+                $"            ILogger<{entityUpper}Service> logger,",
+                $"            SAMMAIContext context,",
+                $"            Global global,",
+                $"            IMapper mapper,",
+                $"            GeneralService generalService)",
+                $"            : base(context, global)",
+            ];
+
+            defaultContent = [
+                $"            _logger = logger ?? throw new ArgumentNullException(nameof(logger));",
+                $"            _context = context ?? throw new ArgumentNullException(nameof(context));",
+                $"            _global = global ?? throw new ArgumentNullException(nameof(global));",
+                $"            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));",
+                $"            _generalService = generalService ?? throw new ArgumentNullException(nameof(generalService));",
+            ];
+
+            content = Utilities.GetConstructor(
+                _serviceModel.FirstOrDefault(x => x.Name == $"{entityUpper}Service"),
+                constructorMethod, defaultProperties, defaultParameters, defaultContent);
 
             return content;
         }

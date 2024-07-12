@@ -137,7 +137,29 @@ namespace CodeGenerator.Helper
             return customLines.Count > 0 ? customLines : [""];
         }
 
-        public static List<string> GetNamespaces(FileModel? fileModel)
+        public static List<string> GetNamespaces(FileModel? fileModel, List<string> defaultNamespaces)
+        {
+            List<string> content;
+
+            content = GetNamespaces(fileModel);
+
+            if (content.Count == 0)
+                content = defaultNamespaces;
+            else
+            {
+                for (int i = 0; i < defaultNamespaces.Count; i++)
+                {
+                    if (!content.Any(x => x.Equals(defaultNamespaces[i])))
+                    {
+                        content.Insert(i, defaultNamespaces[i]);
+                    }
+                }
+            }
+
+            return content;
+        }
+
+        private static List<string> GetNamespaces(FileModel? fileModel)
         {
             List<string> template;
             List<string> customLines;
@@ -156,6 +178,85 @@ namespace CodeGenerator.Helper
                     i = template.Count;
                 else
                     customLines.Add(line);
+            }
+
+            return customLines;
+        }
+
+        public static List<string> GetConstructor(FileModel? fileModel, string constructorMethod, List<string> defaultProperties, List<string> defaultParameters, List<string> defaultContent)
+        {
+            List<string> content;
+            List<string> defaultContructor;
+            string openBrackets = "        {";
+            string closeBrackets = "        }";
+            int lastBracket;
+
+            defaultContructor = [];
+            defaultContructor.AddRange(defaultProperties);
+            defaultContructor.Add("");
+            defaultContructor.Add(constructorMethod);
+            defaultContructor.AddRange(defaultParameters);
+
+            lastBracket = (defaultContructor[^1].Contains(':')) ? 2 : 1;
+
+            defaultContructor[^lastBracket] = defaultContructor[^lastBracket].Replace(',', ')');
+            defaultContructor.Add(openBrackets);
+            defaultContructor.AddRange(defaultContent);
+            defaultContructor.Add(closeBrackets);
+
+            content = GetConstructor(fileModel);
+
+            if (content.Count == 0)
+                content = defaultContructor;
+            else
+            {
+                for (int i = 0; i < defaultProperties.Count; i++)
+                {
+                    if (!content.Any(x => x.Equals(defaultProperties[i])))
+                    {
+                        content.Insert(i, defaultProperties[i]);
+
+                        int index = content.IndexOf(constructorMethod);
+                        content.Insert(i + 1 + index, defaultParameters[i]);
+
+                        index = content.IndexOf(openBrackets);
+                        content.Insert(i + 1 + index, defaultContent[i]);
+                    }
+                }
+            }
+
+            return content;
+        }
+
+        private static List<string> GetConstructor(FileModel? fileModel)
+        {
+            List<string> template;
+            List<string> customLines;
+            string startKey = "    public class";
+            const string endKey = "        #region Base";
+
+            if (fileModel is null) return [];
+
+            template = [.. File.ReadAllLines(fileModel.Path)];
+            customLines = [];
+
+            for (int i = 0; i < template.Count; i++)
+            {
+                string line = template[i];
+                if (line.Contains(startKey))
+                {
+                    for (i = i + 2; i < template.Count; i++)
+                    {
+                        line = template[i];
+                        if (line.Contains(endKey))
+                        {
+                            customLines.RemoveAt(customLines.Count - 1);
+                            i = template.Count;
+                        }
+                        else
+                            customLines.Add(line);
+                    }
+                }
             }
 
             return customLines;
