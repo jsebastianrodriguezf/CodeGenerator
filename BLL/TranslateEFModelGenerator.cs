@@ -37,9 +37,9 @@ namespace CodeGenerator.BLL
 
                 return "Files was generated successfully";
             }
-            catch (Exception ex)
+            catch
             {
-                return ex.Message;
+                throw;
             }
         }
 

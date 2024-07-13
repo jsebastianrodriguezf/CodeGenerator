@@ -35,9 +35,9 @@ namespace CodeGenerator.BLL
 
                 return "Files was generated successfully";
             }
-            catch (Exception ex)
+            catch
             {
-                return ex.Message;
+                throw;
             }
         }
 
@@ -203,6 +203,7 @@ namespace CodeGenerator.BLL
                 contentObject.Add("}");
 
                 GenerateFile("Objects", $"{classObjectName}Object.cs", contentObject);
+                GenerateDTO($"{classObjectName}Object", contentObject);
 
                 contentEntity = [
                     "namespace SAMMAI.DataBase.Repository.Entities;",
@@ -272,6 +273,40 @@ namespace CodeGenerator.BLL
             }
 
             return content;
+        }
+        #endregion
+
+        #region GenerateDTOs
+        public void GenerateDTO(string className, List<string> template)
+        {
+            List<string> content;
+            string newClassName;
+
+            newClassName = $"{className[..^"Object".Length]}DTO";
+
+            content = [
+                $"namespace SAMMAI.Transverse.Models.DTOs",
+                "{",
+                $"    public class {newClassName}",
+                "    {"
+            ];
+
+            for (int i = 0; i < template.Count; i++)
+            {
+                string line = template[i];
+
+                if (Utilities.IsNotBlackList(line))
+                    content.Add("    " + line);
+                else
+                    continue;
+            }
+
+            content.AddRange([
+                "    }",
+                "}"
+            ]);
+
+            GenerateFile("DTOs", $"{newClassName}.cs", content);
         }
         #endregion
 

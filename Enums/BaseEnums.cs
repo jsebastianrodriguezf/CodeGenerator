@@ -4,16 +4,18 @@
     {
         public enum InputEnum
         {
-            DatabaseGenerator,
-            TranslateEFModelGenerator,
-            I18NDictionaryGenerator,
-            ControllerDataBaseGenerator,
-            SingleControllerDataBaseGenerator,
-            FolderTableGenerator,
-            SPsTableGenerator,
             BaseSPsTableGenerator,
+            MapDataBase,
+
+            SPsTableGenerator,
+            I18NDictionaryGenerator,
+            TranslateEFModelGenerator,
+            DatabaseGenerator,
+            SingleControllerDataBaseGenerator,
+            ControllerDataBaseGenerator,
             SingleControllerCoreDALGenerator,
             ControllerCoreDALGenerator,
+            FolderTableGenerator,
             AlterTableGenerator
         }
     }

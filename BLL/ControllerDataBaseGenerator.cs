@@ -43,7 +43,8 @@ namespace CodeGenerator.BLL
                 x.Name.Substring(0, 2) != x.Name.Substring(0, 2).ToUpper() &&
                 !(x.Name == "IdaeObject" || x.Name == "ErrorsObject"))).ToList();
             List<string> contentDI = [];
-            List<string> contentMappers = [];
+            List<string> contentEntityMappers = [];
+            List<string> contentDTOMappers = [];
             List<string> constants = [];
 
             foreach (FileModel file in files)
@@ -53,12 +54,14 @@ namespace CodeGenerator.BLL
                     responses.Add(response);
 
                 contentDI.Add(GenerateDI(file.Name));
-                contentMappers.AddRange(GenerateMapByEntity(file.Name));
+                contentEntityMappers.AddRange(GenerateMapByEntity(file.Name));
+                contentDTOMappers.AddRange(GenerateMapDTOByEntity(file.Name));
                 constants.Add(GenerateConstants(file.Name));
             }
 
             GenerateFile("Dependencies", "Dependency.cs", contentDI);
-            GenerateFile("Profiles", "GeneralEntityProfile.cs", contentMappers);
+            GenerateFile("Profiles", "GeneralEntityProfile.cs", contentEntityMappers);
+            GenerateFile("Profiles", "GeneralDTOObjectProfile.cs", contentDTOMappers);
             GenerateFile("Constants", "EntityConstants.cs", constants);
 
             return responses;
@@ -115,9 +118,9 @@ namespace CodeGenerator.BLL
 
                 return string.Empty;
             }
-            catch (Exception ex)
+            catch
             {
-                return ex.Message + "|" + ex.StackTrace;
+                throw;
             }
         }
 
@@ -1227,6 +1230,35 @@ namespace CodeGenerator.BLL
                 $"CreateMap<{entity[..^"Object".Length]}, {entity}>();",
                 ""
             ];
+
+            return content;
+        }
+
+        private List<string> GenerateMapDTOByEntity(string entity)
+        {
+            List<string> content;
+
+            content = [
+                $"CreateMap<{entity}, {entity[..^"Object".Length]}DTO>();",
+                $"CreateMap<{entity[..^"Object".Length]}DTO, {entity}>();",
+                "",
+            ];
+
+            if (_filesModel.Any(x => x.Name == $"View{entity}"))
+                content.AddRange([
+                    $"CreateMap<View{entity}, View{entity[..^"Object".Length]}DTO>();",
+                    $"CreateMap<View{entity[..^"Object".Length]}DTO, View{entity}>();",
+                    "",
+                ]);
+
+            if (_filesModel.Any(x => x.Name == $"View{entity[..^"Object".Length]}BaseObject"))
+                content.AddRange([
+                    $"CreateMap<View{entity[..^"Object".Length]}BaseObject, View{entity[..^"Object".Length]}BaseDTO>();",
+                    $"CreateMap<View{entity[..^"Object".Length]}BaseDTO, View{entity[..^"Object".Length]}BaseObject>();",
+                    "",
+                ]);
+
+            content.Add("");
 
             return content;
         }

@@ -282,7 +282,6 @@ namespace CodeGenerator.BLL
 
             List<FileModel> files = _filesModel.Where(x => x.Name.Substring(3, 1) == x.Name.Substring(3, 1).ToUpper()).ToList();
             List<string> contentDI = [];
-            List<string> contentMappers = [];
             List<string> constants = [];
 
             foreach (FileModel file in files)
@@ -295,13 +294,9 @@ namespace CodeGenerator.BLL
                     responses.Add(response);
 
                 contentDI.Add(GenerateDI(file.Name));
-                contentMappers.AddRange(GenerateMapByEntity(file.Name));
-                constants.Add(GenerateConstants(file.Name));
             }
 
             GenerateFile("Dependencies", "Dependency.cs", contentDI);
-            GenerateFile("Profiles", "GeneralEntityProfile.cs", contentMappers);
-            GenerateFile("Constants", "EntityConstants.cs", constants);
 
             return responses;
         }
@@ -341,13 +336,12 @@ namespace CodeGenerator.BLL
                 GenerateController(prefix, entityUpper, entityLower, withCodigo, hasView, hasCmm);
                 GenerateIService(prefix, entityUpper, withCodigo, hasView, hasCmm);
                 GenerateService(prefix, entityUpper, entityLower, withCodigo, hasView, hasCmm);
-                GenerateDTO(file);
 
                 return string.Empty;
             }
-            catch (Exception ex)
+            catch
             {
-                return ex.Message + "|" + ex.StackTrace;
+                throw;
             }
         }
 
@@ -1311,106 +1305,10 @@ namespace CodeGenerator.BLL
             GenerateFile("Services", $"{entityUpper}Service.cs", content);
         }
 
-        public void GenerateDTO(FileModel file)
-        {
-            List<string> template;
-            List<string> content;
-            List<FileModel> thisFileModel;
-            List<string> files = [file.Path];
-
-            List<string> pathList = [.. file.Path.Split("\\")];
-            string pathFolder = string.Join("\\", pathList.GetRange(0, pathList.Count - 1));
-
-            if (File.Exists(Path.Combine(pathFolder, $"View{file.Name}.{file.Extension}")))
-                files.Add(Path.Combine(pathFolder, $"View{file.Name}.{file.Extension}"));
-
-            if (File.Exists(Path.Combine(pathFolder, $"View{file.Name}.{file.Extension}").Replace($"Object.{file.Extension}", $"BaseObject.{file.Extension}")))
-                files.Add(Path.Combine(pathFolder, $"View{file.Name}.{file.Extension}").Replace($"Object.{file.Extension}", $"BaseObject.{file.Extension}"));
-
-            thisFileModel = Utilities.GetFilesModel(files);
-
-            foreach (FileModel fileModel in thisFileModel)
-            {
-                template = [.. File.ReadAllLines(fileModel.Path)];
-
-                content = [
-                    $"namespace SAMMAI.Transverse.Models.DTOs",
-                    "{",
-                    $"    public class {fileModel.Name[..^"Object".Length]}DTO",
-                    "    {"
-                ];
-
-                for (int i = 0; i < template.Count; i++)
-                {
-                    string line = template[i];
-
-                    if (IsNotBlackList(line))
-                        content.Add("    " + line);
-                    else
-                        continue;
-                }
-
-                content.AddRange([
-                    "    }",
-                    "}"
-                ]);
-
-                GenerateFile("DTOs", $"{fileModel.Name[..^"Object".Length]}DTO.cs", content);
-            }
-        }
-
-        private bool IsNotBlackList(string line)
-        {
-            return line.Contains("public ") && line.Contains(" { get; set; }") &&
-                        !line.Contains(" Uid { get; set; }") &&
-                        !line.Contains(" Eid { get; set; }") &&
-                        !line.Contains(" IdUsuarioModifico { get; set; }") &&
-                        !line.Contains(" IdUsuarioCreo { get; set; }") &&
-                        !line.Contains(" FechaModificacion { get; set; }") &&
-                        !line.Contains(" FechaCreacion { get; set; }") &&
-                        !line.Contains(" Active { get; set; }") &&
-                        !line.Contains(" public byte[]") &&
-                        !line.Contains(" public string? Clave { get; set; }") &&
-                        !line.Contains(" Multiempresa { get; set; }") &&
-                        !line.Contains(" IdUserModifier { get; set; }") &&
-                        !line.Contains(" IdUserCreator { get; set; }") &&
-                        !line.Contains(" DateModification { get; set; }") &&
-                        !line.Contains(" DateCreation { get; set; }") &&
-                        !line.Contains(" public byte[]") &&
-                        !line.Contains(" public string? Password { get; set; }") &&
-                        !line.Contains(" Multicompany { get; set; }");
-        }
-
         public string GenerateDI(string entity)
         {
             string service = $"{entity.AsSpan(3).ToString()[..^"Object".Length]}Service";
             return $"services.AddScoped<Services.DAL.Interfaces.I{service}, Services.DAL.Implementations.{service}> ();";
-        }
-
-        public string GenerateConstants(string entity)
-        {
-            string constant = entity.AsSpan(3).ToString()[..^"Object".Length];
-            return $"public const string {constant} = \"{Utilities.ToKebabCase(constant)}\";";
-        }
-
-        public List<string> GenerateMapByEntity(string entity)
-        {
-            List<string> content;
-
-            content = [
-                $"CreateMap<{entity}, {entity[..^"Object".Length]}DTO>();",
-                $"CreateMap<{entity[..^"Object".Length]}DTO, {entity}>();",
-                "",
-                $"CreateMap<View{entity}, View{entity[..^"Object".Length]}DTO>();",
-                $"CreateMap<View{entity[..^"Object".Length]}DTO, View{entity}>();",
-                "",
-                $"CreateMap<View{entity[..^"Object".Length]}BaseObject, View{entity[..^"Object".Length]}BaseDTO>();",
-                $"CreateMap<View{entity[..^"Object".Length]}BaseDTO, View{entity[..^"Object".Length]}BaseObject>();",
-                "",
-                ""
-            ];
-
-            return content;
         }
 
         #region Utilities
