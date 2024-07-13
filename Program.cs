@@ -8,16 +8,19 @@ internal class Program
     private static void Main(string[] args)
     {
         string response;
+        const string context = "SAMMAIPrincipalContext";
+        const string rootPathSAMMAIDirectory = @"C:\Workspaces\GIT\SAMMAI";
+        const string rootPathBaseWorkDirectory = @"C:\Workspaces\GIT\CodeGenerator";
 
         Console.WriteLine("Start ...");
 
-        response = Execute(InputEnum.MapDataBase);
+        response = Execute(InputEnum.MapDataBase, context, rootPathBaseWorkDirectory, rootPathSAMMAIDirectory);
 
         Console.WriteLine($"Result: {response}");
         Console.WriteLine("End");
     }
 
-    private static string Execute(InputEnum option)
+    private static string Execute(InputEnum option, string context, string rootPathBaseWorkDirectory, string rootPathSAMMAIDirectory)
     {
         string response;
         string path;
@@ -39,8 +42,8 @@ internal class Program
             //Use this one to separate the View and SPs from the base script and generate the new Views and update SPs
             case InputEnum.SPsTableGenerator:
                 spsTableGenerator = new SPsTableGenerator(
-                    rootPath: "C:\\Workspaces\\GIT\\CodeGenerator\\BaseScript",
-                    destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\SPs");
+                    rootPath: Path.Combine(rootPathBaseWorkDirectory, "BaseScript"),
+                    destityPath: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "SPs"));
 
                 response = string.Join(Environment.NewLine, spsTableGenerator.GenerateSPs());
 
@@ -50,11 +53,11 @@ internal class Program
             //Use this one to generate all the classes, config, translate, mappers and constants, base on the database objects
             case InputEnum.MapDataBase:
                 mapDataBase = new MapDataBase(
-                    contextName: "SAMMAIPrincipalContext",
-                    rootPathModels: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\Models",
-                    rootPathSAMMAIDataBase: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.DataBase\\SAMMAI.DataBase",
-                    rootPathSAMMAICore: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.Core\\SAMMAI.Core",
-                    destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\MapDataBase");
+                    contextName: context,
+                    rootPathModels: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "Models"),
+                    rootPathSAMMAIDataBase: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DataBase", "SAMMAI.DataBase"),
+                    rootPathSAMMAICore: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.Core", "SAMMAI.Core"),
+                    destityPath: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "MapDataBase"));
 
                 response = mapDataBase.Execute();
 
@@ -63,9 +66,9 @@ internal class Program
             #region Singles
             case InputEnum.I18NDictionaryGenerator:
                 i18NDictionaryGenerator = new I18NDictionaryGenerator(
-                    contextName: "SAMMAIPrincipalContext",
-                    rootPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\Models",
-                    destinyPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\I18N");
+                    contextName: context,
+                    rootPath: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "Models"),
+                    destinyPath: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "I18N"));
 
                 i18NDictionaryGenerator.FullFillDictionary();
                 response = "ok";
@@ -74,9 +77,9 @@ internal class Program
 
             case InputEnum.TranslateEFModelGenerator:
                 translateEFModelGenerator = new TranslateEFModelGenerator(
-                    conextName: "SAMMAIPrincipalContext",
-                    rootPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\Models",
-                    destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\ModelsTranslated");
+                    conextName: context,
+                    rootPath: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "Models"),
+                    destityPath: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "ModelsTranslated"));
 
                 response = translateEFModelGenerator.Generate();
 
@@ -84,30 +87,30 @@ internal class Program
 
             case InputEnum.DatabaseGenerator:
                 databaseGenerator = new DatabaseGenerator(
-                    conextName: "SAMMAIPrincipalContext",
-                    rootPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\ModelsTranslated",
-                    destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\Result");
+                    conextName: context,
+                    rootPath: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "ModelsTranslated"),
+                    destityPath: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "Result"));
 
                 response = databaseGenerator.Generate();
 
                 break;
 
             case InputEnum.SingleControllerDataBaseGenerator:
-                path = "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.Transverse\\SAMMAI.Transverse\\Models\\Objects";
+                path = Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.Transverse", "SAMMAI.Transverse", "Models", "Objects");
                 entity = "SegPreference";
 
                 fileModel = new FileModel()
                 {
-                    Path = $"{path}\\{entity}Object.cs",
+                    Path = $"{path}//{entity}Object.cs",
                     Name = $"{entity}Object",
                     Extension = "cs"
                 };
 
                 controllerDataBaseGenerator = new ControllerDataBaseGenerator(
                     rootPath: path,
-                    destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\Microservice",
-                    controllerPath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.DataBase\\SAMMAI.DataBase\\Controllers",
-                    servicePath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.DataBase\\SAMMAI.DataBase\\Services\\Implementations");
+                    destityPath: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "Microservice"),
+                    controllerPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DataBase", "SAMMAI.DataBase", "Controllers"),
+                    servicePath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DataBase", "SAMMAI.DataBase", "Services", "Implementations"));
 
 
                 response = controllerDataBaseGenerator.GenerateByEntity(entity, fileModel);
@@ -116,32 +119,32 @@ internal class Program
 
             case InputEnum.ControllerDataBaseGenerator:
                 controllerDataBaseGenerator = new ControllerDataBaseGenerator(
-                    rootPath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.Transverse\\SAMMAI.Transverse\\Models\\Objects",
-                    destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\Microservice",
-                    controllerPath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.DataBase\\SAMMAI.DataBase\\Controllers",
-                    servicePath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.DataBase\\SAMMAI.DataBase\\Services\\Implementations");
+                    rootPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.Transverse", "SAMMAI.Transverse", "Models", "Objects"),
+                    destityPath: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "Microservice"),
+                    controllerPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DataBase", "SAMMAI.DataBase", "Controllers"),
+                    servicePath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DataBase", "SAMMAI.DataBase", "Services", "Implementations"));
 
                 response = string.Join(Environment.NewLine, controllerDataBaseGenerator.GenerateForAllEntities());
 
                 break;
 
             case InputEnum.SingleControllerCoreDALGenerator:
-                path = "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.Transverse\\SAMMAI.Transverse\\Models\\Objects";
+                path = Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.Transverse", "SAMMAI.Transverse", "Models", "Objects");
                 entity = "GenFormularioCatalogoEquipo";
 
                 fileModel = new FileModel()
                 {
-                    Path = $"{path}\\{entity}Object.cs",
+                    Path = $"{path}//{entity}Object.cs",
                     Name = $"{entity}Object",
                     Extension = "cs"
                 };
 
                 controllerCoreDALGenerator = new ControllerCoreDALGenerator(
                     rootPath: path,
-                    destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\CoreDAL",
-                    controllerPath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.Core\\SAMMAI.Core\\Controllers",
-                    servicePath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.Core\\SAMMAI.Core\\Services\\DAL\\Implementations",
-                    iServicePath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.Core\\SAMMAI.Core\\Services\\DAL\\Interfaces");
+                    destityPath: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "CoreDAL"),
+                    controllerPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.Core", "SAMMAI.Core", "Controllers"),
+                    servicePath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.Core", "SAMMAI.Core", "Services", "DAL", "Implementations"),
+                    iServicePath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.Core", "SAMMAI.Core", "Services", "DAL", "Interfaces"));
 
 
                 response = controllerCoreDALGenerator.GenerateByEntity(entity, fileModel);
@@ -150,11 +153,11 @@ internal class Program
 
             case InputEnum.ControllerCoreDALGenerator:
                 controllerCoreDALGenerator = new ControllerCoreDALGenerator(
-                    rootPath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.Transverse\\SAMMAI.Transverse\\Models\\Objects",
-                    destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\CoreDAL",
-                    controllerPath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.Core\\SAMMAI.Core\\Controllers",
-                    servicePath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.Core\\SAMMAI.Core\\Services\\DAL\\Implementations",
-                    iServicePath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.Core\\SAMMAI.Core\\Services\\DAL\\Interfaces");
+                    rootPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.Transverse", "SAMMAI.Transverse", "Models", "Objects"),
+                    destityPath: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "CoreDAL"),
+                    controllerPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.Core", "SAMMAI.Core", "Controllers"),
+                    servicePath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.Core", "SAMMAI.Core", "Services", "DAL", "Implementations"),
+                    iServicePath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.Core", "SAMMAI.Core", "Services", "DAL", "Interfaces"));
 
                 response = string.Join(Environment.NewLine, controllerCoreDALGenerator.GenerateForAllEntities());
 
@@ -162,9 +165,9 @@ internal class Program
 
             case InputEnum.FolderTableGenerator:
                 folderTableGenerator = new FolderTableGenerator(
-                    rootPath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.DataBase\\SAMMAI.DBObjects\\Tables",
-                    configRootPath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.DataBase\\SAMMAI.DataBase\\Repository\\Configurations",
-                    destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\DBObjects\\Tables");
+                    rootPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DataBase", "SAMMAI.DBObjects", "Tables"),
+                    configRootPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DataBase", "SAMMAI.DataBase", "Repository", "Configurations"),
+                    destityPath: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "DBObjects", "Tables"));
 
                 response = string.Join(Environment.NewLine, folderTableGenerator.GenerateFolders());
 
@@ -172,8 +175,8 @@ internal class Program
 
             case InputEnum.BaseSPsTableGenerator:
                 spsTableGenerator = new SPsTableGenerator(
-                    rootPath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.DataBase\\SAMMAI.DBObjects\\Views",
-                    destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\SPs");
+                    rootPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DataBase", "SAMMAI.DBObjects", "Views"),
+                    destityPath: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "SPs"));
 
                 response = string.Join(Environment.NewLine, spsTableGenerator.GenerateBasicViews());
 
@@ -181,9 +184,9 @@ internal class Program
 
             case InputEnum.AlterTableGenerator:
                 alterTableGenerator = new AlterTableGenerator(
-                    tablesRootPath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.DataBase\\SAMMAI.DBObjects\\Tables",
-                    spsRootPath: "C:\\Workspaces\\GIT\\SAMMAI\\SAMMAI.DataBase\\SAMMAI.DBObjects\\StoreProcedures",
-                    destityPath: "C:\\Workspaces\\GIT\\CodeGenerator\\DataBase\\AlterTable");
+                    tablesRootPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DataBase", "SAMMAI.DBObjects", "Tables"),
+                    spsRootPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DataBase", "SAMMAI.DBObjects", "StoreProcedures"),
+                    destityPath: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "AlterTable"));
 
                 response = string.Join(Environment.NewLine, alterTableGenerator.GenerateAlterScripts());
 
