@@ -37,13 +37,15 @@ internal class Program
         AlterTableGenerator alterTableGenerator;
         FileModel fileModel;
 
+        const string baseResponseFolder = "DataBase";
+
         switch (option)
         {
             //Use this one to separate the View and SPs from the base script and generate the new Views and update SPs
             case InputEnum.SPsTableGenerator:
                 spsTableGenerator = new SPsTableGenerator(
                     rootPath: Path.Combine(rootPathBaseWorkDirectory, "BaseScript"),
-                    destityPath: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "SPs"));
+                    destityPath: Path.Combine(rootPathBaseWorkDirectory, baseResponseFolder, "SPs"));
 
                 response = string.Join(Environment.NewLine, spsTableGenerator.GenerateSPs());
 
@@ -54,10 +56,10 @@ internal class Program
             case InputEnum.MapDataBase:
                 mapDataBase = new MapDataBase(
                     contextName: context,
-                    rootPathModels: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "Models"),
+                    rootPathModels: Path.Combine(rootPathBaseWorkDirectory, baseResponseFolder, "Models"),
                     rootPathSAMMAIDataBase: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DataBase", "SAMMAI.DataBase"),
                     rootPathSAMMAICore: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.Core", "SAMMAI.Core"),
-                    destityPath: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "MapDataBase"));
+                    destityPath: Path.Combine(rootPathBaseWorkDirectory, baseResponseFolder, "MapDataBase"));
 
                 response = mapDataBase.Execute();
 
@@ -67,8 +69,8 @@ internal class Program
             case InputEnum.I18NDictionaryGenerator:
                 i18NDictionaryGenerator = new I18NDictionaryGenerator(
                     contextName: context,
-                    rootPath: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "Models"),
-                    destinyPath: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "I18N"));
+                    rootPath: Path.Combine(rootPathBaseWorkDirectory, baseResponseFolder, "Models"),
+                    destinyPath: Path.Combine(rootPathBaseWorkDirectory, baseResponseFolder, "I18N"));
 
                 i18NDictionaryGenerator.FullFillDictionary();
                 response = "ok";
@@ -78,8 +80,8 @@ internal class Program
             case InputEnum.TranslateEFModelGenerator:
                 translateEFModelGenerator = new TranslateEFModelGenerator(
                     conextName: context,
-                    rootPath: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "Models"),
-                    destityPath: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "ModelsTranslated"));
+                    rootPath: Path.Combine(rootPathBaseWorkDirectory, baseResponseFolder, "Models"),
+                    destityPath: Path.Combine(rootPathBaseWorkDirectory, baseResponseFolder, "ModelsTranslated"));
 
                 response = translateEFModelGenerator.Generate();
 
@@ -88,8 +90,8 @@ internal class Program
             case InputEnum.DatabaseGenerator:
                 databaseGenerator = new DatabaseGenerator(
                     conextName: context,
-                    rootPath: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "ModelsTranslated"),
-                    destityPath: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "Result"));
+                    rootPath: Path.Combine(rootPathBaseWorkDirectory, baseResponseFolder, "ModelsTranslated"),
+                    destityPath: Path.Combine(rootPathBaseWorkDirectory, baseResponseFolder, "Result"));
 
                 response = databaseGenerator.Generate();
 
@@ -108,7 +110,7 @@ internal class Program
 
                 controllerDataBaseGenerator = new ControllerDataBaseGenerator(
                     rootPath: path,
-                    destityPath: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "Microservice"),
+                    destityPath: Path.Combine(rootPathBaseWorkDirectory, baseResponseFolder, "Microservice"),
                     controllerPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DataBase", "SAMMAI.DataBase", "Controllers"),
                     servicePath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DataBase", "SAMMAI.DataBase", "Services", "Implementations"));
 
@@ -120,7 +122,7 @@ internal class Program
             case InputEnum.ControllerDataBaseGenerator:
                 controllerDataBaseGenerator = new ControllerDataBaseGenerator(
                     rootPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.Transverse", "SAMMAI.Transverse", "Models", "Objects"),
-                    destityPath: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "Microservice"),
+                    destityPath: Path.Combine(rootPathBaseWorkDirectory, baseResponseFolder, "Microservice"),
                     controllerPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DataBase", "SAMMAI.DataBase", "Controllers"),
                     servicePath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DataBase", "SAMMAI.DataBase", "Services", "Implementations"));
 
@@ -141,7 +143,7 @@ internal class Program
 
                 controllerCoreDALGenerator = new ControllerCoreDALGenerator(
                     rootPath: path,
-                    destityPath: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "CoreDAL"),
+                    destityPath: Path.Combine(rootPathBaseWorkDirectory, baseResponseFolder, "CoreDAL"),
                     controllerPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.Core", "SAMMAI.Core", "Controllers"),
                     servicePath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.Core", "SAMMAI.Core", "Services", "DAL", "Implementations"),
                     iServicePath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.Core", "SAMMAI.Core", "Services", "DAL", "Interfaces"));
@@ -154,7 +156,7 @@ internal class Program
             case InputEnum.ControllerCoreDALGenerator:
                 controllerCoreDALGenerator = new ControllerCoreDALGenerator(
                     rootPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.Transverse", "SAMMAI.Transverse", "Models", "Objects"),
-                    destityPath: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "CoreDAL"),
+                    destityPath: Path.Combine(rootPathBaseWorkDirectory, baseResponseFolder, "CoreDAL"),
                     controllerPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.Core", "SAMMAI.Core", "Controllers"),
                     servicePath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.Core", "SAMMAI.Core", "Services", "DAL", "Implementations"),
                     iServicePath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.Core", "SAMMAI.Core", "Services", "DAL", "Interfaces"));
@@ -167,7 +169,7 @@ internal class Program
                 folderTableGenerator = new FolderTableGenerator(
                     rootPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DataBase", "SAMMAI.DBObjects", "Tables"),
                     configRootPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DataBase", "SAMMAI.DataBase", "Repository", "Configurations"),
-                    destityPath: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "DBObjects", "Tables"));
+                    destityPath: Path.Combine(rootPathBaseWorkDirectory, baseResponseFolder, "DBObjects", "Tables"));
 
                 response = string.Join(Environment.NewLine, folderTableGenerator.GenerateFolders());
 
@@ -176,7 +178,7 @@ internal class Program
             case InputEnum.BaseSPsTableGenerator:
                 spsTableGenerator = new SPsTableGenerator(
                     rootPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DataBase", "SAMMAI.DBObjects", "Views"),
-                    destityPath: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "SPs"));
+                    destityPath: Path.Combine(rootPathBaseWorkDirectory, baseResponseFolder, "SPs"));
 
                 response = string.Join(Environment.NewLine, spsTableGenerator.GenerateBasicViews());
 
@@ -186,7 +188,7 @@ internal class Program
                 alterTableGenerator = new AlterTableGenerator(
                     tablesRootPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DataBase", "SAMMAI.DBObjects", "Tables"),
                     spsRootPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DataBase", "SAMMAI.DBObjects", "StoreProcedures"),
-                    destityPath: Path.Combine(rootPathBaseWorkDirectory, "DataBase", "AlterTable"));
+                    destityPath: Path.Combine(rootPathBaseWorkDirectory, baseResponseFolder, "AlterTable"));
 
                 response = string.Join(Environment.NewLine, alterTableGenerator.GenerateAlterScripts());
 
