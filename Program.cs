@@ -52,7 +52,7 @@ internal class Program
                 break;
 
             //Before to use this one, use the old SPs Generator, execute scripts and then generate the EF Core models
-            //Use this one to generate all the classes, config, translate, mappers and constants, base on the database objects
+            //Use this one to generate all the classes, config, translate, mappers and constants, base on the EF Core config
             case InputEnum.MapDataBase:
                 mapDataBase = new MapDataBase(
                     contextName: context,
