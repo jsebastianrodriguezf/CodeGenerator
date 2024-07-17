@@ -23,7 +23,7 @@ namespace CodeGenerator.BLL
 
         public string GenerateSPs()
         {
-            foreach (FileModel fileModel in _filesModel)
+            foreach (FileModel fileModel in _filesModel.Where(x => x.Extension == "sql"))
             {
                 GenerateSPs(fileModel);
             }
@@ -40,12 +40,18 @@ namespace CodeGenerator.BLL
             List<string> allNewLines;
             string line;
             string tableName;
+            string principalColumn;
+            bool hasCmm;
+            bool hasPrincipalColumn;
+
+            const string cmm = "[cmm] AS [cmm]";
 
             template = [.. File.ReadAllLines(fileModel.Path)];
             linesByTable = [];
             spTableRoot = [];
             spRoot = [];
             allNewLines = [];
+            hasCmm = false;
 
             for (int i = 0; i < template.Count; i++)
             {
@@ -54,7 +60,11 @@ namespace CodeGenerator.BLL
                 if (line.StartsWith("print '") && line.EndsWith("'"))
                 {
                     tableName = GetTableName(line);
-                    spTableRoot = ExtractSPsByTable(tableName, linesByTable, ref allNewLines);
+                    principalColumn = tableName.Remove(0, 4);
+
+                    hasPrincipalColumn = linesByTable.Any(x => x.Contains($"[{principalColumn}] AS [{principalColumn}]"));
+
+                    spTableRoot = ExtractSPsByTable(tableName, linesByTable, hasCmm, hasPrincipalColumn, ref allNewLines);
 
                     allNewLines.Add("------------------------------------------");
                     allNewLines.Add($"PRINT '{tableName}'");
@@ -66,15 +76,21 @@ namespace CodeGenerator.BLL
 
                     i += 1;
                     linesByTable = [];
+                    hasCmm = false;
                 }
                 else
                 {
                     linesByTable.Add(line);
+
+                    if (!hasCmm && (line.EndsWith(cmm) || line.EndsWith(cmm + ",")))
+                    {
+                        hasCmm = true;
+                    }
                 }
             }
 
             Utilities.GenerateFile(_destinyPath, "Roots", "01_All_" + fileModel.Name + ".txt", spRoot);
-            Utilities.GenerateFile(_destinyPath, "AllScripts", "01_All_scripts" + fileModel.Name + ".sql", allNewLines);
+            Utilities.GenerateFile(_destinyPath, "AllScripts", "01_All_scripts_" + fileModel.Name + ".sql", allNewLines);
         }
 
         private string GetTableName(string line)
@@ -88,15 +104,17 @@ namespace CodeGenerator.BLL
             return tableName;
         }
 
-        private List<string> ExtractSPsByTable(string tableName, List<string> templateTable, ref List<string> allNewLines)
+        private List<string> ExtractSPsByTable(string tableName, List<string> templateTable, bool hasCmm, bool hasPrincipalColumn, ref List<string> allNewLines)
         {
             List<string> sp;
             List<string> spRoot;
             string line;
             string spName;
             string viewName;
+            string idParamSelMSP;
             bool isView;
             bool isSelMSP;
+            bool isSelAllSP;
 
             const string separator = "----------------------";
             const string ifExists = "IF  EXISTS (SELECT * FROM ";
@@ -105,8 +123,10 @@ namespace CodeGenerator.BLL
             spRoot = [];
             spName = "SPNoName";
             viewName = "VIEWNoName";
+            idParamSelMSP = "";
             isView = false;
             isSelMSP = false;
+            isSelAllSP = false;
 
             for (int i = 0; i < templateTable.Count; i++)
             {
@@ -152,11 +172,12 @@ namespace CodeGenerator.BLL
                     if (line.StartsWith(ifExists) && line.EndsWith("]"))
                     {
                         int start = line.LastIndexOf("[dbo].[") + 7;
-                        int end = line.LastIndexOf("]");
+                        int end = line.LastIndexOf(']');
                         if (start < end)
                         {
                             spName = line[start..end] + ".sql";
                             isSelMSP = spName.StartsWith($"sel_{tableName.Replace(".", "_")}") && spName.EndsWith($"_m.sql") && spName.Contains('X', StringComparison.CurrentCulture);
+                            isSelAllSP = spName.StartsWith($"sel_{tableName.Replace(".", "_")}") && spName.EndsWith($"_m.sql") && !spName.Contains('X', StringComparison.CurrentCulture);
                         }
 
                         if (!isView)
@@ -171,6 +192,8 @@ namespace CodeGenerator.BLL
 
                     if (isSelMSP && line.Contains("@p_eid as varchar(50)"))
                     {
+                        idParamSelMSP = sp[^2].Split(" ").Where(x => !string.IsNullOrWhiteSpace(x)).First().TrimStart();
+                        sp[^2] = "	@p_id INT, -- " + idParamSelMSP.Replace("@p_", string.Empty);
                         sp[^1] = line + ",";
                         sp.Add("	@p_cmm VARCHAR(300) = NULL,");
                         sp.Add("	@p_retorno INT = 1");
@@ -179,13 +202,30 @@ namespace CodeGenerator.BLL
                     if (isSelMSP && line.Contains("BEGIN"))
                     {
                         i += 1;
-                        sp.AddRange(GetSelSP(ref i, tableName, templateTable));
+                        sp.AddRange(GetSelSP(ref i, tableName, templateTable, hasCmm, idParamSelMSP));
                         i -= 1;
+                    }
+
+                    if (isSelAllSP && line.Contains("@p_eid as varchar (50)='',"))
+                    {
+                        sp.Add("	@p_cmm VARCHAR(300) = NULL,");
+                        sp.Add("	@p_retorno INT = 1");
+                        sp.Add("AS");
+
+                        i += 3;
+                    }
+
+                    if (isSelAllSP && line.Contains("BEGIN"))
+                    {
+                        i += 1;
+                        sp.AddRange(GetAllSP(ref i, tableName, templateTable, hasCmm, hasPrincipalColumn));
+                        i += 2;
                     }
                 }
             }
 
-            GenerateUpdateCmmSP(tableName, ref allNewLines, ref spRoot);
+            if (hasCmm)
+                GenerateUpdateCmmSP(tableName, ref allNewLines, ref spRoot);
 
             return spRoot;
         }
@@ -280,7 +320,7 @@ namespace CodeGenerator.BLL
             return sp;
         }
 
-        private List<string> GetSelSP(ref int index, string tableName, List<string> template)
+        private List<string> GetSelSP(ref int index, string tableName, List<string> template, bool hasCmm, string idParamSelMSP)
         {
             List<string> content = [];
             List<string> originalContent = [];
@@ -329,16 +369,103 @@ namespace CodeGenerator.BLL
                         }
                     }
 
+                    line = line.Replace(idParamSelMSP, "@p_id");
                     content.Add(line);
 
                 }
                 content.AddRange([
-                       $"		AND (@p_cmm IS NULL OR [cmm] LIKE '%' + @p_cmm + '%')",
+                       $"		AND (@p_cmm IS NULL{(hasCmm ? " OR [cmm] LIKE '%' + @p_cmm + '%'" : "")})",
                        $"		AND ([active] = 1)",
                        $"	END",
                        ""
                    ]);
             }
+
+            return content;
+        }
+
+        private List<string> GetAllSP(ref int index, string tableName, List<string> template, bool hasCmm, bool hasPrincipalColumn)
+        {
+            List<string> content;
+            List<string> cmmCondition;
+            string principalColumn;
+            string tableWithoutDot;
+
+            content = [];
+            principalColumn = tableName.Remove(0, 4);
+            tableWithoutDot = tableName.Replace(".", "_");
+
+            cmmCondition = [
+                $"			(eid LIKE @p_eid+'%') AND",
+                $"			(",
+                $"				@p_cmm IS NULL OR",
+                $"				(",
+            ];
+
+            if (hasPrincipalColumn)
+                cmmCondition.AddRange([
+                    $"					([cmm] IS NULL AND [{principalColumn}] LIKE '%' + @p_cmm + '%') OR ",
+                    $"					([cmm] IS NOT NULL AND [cmm] LIKE '%' + @p_cmm + '%')",
+                ]);
+            else
+                cmmCondition.AddRange([
+                   $"					[cmm] IS NOT NULL AND [cmm] LIKE '%' + @p_cmm + '%'",
+                ]);
+
+            cmmCondition.AddRange([
+                $"				)",
+                $"			)",
+            ]);
+
+            content.AddRange([
+                $"	IF @p_retorno = 0 -- TABLE",
+                $"	BEGIN",
+                $"		SELECT *",
+                $"		FROM [{tableName}]",
+                $"		WHERE",
+                $"			([active] = 1) AND",
+            ]);
+
+            if (hasCmm)
+                content.AddRange(cmmCondition);
+            else
+                content.Add($"			(eid LIKE @p_eid+'%')");
+
+            content.AddRange([
+                $"	END",
+                $"",
+                $"	ELSE IF @p_retorno = 1 -- VIEW",
+                $"	BEGIN",
+                $"		SELECT *",
+                $"		FROM [view_{tableWithoutDot}]",
+                $"		WHERE",
+                $"			([active] = 1) AND",
+            ]);
+
+            if (hasCmm)
+                content.AddRange(cmmCondition);
+            else
+                content.Add($"			(eid LIKE @p_eid+'%')");
+
+            content.AddRange([
+                $"	END",
+                $"",
+                $"	ELSE IF @p_retorno = 2 -- VIEWBASE",
+                $"	BEGIN",
+                $"		SELECT *",
+                $"		FROM [view_{tableWithoutDot}_base]",
+                $"		WHERE",
+                $"			([active] = 1) AND",
+            ]);
+
+            if (hasCmm)
+                content.AddRange(cmmCondition);
+            else
+                content.Add($"			(eid LIKE @p_eid+'%')");
+
+            content.AddRange([
+                $"	END",
+            ]);
 
             return content;
         }

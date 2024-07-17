@@ -14,7 +14,7 @@ internal class Program
 
         Console.WriteLine("Start ...");
 
-        response = Execute(InputEnum.MapDataBase, context, rootPathBaseWorkDirectory, rootPathSAMMAIDirectory);
+        response = Execute(InputEnum.SPsTableGenerator, context, rootPathBaseWorkDirectory, rootPathSAMMAIDirectory);
 
         Console.WriteLine($"Result: {response}");
         Console.WriteLine("End");

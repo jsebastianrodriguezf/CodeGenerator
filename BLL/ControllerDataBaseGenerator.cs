@@ -460,8 +460,8 @@ namespace CodeGenerator.BLL
                     $"        /// Gets all {entityUpper}",
                     $"        /// </summary>",
                     $"        /// <param name=\"cmmKeyword\">Search by cmm</param>",
-                    $"        /// <param name=\"idForeignKey\">Search by foreign column</param>",
-                    $"        /// <param name=\"foreignValue\">Search the foreign column with this value</param>",
+                    $"        /// <param name=\"spName\">Get data from this store procedure</param>",
+                    $"        /// <param name=\"foreignValue\">Filter the store procedure with this value</param>",
                     $"        /// <returns></returns>",
                     $"        /// <remarks>",
                     $"        /// Gets all {entityUpper}",
@@ -479,9 +479,9 @@ namespace CodeGenerator.BLL
                     $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<{prefix}{entityUpper}Object>>), (int)StatusCodeEnum.OK)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
-                    $"        public async Task<ActionResult<object>> GetAll([FromQuery] string? cmmKeyword = null, [FromQuery] int? idForeignKey = null, [FromQuery] int foreignValue = 0)",
+                    $"        public async Task<ActionResult<object>> GetAll([FromQuery] string? cmmKeyword = null, [FromQuery] string? spName = null, [FromQuery] int? foreignValue = null)",
                     "        {",
-                    $"            List<{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAll(cmmKeyword, idForeignKey, foreignValue);",
+                    $"            List<{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAll(cmmKeyword, spName, foreignValue);",
                     $"",
                     $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                     "        }",
@@ -495,8 +495,8 @@ namespace CodeGenerator.BLL
                         $"        /// Gets all full {entityUpper}",
                         $"        /// </summary>",
                         $"        /// <param name=\"cmmKeyword\">Search by cmm</param>",
-                        $"        /// <param name=\"idForeignKey\">Search by foreign column</param>",
-                        $"        /// <param name=\"foreignValue\">Search the foreign column with this value</param>",
+                        $"        /// <param name=\"spName\">Get data from this store procedure</param>",
+                        $"        /// <param name=\"foreignValue\">Filter the store procedure with this value</param>",
                         $"        /// <returns></returns>",
                         $"        /// <remarks>",
                         $"        /// Gets all full {entityUpper}",
@@ -514,9 +514,9 @@ namespace CodeGenerator.BLL
                         $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<View{prefix}{entityUpper}Object>>), (int)StatusCodeEnum.OK)]",
                         $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                         $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
-                        $"        public async Task<ActionResult<object>> GetAllFull([FromQuery] string? cmmKeyword = null, [FromQuery] int? idForeignKey = null, [FromQuery] int foreignValue = 0)",
+                        $"        public async Task<ActionResult<object>> GetAllFull([FromQuery] string? cmmKeyword = null, [FromQuery] string? spName = null, [FromQuery] int? foreignValue = null)",
                         "        {",
-                        $"            List<View{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAllFull(cmmKeyword, idForeignKey, foreignValue);",
+                        $"            List<View{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAllFull(cmmKeyword, spName, foreignValue);",
                         $"",
                         $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                         "        }",
@@ -528,8 +528,8 @@ namespace CodeGenerator.BLL
                         $"        /// Gets all base {entityUpper}",
                         $"        /// </summary>",
                         $"        /// <param name=\"cmmKeyword\">Search by cmm</param>",
-                        $"        /// <param name=\"idForeignKey\">Search by foreign column</param>",
-                        $"        /// <param name=\"foreignValue\">Search the foreign column with this value</param>",
+                        $"        /// <param name=\"spName\">Get data from this store procedure</param>",
+                        $"        /// <param name=\"foreignValue\">Filter the store procedure with this value</param>",
                         $"        /// <returns></returns>",
                         $"        /// <remarks>",
                         $"        /// Gets all base {entityUpper}",
@@ -547,9 +547,9 @@ namespace CodeGenerator.BLL
                         $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<View{prefix}{entityUpperBase}BaseObject>>), (int)StatusCodeEnum.OK)]",
                         $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                         $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
-                        $"        public async Task<ActionResult<object>> GetAllBase([FromQuery] string? cmmKeyword = null, [FromQuery] int? idForeignKey = null, [FromQuery] int foreignValue = 0)",
+                        $"        public async Task<ActionResult<object>> GetAllBase([FromQuery] string? cmmKeyword = null, [FromQuery] string? spName = null, [FromQuery] int? foreignValue = null)",
                         "        {",
-                        $"            List<View{prefix}{entityUpperBase}BaseObject> response = await _{entityLower}Service.GetAllBase(cmmKeyword, idForeignKey, foreignValue);",
+                        $"            List<View{prefix}{entityUpperBase}BaseObject> response = await _{entityLower}Service.GetAllBase(cmmKeyword, spName, foreignValue);",
                         $"",
                         $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                         "        }",
@@ -563,8 +563,15 @@ namespace CodeGenerator.BLL
                     $"        /// <summary>",
                     $"        /// Gets all {entityUpper}",
                     $"        /// </summary>",
-                    $"        /// <param name=\"idForeignKey\">Search by foreign column</param>",
-                    $"        /// <param name=\"foreignValue\">Search the foreign column with this value</param>",
+                    ]);
+
+                if (isStandardTable)
+                    content.AddRange([
+                        $"        /// <param name=\"spName\">Get data from this store procedure</param>",
+                        $"        /// <param name=\"foreignValue\">Filter the store procedure with this value</param>",
+                    ]);
+
+                content.AddRange([
                     $"        /// <returns></returns>",
                     $"        /// <remarks>",
                     $"        /// Gets all {entityUpper}",
@@ -582,9 +589,9 @@ namespace CodeGenerator.BLL
                     $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<{prefix}{entityUpper}Object>>), (int)StatusCodeEnum.OK)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
-                    $"        public async Task<ActionResult<object>> GetAll([FromQuery] int? idForeignKey = null, [FromQuery] int foreignValue = 0)",
+                    $"        public async Task<ActionResult<object>> GetAll({(isStandardTable ? "[FromQuery] string? spName = null, [FromQuery] int? foreignValue = null" : "")})",
                     "        {",
-                    $"            List<{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAll(idForeignKey, foreignValue);",
+                    $"            List<{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAll({(isStandardTable ? "spName, foreignValue" : "")});",
                     $"",
                     $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                     "        }",
@@ -597,8 +604,8 @@ namespace CodeGenerator.BLL
                         $"        /// <summary>",
                         $"        /// Gets all full {entityUpper}",
                         $"        /// </summary>",
-                        $"        /// <param name=\"idForeignKey\">Search by foreign column</param>",
-                        $"        /// <param name=\"foreignValue\">Search the foreign column with this value</param>",
+                        $"        /// <param name=\"spName\">Get data from this store procedure</param>",
+                        $"        /// <param name=\"foreignValue\">Filter the store procedure with this value</param>",
                         $"        /// <returns></returns>",
                         $"        /// <remarks>",
                         $"        /// Gets all full {entityUpper}",
@@ -616,9 +623,9 @@ namespace CodeGenerator.BLL
                         $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<View{prefix}{entityUpper}Object>>), (int)StatusCodeEnum.OK)]",
                         $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                         $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
-                        $"        public async Task<ActionResult<object>> GetAllFull([FromQuery] int? idForeignKey = null, [FromQuery] int foreignValue = 0)",
+                        $"        public async Task<ActionResult<object>> GetAllFull([FromQuery] string? spName = null, [FromQuery] int? foreignValue = null)",
                         "        {",
-                        $"            List<View{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAllFull(idForeignKey, foreignValue);",
+                        $"            List<View{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAllFull(spName, foreignValue);",
                         $"",
                         $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                         "        }",
@@ -629,8 +636,8 @@ namespace CodeGenerator.BLL
                         $"        /// <summary>",
                         $"        /// Gets all base {entityUpper}",
                         $"        /// </summary>",
-                        $"        /// <param name=\"idForeignKey\">Search by foreign column</param>",
-                        $"        /// <param name=\"foreignValue\">Search the foreign column with this value</param>",
+                        $"        /// <param name=\"spName\">Get data from this store procedure</param>",
+                        $"        /// <param name=\"foreignValue\">Filter the store procedure with this value</param>",
                         $"        /// <returns></returns>",
                         $"        /// <remarks>",
                         $"        /// Gets all base {entityUpper}",
@@ -648,9 +655,9 @@ namespace CodeGenerator.BLL
                         $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<View{prefix}{entityUpperBase}BaseObject>>), (int)StatusCodeEnum.OK)]",
                         $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                         $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
-                        $"        public async Task<ActionResult<object>> GetAllBase([FromQuery] int? idForeignKey = null, [FromQuery] int foreignValue = 0)",
+                        $"        public async Task<ActionResult<object>> GetAllBase([FromQuery] string? spName = null, [FromQuery] int? foreignValue = null)",
                         "        {",
-                        $"            List<View{prefix}{entityUpperBase}BaseObject> response = await _{entityLower}Service.GetAllBase(idForeignKey, foreignValue);",
+                        $"            List<View{prefix}{entityUpperBase}BaseObject> response = await _{entityLower}Service.GetAllBase(spName, foreignValue);",
                         $"",
                         $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                         "        }",
@@ -965,23 +972,9 @@ namespace CodeGenerator.BLL
             if (hasCmm)
             {
                 content.AddRange([
-                    $"        public async Task<List<{prefix}{entityUpper}Object>> GetAll(string? cmmKeyword, int? idForeignKey = null, int foreignValue = 0)",
+                    $"        public async Task<List<{prefix}{entityUpper}Object>> GetAll(string? cmmKeyword, string? spName = null, int? foreignValue = null)",
                     "        {",
-                    $"            IEnumerable<{prefix}{entityUpper}Object> {entityLower}s;",
-                    $"",
-                    $"            if ((idForeignKey ?? 0) == 0)",
-                    $"                {entityLower}s = string.IsNullOrWhiteSpace(cmmKeyword) ?",
-                    $"                    await GetFilteredAsync(x => x.Eid == _global.Eid && x.Active) :",
-                    $"                    await GetFilteredAsync(x => {
-                                           (hasPrincipalField ?
-                                               $"(x.Cmm == null ? x.{entityUpper}.Contains(cmmKeyword) : x.Cmm.Contains(cmmKeyword))" :
-                                               $"x.Cmm != null && x.Cmm.Contains(cmmKeyword)"
-                                           )
-                                         } && x.Eid == _global.Eid && x.Active);",
-                    "            else",
-                    $"                {entityLower}s = await _generalService.GetData<{prefix}{entityUpper}, {prefix}{entityUpper}>((int)idForeignKey!, foreignValue, cmmKeyword);",
-                    $"",
-                    $"            return {entityLower}s.ToList();",
+                    $"            return await _generalService.GetAllData<{prefix}{entityUpper}, {prefix}{entityUpper}, {prefix}{entityUpper}Object>(spName, foreignValue, cmmKeyword);",
                     "        }",
                     $""
                 ]);
@@ -989,45 +982,17 @@ namespace CodeGenerator.BLL
                 if (hasView)
                 {
                     content.AddRange([
-                        $"        public async Task<List<View{prefix}{entityUpper}Object>> GetAllFull(string? cmmKeyword, int? idForeignKey = null, int foreignValue = 0)",
+                        $"        public async Task<List<View{prefix}{entityUpper}Object>> GetAllFull(string? cmmKeyword, string? spName = null, int? foreignValue = null)",
                         "        {",
-                        $"            IEnumerable<View{prefix}{entityUpper}Object> {entityLower}s;",
-                        $"",
-                        $"            if ((idForeignKey ?? 0) == 0)",
-                        $"                {entityLower}s = string.IsNullOrWhiteSpace(cmmKeyword) ?",
-                        $"                    await GetViewFilteredAsync(x => x.Eid == _global.Eid && x.Active) :",
-                        $"                    await GetViewFilteredAsync(x => {
-                                                (hasPrincipalField ?
-                                                    $"(x.Cmm == null ? x.{entityUpper}.Contains(cmmKeyword) : x.Cmm.Contains(cmmKeyword))" :
-                                                    $"x.Cmm != null && x.Cmm.Contains(cmmKeyword)"
-                                                )
-                                              } && x.Eid == _global.Eid && x.Active);",
-                        "            else",
-                        $"                {entityLower}s = await _generalService.GetData<{prefix}{entityUpper}, View{prefix}{entityUpper}>((int)idForeignKey!, foreignValue, cmmKeyword);",
-                        $"",
-                        $"            return {entityLower}s.ToList();",
+                        $"            return await _generalService.GetAllData<{prefix}{entityUpper}, View{prefix}{entityUpper}, View{prefix}{entityUpper}Object>(spName, foreignValue, cmmKeyword);",
                         "        }",
                         $""
                     ]);
 
                     content.AddRange([
-                        $"        public async Task<List<View{prefix}{entityUpperBase}BaseObject>> GetAllBase(string? cmmKeyword, int? idForeignKey = null, int foreignValue = 0)",
+                        $"        public async Task<List<View{prefix}{entityUpperBase}BaseObject>> GetAllBase(string? cmmKeyword, string? spName = null, int? foreignValue = null)",
                         "        {",
-                        $"            IEnumerable<View{prefix}{entityUpperBase}BaseObject> {entityLower}s;",
-                        $"",
-                        $"            if ((idForeignKey ?? 0) == 0)",
-                        $"                {entityLower}s = string.IsNullOrWhiteSpace(cmmKeyword) ?",
-                        $"                    await GetViewBaseFilteredAsync(x => x.Eid == _global.Eid && x.Active) :",
-                        $"                    await GetViewBaseFilteredAsync(x => {
-                                                (hasPrincipalField ?
-                                                    $"(x.Cmm == null ? x.{entityUpper}.Contains(cmmKeyword) : x.Cmm.Contains(cmmKeyword))" :
-                                                    $"x.Cmm != null && x.Cmm.Contains(cmmKeyword)"
-                                                )
-                                              } && x.Eid == _global.Eid && x.Active);",
-                        "            else",
-                        $"                {entityLower}s = await _generalService.GetData<{prefix}{entityUpper}, View{prefix}{entityUpperBase}Base>((int)idForeignKey!, foreignValue, cmmKeyword);",
-                        $"",
-                        $"            return {entityLower}s.ToList();",
+                        $"            return await _generalService.GetAllData<{prefix}{entityUpper}, View{prefix}{entityUpperBase}Base, View{prefix}{entityUpperBase}BaseObject>(spName, foreignValue, cmmKeyword);",
                         "        }",
                         $""
                     ]);
@@ -1036,16 +1001,11 @@ namespace CodeGenerator.BLL
             else
             {
                 content.AddRange([
-                    $"        public async Task<List<{prefix}{entityUpper}Object>> GetAll(int? idForeignKey = null, int foreignValue = 0)",
+                    $"        public async Task<List<{prefix}{entityUpper}Object>> GetAll({(isStandardTable ? "string? spName = null, int? foreignValue = null" : "")})",
                     "        {",
-                    $"            IEnumerable<{prefix}{entityUpper}Object> {entityLower}s;",
-                    $"",
-                    $"            if ((idForeignKey ?? 0) == 0)",
-                    $"                {entityLower}s = await {(isStandardTable ? "GetFilteredAsync(x => x.Eid == _global.Eid && x.Active)" : "GetAll()")};",
-                    "            else",
-                    $"                {entityLower}s = await _generalService.GetData<{prefix}{entityUpper}, {prefix}{entityUpper}>((int)idForeignKey!, foreignValue);",
-                    $"",
-                    $"            return {entityLower}s.ToList();",
+                    $"            return await {(isStandardTable ?
+                                        $"_generalService.GetAllData<{prefix}{entityUpper}, {prefix}{entityUpper}, {prefix}{entityUpper}Object>(spName, foreignValue)" :
+                                        $"GetAll()")};",
                     "        }",
                     $""
                 ]);
@@ -1053,31 +1013,17 @@ namespace CodeGenerator.BLL
                 if (hasView)
                 {
                     content.AddRange([
-                        $"        public async Task<List<View{prefix}{entityUpper}Object>> GetAllFull(int? idForeignKey = null, int foreignValue = 0)",
+                        $"        public async Task<List<View{prefix}{entityUpper}Object>> GetAllFull(string? spName = null, int? foreignValue = null)",
                         "        {",
-                        $"            IEnumerable<View{prefix}{entityUpper}Object> {entityLower}s;",
-                        $"",
-                        $"            if ((idForeignKey ?? 0) == 0)",
-                        $"                {entityLower}s = await GetViewFilteredAsync(x => x.Eid == _global.Eid && x.Active);",
-                        "            else",
-                        $"                {entityLower}s = await _generalService.GetData<{prefix}{entityUpper}, View{prefix}{entityUpper}>((int)idForeignKey!, foreignValue);",
-                        $"",
-                        $"            return {entityLower}s.ToList();",
+                        $"            return await _generalService.GetAllData<{prefix}{entityUpper}, View{prefix}{entityUpper}, View{prefix}{entityUpper}Object>(spName, foreignValue);",
                         "        }",
                         $""
                     ]);
 
                     content.AddRange([
-                        $"        public async Task<List<View{prefix}{entityUpperBase}BaseObject>> GetAllBase(int? idForeignKey = null, int foreignValue = 0)",
+                        $"        public async Task<List<View{prefix}{entityUpperBase}BaseObject>> GetAllBase(string? spName = null, int? foreignValue = null)",
                         "        {",
-                        $"            IEnumerable<View{prefix}{entityUpperBase}BaseObject> {entityLower}s;",
-                        $"",
-                        $"            if ((idForeignKey ?? 0) == 0)",
-                        "                 {entityLower}s = await GetViewBaseFilteredAsync(x => x.Eid == _global.Eid && x.Active);",
-                        "            else",
-                        $"                 {entityLower}s = await _generalService.GetData<{prefix}{entityUpper}, View{prefix}{entityUpperBase}Base>((int)idForeignKey!, foreignValue);",
-                        $"",
-                        $"            return {entityLower}s.ToList();",
+                        $"            return await _generalService.GetAllData<{prefix}{entityUpper}, View{prefix}{entityUpperBase}Base, View{prefix}{entityUpperBase}BaseObject>(spName, foreignValue);",
                         "        }",
                         $""
                     ]);
