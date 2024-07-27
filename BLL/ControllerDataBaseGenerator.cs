@@ -54,8 +54,8 @@ namespace CodeGenerator.BLL
                     responses.Add(response);
 
                 contentDI.Add(GenerateDI(file.Name));
-                contentEntityMappers.AddRange(GenerateMapByEntity(file.Name));
-                contentDTOMappers.AddRange(GenerateMapDTOByEntity(file.Name));
+                contentEntityMappers.AddRange(GenerateMapByEntity(file));
+                contentDTOMappers.AddRange(GenerateMapDTOByEntity(file));
                 constants.Add(GenerateConstants(file.Name));
             }
 
@@ -75,6 +75,7 @@ namespace CodeGenerator.BLL
             string init;
             bool withCode;
             bool hasView;
+            bool hasViewFull;
             bool hasCmm;
             bool hasPrincipalField;
             bool isStandardTable;
@@ -109,12 +110,13 @@ namespace CodeGenerator.BLL
 
                 hasCmm = HasWord(file.Path, $"public string? Cmm {{ get; set; }}");
                 hasView = HasView(file);
+                hasViewFull = HasViewFull(file);
 
                 if (entityLower == "event" || entityLower == "group")
                     entityLower += "Obj";
 
-                GenerateController(prefix, entityUpper, entityLower, withCode, hasView, hasCmm, isStandardTable);
-                GenerateService(prefix, entityUpper, entityLower, withCode, hasView, hasCmm, hasPrincipalField, isStandardTable);
+                GenerateController(prefix, entityUpper, entityLower, withCode, hasView, hasCmm, isStandardTable, hasViewFull);
+                GenerateService(prefix, entityUpper, entityLower, withCode, hasView, hasCmm, hasPrincipalField, isStandardTable, hasViewFull);
 
                 return string.Empty;
             }
@@ -124,11 +126,20 @@ namespace CodeGenerator.BLL
             }
         }
 
-        public void GenerateController(string prefix, string entityUpper, string entityLower, bool WithCode, bool hasView, bool hasCmm, bool isStandardTable)
+        private string GetClassName(string prefix, string entity, bool hasViewFull)
+        {
+            return hasViewFull ? $"View{prefix}{entity}Full" : $"{prefix}{entity}";
+
+        }
+
+        public void GenerateController(string prefix, string entityUpper, string entityLower, bool WithCode, bool hasView, bool hasCmm, bool isStandardTable, bool hasViewFull)
         {
             List<string> content;
             string controllerRoute;
             string entityUpperBase;
+            bool withSp = true;
+
+            string className = GetClassName(prefix, entityUpper, hasViewFull);
 
             entityUpperBase = entityUpper;
 
@@ -172,13 +183,13 @@ namespace CodeGenerator.BLL
                 $"        [HttpGet]",
                 $"        [Route(\"{{id}}\")]",
                 $"        [Produces(GeneralConstants.ContentType.Json)]",
-                $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<{prefix}{entityUpper}Object>), (int)StatusCodeEnum.OK)]",
+                $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<{className}Object>), (int)StatusCodeEnum.OK)]",
                 $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.NOT_FOUND)]",
                 $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                 $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
                 $"        public async Task<ActionResult<object>> GetById(int id)",
                 "        {",
-                $"            {prefix}{entityUpper}Object response = await _{entityLower}Service.GetById(id);",
+                $"            {className}Object response = await _{entityLower}Service.GetById(id);",
                 $"",
                 $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                 "        }",
@@ -271,13 +282,13 @@ namespace CodeGenerator.BLL
                 $"        [HttpPost]",
                 $"        [Route(\"get-set\")]",
                 $"        [Produces(GeneralConstants.ContentType.Json)]",
-                $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<{prefix}{entityUpper}Object>>), (int)StatusCodeEnum.OK)]",
+                $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<{className}Object>>), (int)StatusCodeEnum.OK)]",
                 $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.NOT_FOUND)]",
                 $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                 $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
                 $"        public async Task<ActionResult<object>> GetSetByIds([FromBody] List<int> ids)",
                 "        {",
-                $"            List<{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetSetByIds(ids);",
+                $"            List<{className}Object> response = await _{entityLower}Service.GetSetByIds(ids);",
                 $"",
                 $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                 "        }",
@@ -372,13 +383,13 @@ namespace CodeGenerator.BLL
                     $"        [HttpGet]",
                     $"        [Route(\"code/{{code}}\")]",
                     $"        [Produces(GeneralConstants.ContentType.Json)]",
-                    $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<{prefix}{entityUpper}Object>), (int)StatusCodeEnum.OK)]",
+                    $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<{className}Object>), (int)StatusCodeEnum.OK)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.NOT_FOUND)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
                     $"        public async Task<ActionResult<object>> GetByCode(string code)",
                     "        {",
-                    $"            {prefix}{entityUpper}Object response = await _{entityLower}Service.GetByCode(code);",
+                    $"            {className}Object response = await _{entityLower}Service.GetByCode(code);",
                     $"",
                     $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                     "        }",
@@ -476,12 +487,12 @@ namespace CodeGenerator.BLL
                     $"        [HttpGet]",
                     $"        [Route(\"all\")]",
                     $"        [Produces(GeneralConstants.ContentType.Json)]",
-                    $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<{prefix}{entityUpper}Object>>), (int)StatusCodeEnum.OK)]",
+                    $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<{className}Object>>), (int)StatusCodeEnum.OK)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
                     $"        public async Task<ActionResult<object>> GetAll([FromQuery] string? cmmKeyword = null, [FromQuery] string? spName = null, [FromQuery] int? foreignValue = null)",
                     "        {",
-                    $"            List<{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAll(cmmKeyword, spName, foreignValue);",
+                    $"            List<{className}Object> response = await _{entityLower}Service.GetAll(cmmKeyword, spName, foreignValue);",
                     $"",
                     $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                     "        }",
@@ -586,12 +597,12 @@ namespace CodeGenerator.BLL
                     $"        [HttpGet]",
                     $"        [Route(\"all\")]",
                     $"        [Produces(GeneralConstants.ContentType.Json)]",
-                    $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<{prefix}{entityUpper}Object>>), (int)StatusCodeEnum.OK)]",
+                    $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<{className}Object>>), (int)StatusCodeEnum.OK)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
                     $"        public async Task<ActionResult<object>> GetAll({(isStandardTable ? "[FromQuery] string? spName = null, [FromQuery] int? foreignValue = null" : "")})",
                     "        {",
-                    $"            List<{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAll({(isStandardTable ? "spName, foreignValue" : "")});",
+                    $"            List<{className}Object> response = await _{entityLower}Service.GetAll({(isStandardTable ? "spName, foreignValue" : "")});",
                     $"",
                     $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                     "        }",
@@ -666,64 +677,186 @@ namespace CodeGenerator.BLL
                 }
             }
 
-            content.AddRange([
-                $"        /// <summary>",
-                $"        /// Insert a {entityUpper}",
-                $"        /// </summary>",
-                $"        /// <param name=\"{entityLower}\"></param>",
-                $"        /// <returns></returns>",
-                $"        /// <remarks>",
-                $"        /// Inserts a new {entityUpper}",
-                $"        /// ",
-                $"        /// Authorization: Private",
-                $"        /// ",
-                $"        ///     Headers:",
-                $"        ///         Authorization: <c>Bearer {{Token}}</c>",
-                $"        /// </remarks>",
-                $"        /// <response code=\"200\">Success: Returns the new {entityUpper} object</response>",
-                $"        [IdentifierFilter]",
-                $"        [HttpPost]",
-                $"        [Route(\"insert\")]",
-                $"        [Produces(GeneralConstants.ContentType.Json)]",
-                $"        [ProducesResponseType(typeof(BaseApiResponseWithData<{prefix}{entityUpper}Object>), (int)StatusCodeEnum.CREATED)]",
-                $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
-                $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
-                $"        public async Task<ActionResult<object>> Insert([FromBody] {prefix}{entityUpper}Object {entityLower})",
-                "        {",
-                $"            {prefix}{entityUpper}Object response = await _{entityLower}Service.Insert({entityLower});",
-                $"",
-                $"            return StatusCode((int)StatusCodeEnum.CREATED, ResponseHelper.SetResponseWithData(StatusCodeEnum.CREATED, response));",
-                "        }",
-                $"",
-                $"        /// <summary>",
-                $"        /// Update a {entityUpper}",
-                $"        /// </summary>",
-                $"        /// <param name=\"{entityLower}\"></param>",
-                $"        /// <returns></returns>",
-                $"        /// <remarks>",
-                $"        /// Update a {entityUpper}",
-                $"        /// ",
-                $"        /// Authorization: Private",
-                $"        /// ",
-                $"        ///     Headers:",
-                $"        ///         Authorization: <c>Bearer {{Token}}</c>",
-                $"        /// </remarks>",
-                $"        /// <response code=\"204\">No Content</response>",
-                $"        [IdentifierFilter]",
-                $"        [HttpPut]",
-                $"        [Route(\"update\")]",
-                $"        [Produces(GeneralConstants.ContentType.Json)]",
-                $"        [ProducesResponseType((int)StatusCodeEnum.NO_CONTENT)]",
-                $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.NOT_FOUND)]",
-                $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
-                $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
-                $"        public async Task<ActionResult<object>> Update([FromBody] {prefix}{entityUpper}Object {entityLower})",
-                "        {",
-                $"            await _{entityLower}Service.Update({entityLower});",
-                $"",
-                $"            return NoContent();",
-                "        }",
-            ]);
+            if (withSp && isStandardTable)
+            {
+                content.AddRange([
+                    $"        /// <summary>",
+                    $"        /// Insert a {entityUpper}",
+                    $"        /// </summary>",
+                    $"        /// <param name=\"{entityLower}\"></param>",
+                    $"        /// <returns></returns>",
+                    $"        /// <remarks>",
+                    $"        /// Inserts a new {entityUpper}",
+                    $"        /// ",
+                    $"        /// Authorization: Private",
+                    $"        /// ",
+                    $"        ///     Headers:",
+                    $"        ///         Authorization: <c>Bearer {{Token}}</c>",
+                    $"        /// </remarks>",
+                    $"        /// <response code=\"200\">Success: Returns the new {entityUpper} object</response>",
+                    $"        [IdentifierFilter]",
+                    $"        [HttpPost]",
+                    $"        [Route(\"insert\")]",
+                    $"        [Produces(GeneralConstants.ContentType.Json)]",
+                    $"        [ProducesResponseType(typeof(BaseApiResponseWithData<{className}Object>), (int)StatusCodeEnum.CREATED)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
+                    $"        public async Task<ActionResult<object>> Insert([FromBody] {className}Object {entityLower})",
+                    "        {",
+                    $"            {className}Object response = await _{entityLower}Service.Insert({entityLower});",
+                    $"",
+                    $"            return StatusCode((int)StatusCodeEnum.CREATED, ResponseHelper.SetResponseWithData(StatusCodeEnum.CREATED, response));",
+                    "        }",
+                    $"",
+                    $"        /// <summary>",
+                    $"        /// Insert a list of {entityUpper}s",
+                    $"        /// </summary>",
+                    $"        /// <param name=\"{entityLower}s\"></param>",
+                    $"        /// <returns></returns>",
+                    $"        /// <remarks>",
+                    $"        /// Insert a list of {entityUpper}s",
+                    $"        /// ",
+                    $"        /// Authorization: Private",
+                    $"        /// ",
+                    $"        ///     Headers:",
+                    $"        ///         Authorization: <c>Bearer {{Token}}</c>",
+                    $"        /// </remarks>",
+                    $"        /// <response code=\"200\">Success: Returns the news {entityUpper}s object</response>",
+                    $"        [IdentifierFilter]",
+                    $"        [HttpPost]",
+                    $"        [Route(\"insert/bulk\")]",
+                    $"        [Produces(GeneralConstants.ContentType.Json)]",
+                    $"        [ProducesResponseType(typeof(BaseApiResponseWithData<List<{className}Object>>), (int)StatusCodeEnum.CREATED)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
+                    $"        public async Task<ActionResult<object>> BulkInsert([FromBody] List<{className}Object> {entityLower}s)",
+                    "        {",
+                    $"            List<{className}Object> response = await _{entityLower}Service.BulkInsert({entityLower}s);",
+                    $"",
+                    $"            return StatusCode((int)StatusCodeEnum.CREATED, ResponseHelper.SetResponseWithData(StatusCodeEnum.CREATED, response));",
+                    "        }",
+                    $"",
+                    $"        /// <summary>",
+                    $"        /// Update a {entityUpper}",
+                    $"        /// </summary>",
+                    $"        /// <param name=\"{entityLower}\"></param>",
+                    $"        /// <returns></returns>",
+                    $"        /// <remarks>",
+                    $"        /// Update a {entityUpper}",
+                    $"        /// ",
+                    $"        /// Authorization: Private",
+                    $"        /// ",
+                    $"        ///     Headers:",
+                    $"        ///         Authorization: <c>Bearer {{Token}}</c>",
+                    $"        /// </remarks>",
+                    $"        /// <response code=\"204\">No Content</response>",
+                    $"        [IdentifierFilter]",
+                    $"        [HttpPut]",
+                    $"        [Route(\"update\")]",
+                    $"        [Produces(GeneralConstants.ContentType.Json)]",
+                    $"        [ProducesResponseType((int)StatusCodeEnum.NO_CONTENT)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.NOT_FOUND)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
+                    $"        public async Task<ActionResult<object>> Update([FromBody] {className}Object {entityLower})",
+                    "        {",
+                    $"            await _{entityLower}Service.Update({entityLower});",
+                    $"",
+                    $"            return NoContent();",
+                    "        }",
+                    $"",
+                    $"        /// <summary>",
+                    $"        /// Update a list of {entityUpper}s",
+                    $"        /// </summary>",
+                    $"        /// <param name=\"{entityLower}s\"></param>",
+                    $"        /// <returns></returns>",
+                    $"        /// <remarks>",
+                    $"        /// Update a list of {entityUpper}s",
+                    $"        /// ",
+                    $"        /// Authorization: Private",
+                    $"        /// ",
+                    $"        ///     Headers:",
+                    $"        ///         Authorization: <c>Bearer {{Token}}</c>",
+                    $"        /// </remarks>",
+                    $"        /// <response code=\"204\">No Content</response>",
+                    $"        [IdentifierFilter]",
+                    $"        [HttpPut]",
+                    $"        [Route(\"update/bulk\")]",
+                    $"        [Produces(GeneralConstants.ContentType.Json)]",
+                    $"        [ProducesResponseType((int)StatusCodeEnum.NO_CONTENT)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.NOT_FOUND)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
+                    $"        public async Task<ActionResult<object>> BulkUpdate([FromBody] List<{className}Object> {entityLower}s)",
+                    "        {",
+                    $"            await _{entityLower}Service.BulkUpdate({entityLower}s);",
+                    $"",
+                    $"            return NoContent();",
+                    "        }",
+                ]);
+            }
+            else
+            {
+                content.AddRange([
+                    $"        /// <summary>",
+                    $"        /// Insert a {entityUpper}",
+                    $"        /// </summary>",
+                    $"        /// <param name=\"{entityLower}\"></param>",
+                    $"        /// <returns></returns>",
+                    $"        /// <remarks>",
+                    $"        /// Inserts a new {entityUpper}",
+                    $"        /// ",
+                    $"        /// Authorization: Private",
+                    $"        /// ",
+                    $"        ///     Headers:",
+                    $"        ///         Authorization: <c>Bearer {{Token}}</c>",
+                    $"        /// </remarks>",
+                    $"        /// <response code=\"200\">Success: Returns the new {entityUpper} object</response>",
+                    $"        [IdentifierFilter]",
+                    $"        [HttpPost]",
+                    $"        [Route(\"insert\")]",
+                    $"        [Produces(GeneralConstants.ContentType.Json)]",
+                    $"        [ProducesResponseType(typeof(BaseApiResponseWithData<{prefix}{entityUpper}Object>), (int)StatusCodeEnum.CREATED)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
+                    $"        public async Task<ActionResult<object>> Insert([FromBody] {prefix}{entityUpper}Object {entityLower})",
+                    "        {",
+                    $"            {prefix}{entityUpper}Object response = await _{entityLower}Service.Insert({entityLower});",
+                    $"",
+                    $"            return StatusCode((int)StatusCodeEnum.CREATED, ResponseHelper.SetResponseWithData(StatusCodeEnum.CREATED, response));",
+                    "        }",
+                    $"",
+                    $"        /// <summary>",
+                    $"        /// Update a {entityUpper}",
+                    $"        /// </summary>",
+                    $"        /// <param name=\"{entityLower}\"></param>",
+                    $"        /// <returns></returns>",
+                    $"        /// <remarks>",
+                    $"        /// Update a {entityUpper}",
+                    $"        /// ",
+                    $"        /// Authorization: Private",
+                    $"        /// ",
+                    $"        ///     Headers:",
+                    $"        ///         Authorization: <c>Bearer {{Token}}</c>",
+                    $"        /// </remarks>",
+                    $"        /// <response code=\"204\">No Content</response>",
+                    $"        [IdentifierFilter]",
+                    $"        [HttpPut]",
+                    $"        [Route(\"update\")]",
+                    $"        [Produces(GeneralConstants.ContentType.Json)]",
+                    $"        [ProducesResponseType((int)StatusCodeEnum.NO_CONTENT)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.NOT_FOUND)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
+                    $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
+                    $"        public async Task<ActionResult<object>> Update([FromBody] {prefix}{entityUpper}Object {entityLower})",
+                    "        {",
+                    $"            await _{entityLower}Service.Update({entityLower});",
+                    $"",
+                    $"            return NoContent();",
+                    "        }",
+                ]);
+            }
+
 
             if (isStandardTable)
             {
@@ -813,11 +946,14 @@ namespace CodeGenerator.BLL
             GenerateFile("Controllers", $"{entityUpper}Controller.cs", content);
         }
 
-        public void GenerateService(string prefix, string entityUpper, string entityLower, bool WithCode, bool hasView, bool hasCmm, bool hasPrincipalField, bool isStandardTable)
+        public void GenerateService(string prefix, string entityUpper, string entityLower, bool WithCode, bool hasView, bool hasCmm, bool hasPrincipalField, bool isStandardTable, bool hasViewFull)
         {
             List<string> content;
             string viewGenerics;
             string entityUpperBase;
+            bool withSP = true;
+
+            string className = GetClassName(prefix, entityUpper, hasViewFull);
 
             entityUpperBase = entityUpper;
 
@@ -834,7 +970,7 @@ namespace CodeGenerator.BLL
                 $"",
                 $"namespace SAMMAI.DataBase.Services.Implementations",
                 "{",
-                $"    public class {entityUpper}Service : BaseRepository<{prefix}{entityUpper}, {viewGenerics}, SAMMAIContext>",
+                $"    public class {entityUpper}Service : BaseRepository<{className}, {viewGenerics}, SAMMAIContext>",
                 "    {",
             ]);
 
@@ -843,9 +979,9 @@ namespace CodeGenerator.BLL
             content.AddRange([
                 $"",
                 $"        #region Base Services",
-                $"        public async Task<{prefix}{entityUpper}Object> GetById(int id)",
+                $"        public async Task<{className}Object> GetById(int id)",
                 "        {",
-                $"            IEnumerable<{prefix}{entityUpper}> {entityLower}s = await GetFilteredAsync(x => x.Id == id{(isStandardTable ? " && x.Eid == _global.Eid && x.Active" : "")});",
+                $"            IEnumerable<{className}> {entityLower}s = await GetFilteredAsync(x => x.Id == id{(isStandardTable ? " && x.Eid == _global.Eid && x.Active" : "")});",
                 $"",
                 $"            return {entityLower}s.FirstOrDefault() ?? throw new ApiException(StatusCodeEnum.NOT_FOUND);",
                 "        }",
@@ -876,12 +1012,12 @@ namespace CodeGenerator.BLL
             }
 
             content.AddRange([
-                $"        public Task<List<{prefix}{entityUpper}Object>> GetSetByIds(List<int> ids)",
+                $"        public Task<List<{className}Object>> GetSetByIds(List<int> ids)",
                 "        {",
-                $"            IEnumerable<{prefix}{entityUpper}> {entityLower}s;",
+                $"            IEnumerable<{className}> {entityLower}s;",
                 $"",
                 $"            {entityLower}s = (",
-                $"                from {entityLower} in _context.Set<{prefix}{entityUpper}>()",
+                $"                from {entityLower} in _context.Set<{className}>()",
                 $"                join idsObject in ids on {entityLower}.Id equals idsObject",
             ]);
 
@@ -893,7 +1029,7 @@ namespace CodeGenerator.BLL
             content.AddRange([
                 $"                select {entityLower});",
                 $"",
-                $"            return Task.FromResult(_mapper.Map<List<{prefix}{entityUpper}Object>>({entityLower}s));",
+                $"            return Task.FromResult(_mapper.Map<List<{className}Object>>({entityLower}s));",
                 "        }",
                 $""
             ]);
@@ -936,9 +1072,9 @@ namespace CodeGenerator.BLL
             if (WithCode)
             {
                 content.AddRange([
-                    $"        public async Task<{prefix}{entityUpper}Object> GetByCode(string code)",
+                    $"        public async Task<{className}Object> GetByCode(string code)",
                     "        {",
-                    $"            IEnumerable<{prefix}{entityUpper}> {entityLower}s = await GetFilteredAsync(x => x.{entityUpper}Code == code{(isStandardTable ? " && x.Eid == _global.Eid && x.Active" : "")});",
+                    $"            IEnumerable<{className}> {entityLower}s = await GetFilteredAsync(x => x.{entityUpper}Code == code{(isStandardTable ? " && x.Eid == _global.Eid && x.Active" : "")});",
                     $"",
                     $"            return {entityLower}s.FirstOrDefault() ?? throw new ApiException(StatusCodeEnum.NOT_FOUND);",
                     "        }",
@@ -972,9 +1108,9 @@ namespace CodeGenerator.BLL
             if (hasCmm)
             {
                 content.AddRange([
-                    $"        public async Task<List<{prefix}{entityUpper}Object>> GetAll(string? cmmKeyword, string? spName = null, int? foreignValue = null)",
+                    $"        public async Task<List<{className}Object>> GetAll(string? cmmKeyword, string? spName = null, int? foreignValue = null)",
                     "        {",
-                    $"            return await _generalService.GetAllData<{prefix}{entityUpper}, {prefix}{entityUpper}, {prefix}{entityUpper}Object>(spName, foreignValue, cmmKeyword);",
+                    $"            return _mapper.Map<List<{className}Object>>(await GetAllData<{className}>(spName, foreignValue, cmmKeyword));",
                     "        }",
                     $""
                 ]);
@@ -984,7 +1120,7 @@ namespace CodeGenerator.BLL
                     content.AddRange([
                         $"        public async Task<List<View{prefix}{entityUpper}Object>> GetAllFull(string? cmmKeyword, string? spName = null, int? foreignValue = null)",
                         "        {",
-                        $"            return await _generalService.GetAllData<{prefix}{entityUpper}, View{prefix}{entityUpper}, View{prefix}{entityUpper}Object>(spName, foreignValue, cmmKeyword);",
+                        $"            return _mapper.Map<List<View{prefix}{entityUpper}Object>>(await GetAllData<View{prefix}{entityUpper}>(spName, foreignValue, cmmKeyword));",
                         "        }",
                         $""
                     ]);
@@ -992,7 +1128,7 @@ namespace CodeGenerator.BLL
                     content.AddRange([
                         $"        public async Task<List<View{prefix}{entityUpperBase}BaseObject>> GetAllBase(string? cmmKeyword, string? spName = null, int? foreignValue = null)",
                         "        {",
-                        $"            return await _generalService.GetAllData<{prefix}{entityUpper}, View{prefix}{entityUpperBase}Base, View{prefix}{entityUpperBase}BaseObject>(spName, foreignValue, cmmKeyword);",
+                        $"            return _mapper.Map<List<View{prefix}{entityUpperBase}BaseObject>>(await GetAllData<View{prefix}{entityUpperBase}Base>(spName, foreignValue, cmmKeyword));",
                         "        }",
                         $""
                     ]);
@@ -1001,11 +1137,11 @@ namespace CodeGenerator.BLL
             else
             {
                 content.AddRange([
-                    $"        public async Task<List<{prefix}{entityUpper}Object>> GetAll({(isStandardTable ? "string? spName = null, int? foreignValue = null" : "")})",
+                    $"        public async Task<List<{className}Object>> GetAll({(isStandardTable ? "string? spName = null, int? foreignValue = null" : "")})",
                     "        {",
-                    $"            return await {(isStandardTable ?
-                                        $"_generalService.GetAllData<{prefix}{entityUpper}, {prefix}{entityUpper}, {prefix}{entityUpper}Object>(spName, foreignValue)" :
-                                        $"GetAll()")};",
+                    $"            return {(isStandardTable ?
+                                        $"_mapper.Map<List<{className}Object>>(await GetAllData<{className}>(spName, foreignValue))" :
+                                        $"await GetAll()")};",
                     "        }",
                     $""
                 ]);
@@ -1015,7 +1151,7 @@ namespace CodeGenerator.BLL
                     content.AddRange([
                         $"        public async Task<List<View{prefix}{entityUpper}Object>> GetAllFull(string? spName = null, int? foreignValue = null)",
                         "        {",
-                        $"            return await _generalService.GetAllData<{prefix}{entityUpper}, View{prefix}{entityUpper}, View{prefix}{entityUpper}Object>(spName, foreignValue);",
+                        $"            return _mapper.Map<List<View{prefix}{entityUpper}Object>>(await GetAllData<View{prefix}{entityUpper}>(spName, foreignValue));",
                         "        }",
                         $""
                     ]);
@@ -1023,64 +1159,96 @@ namespace CodeGenerator.BLL
                     content.AddRange([
                         $"        public async Task<List<View{prefix}{entityUpperBase}BaseObject>> GetAllBase(string? spName = null, int? foreignValue = null)",
                         "        {",
-                        $"            return await _generalService.GetAllData<{prefix}{entityUpper}, View{prefix}{entityUpperBase}Base, View{prefix}{entityUpperBase}BaseObject>(spName, foreignValue);",
+                        $"            return _mapper.Map<List<View{prefix}{entityUpperBase}BaseObject>>(await GetAllData<View{prefix}{entityUpperBase}Base>(spName, foreignValue));",
                         "        }",
                         $""
                     ]);
                 }
             }
 
-            content.AddRange([
-                $"        public async Task<{prefix}{entityUpper}Object> Insert({prefix}{entityUpper}Object input)",
-                "        {",
-            ]);
-
-            if (isStandardTable)
+            if (withSP && isStandardTable)
+            {
                 content.AddRange([
-                    $"            input.Eid = _global.Eid;",
-                    $"            input.Uid = _global.Uid;",
-                    $"            input.IdUserCreator = _global.IdUser;",
-                    $"            input.IdUserModifier = _global.IdUser;",
-                    $"            input.DateCreation = DateTime.Now;",
-                    $"            input.DateModification = input.DateCreation;",
-                    $"            input.Active = true;",
+                    $"        public async Task<{className}Object> Insert({className}Object input)",
+                    "        {",
+                    $"            List<{className}Object> {entityLower} = await BulkInsert([input]);",
+                    $"",
+                    $"            return {entityLower}.FirstOrDefault() ?? throw new ApiException(StatusCodeEnum.BAD_REQUEST);",
+                    "        }",
+                    $"",
+                    $"        public async Task<List<{className}Object>> BulkInsert(List<{className}Object> input)",
+                    "        {",
+                    $"            List<{className}Object> {entityLower} = _mapper.Map<List<{className}Object>>(await BulkInsert<{className}Object>(input));",
+                    $"            return {entityLower};",
+                    "        }",
+                    $"",
+                    $"        public async Task Update({className}Object input)",
+                    "        {",
+                    $"            await GetById(input.Id);",
+                    "",
+                    $"            await BulkUpdate([input]);",
+                    "        }",
+                    $"",
+                    $"        public async Task BulkUpdate(List<{className}Object> input)",
+                    "        {",
+                    $"            await BulkUpdate<{className}Object>(input);",
+                    "        }",
+                ]);
+            }
+            else
+            {
+                content.AddRange([
+                    $"        public async Task<{prefix}{entityUpper}Object> Insert({prefix}{entityUpper}Object input)",
+                    "        {",
+                ]);
+
+                if (isStandardTable)
+                    content.AddRange([
+                        $"            input.Eid = _global.Eid;",
+                        $"            input.Uid = _global.Uid;",
+                        $"            input.IdUserCreator = _global.IdUser;",
+                        $"            input.IdUserModifier = _global.IdUser;",
+                        $"            input.DateCreation = DateTime.Now;",
+                        $"            input.DateModification = input.DateCreation;",
+                        $"            input.Active = true;",
+                        $"",
+                    ]);
+
+                content.AddRange([
+                    $"            {prefix}{entityUpper}Object? {entityLower} = await AddAsync(_mapper.Map<{prefix}{entityUpper}>(input));",
+                    $"",
+                    $"            if ({entityLower} != null)",
+                    $"                return {entityLower};",
+                    $"",
+                    $"            throw new ApiException(StatusCodeEnum.BAD_REQUEST);",
+                    "        }",
+                    $"",
+                    $"        public async Task Update({prefix}{entityUpper}Object input)",
+                    "        {",
+                    $"            {prefix}{entityUpper}Object {entityLower}Object;",
+                    $"",
+                    $"            await GetById(input.Id);",
                     $"",
                 ]);
 
-            content.AddRange([
-                $"            {prefix}{entityUpper}Object? {entityLower} = await AddAsync(_mapper.Map<{prefix}{entityUpper}>(input));",
-                $"",
-                $"            if ({entityLower} != null)",
-                $"                return {entityLower};",
-                $"",
-                $"            throw new ApiException(StatusCodeEnum.BAD_REQUEST);",
-                "        }",
-                $"",
-                $"        public async Task Update({prefix}{entityUpper}Object input)",
-                "        {",
-                $"            {prefix}{entityUpper}Object {entityLower}Object;",
-                $"",
-                $"            await GetById(input.Id);",
-                $"",
-            ]);
+                if (isStandardTable)
+                    content.AddRange([
+                        $"            input.Eid = _global.Eid;",
+                        $"            input.Uid = _global.Uid;",
+                        $"            input.IdUserModifier = _global.IdUser;",
+                        $"            input.DateModification = DateTime.Now;",
+                        $"            input.Active = true;",
+                        $"",
+                    ]);
 
-            if (isStandardTable)
                 content.AddRange([
-                    $"            input.Eid = _global.Eid;",
-                    $"            input.Uid = _global.Uid;",
-                    $"            input.IdUserModifier = _global.IdUser;",
-                    $"            input.DateModification = DateTime.Now;",
-                    $"            input.Active = true;",
+                    $"            {entityLower}Object = await UpdateAsync(_mapper.Map<{prefix}{entityUpper}>(input));",
                     $"",
+                    $"            if ({entityLower}Object is null)",
+                    $"                throw new ApiException(StatusCodeEnum.BAD_REQUEST);",
+                    "        }",
                 ]);
-
-            content.AddRange([
-                $"            {entityLower}Object = await UpdateAsync(_mapper.Map<{prefix}{entityUpper}>(input));",
-                $"",
-                $"            if ({entityLower}Object is null)",
-                $"                throw new ApiException(StatusCodeEnum.BAD_REQUEST);",
-                "        }",
-                ]);
+            }
 
             if (isStandardTable)
             {
@@ -1088,20 +1256,9 @@ namespace CodeGenerator.BLL
                     $"",
                     $"        public async Task SetActiveById(int id, bool active)",
                     "        {",
-                    $"            {prefix}{entityUpper}Object {entityLower}Object;",
+                    $"            {className}Object {entityLower}Object = await GetById(id);",
                     $"",
-                    $"            {entityLower}Object = await GetById(id);",
-                    $"",
-                    $"            {entityLower}Object.Eid = _global.Eid;",
-                    $"            {entityLower}Object.Uid = _global.Uid;",
-                    $"            {entityLower}Object.IdUserModifier = _global.IdUser;",
-                    $"            {entityLower}Object.DateModification = DateTime.Now;",
-                    $"            {entityLower}Object.Active = active;",
-                    $"",
-                    $"            {entityLower}Object = await UpdateAsync(_mapper.Map<{prefix}{entityUpper}>({entityLower}Object));",
-                    $"",
-                    $"            if ({entityLower}Object is null)",
-                    $"                throw new ApiException(StatusCodeEnum.BAD_REQUEST);",
+                    $"            await Active({entityLower}Object.Id, active);",
                     "        }",
                     $""
                 ]);
@@ -1110,20 +1267,9 @@ namespace CodeGenerator.BLL
                     content.AddRange([
                         $"        public async Task SetActiveByCode(string code, bool active)",
                         "        {",
-                        $"            {prefix}{entityUpper}Object {entityLower}Object;",
+                        $"            {className}Object {entityLower}Object = await GetByCode(code);",
                         $"",
-                        $"            {entityLower}Object = await GetByCode(code);",
-                        $"",
-                        $"            {entityLower}Object.Eid = _global.Eid;",
-                        $"            {entityLower}Object.Uid = _global.Uid;",
-                        $"            {entityLower}Object.IdUserModifier = _global.IdUser;",
-                        $"            {entityLower}Object.DateModification = DateTime.Now;",
-                        $"            {entityLower}Object.Active = active;",
-                        $"",
-                        $"            {entityLower}Object = await UpdateAsync(_mapper.Map<{prefix}{entityUpper}>({entityLower}Object));",
-                        $"",
-                        $"            if ({entityLower}Object is null)",
-                        $"                throw new ApiException(StatusCodeEnum.BAD_REQUEST);",
+                        $"            await Active({entityLower}Object.Id, active);",
                         "        }",
                     ]);
             }
@@ -1167,42 +1313,60 @@ namespace CodeGenerator.BLL
             return $"services.AddTransient<{entityUpper}Service>();";
         }
 
-        public List<string> GenerateMapByEntity(string entity)
+        public List<string> GenerateMapByEntity(FileModel file)
         {
             List<string> content;
 
             content = [
-                $"CreateMap<{entity}, {entity[..^"Object".Length]}>();",
-                $"CreateMap<{entity[..^"Object".Length]}, {entity}>();",
+                $"CreateMap<{file.Name}, {file.Name[..^"Object".Length]}>();",
+                $"CreateMap<{file.Name[..^"Object".Length]}, {file.Name}>();",
                 ""
             ];
+
+            if (HasViewFull(file))
+            {
+                content.AddRange([
+                    $"CreateMap<View{file.Name[..^"Object".Length]}FullObject, View{file.Name[..^"Object".Length]}Full>();",
+                    $"CreateMap<View{file.Name[..^"Object".Length]}Full, View{file.Name[..^"Object".Length]}FullObject>();",
+                    ""
+                ]);
+            }
 
             return content;
         }
 
-        private List<string> GenerateMapDTOByEntity(string entity)
+        private List<string> GenerateMapDTOByEntity(FileModel file)
         {
             List<string> content;
 
             content = [
-                $"CreateMap<{entity}, {entity[..^"Object".Length]}DTO>();",
-                $"CreateMap<{entity[..^"Object".Length]}DTO, {entity}>();",
+                $"CreateMap<{file.Name}, {file.Name[..^"Object".Length]}DTO>();",
+                $"CreateMap<{file.Name[..^"Object".Length]}DTO, {file.Name}>();",
                 "",
             ];
 
-            if (_filesModel.Any(x => x.Name == $"View{entity}"))
+            if (_filesModel.Any(x => x.Name == $"View{file.Name}"))
                 content.AddRange([
-                    $"CreateMap<View{entity}, View{entity[..^"Object".Length]}DTO>();",
-                    $"CreateMap<View{entity[..^"Object".Length]}DTO, View{entity}>();",
+                    $"CreateMap<View{file.Name}, View{file.Name[..^"Object".Length]}DTO>();",
+                    $"CreateMap<View{file.Name[..^"Object".Length]}DTO, View{file.Name}>();",
                     "",
                 ]);
 
-            if (_filesModel.Any(x => x.Name == $"View{entity[..^"Object".Length]}BaseObject"))
+            if (_filesModel.Any(x => x.Name == $"View{file.Name[..^"Object".Length]}BaseObject"))
                 content.AddRange([
-                    $"CreateMap<View{entity[..^"Object".Length]}BaseObject, View{entity[..^"Object".Length]}BaseDTO>();",
-                    $"CreateMap<View{entity[..^"Object".Length]}BaseDTO, View{entity[..^"Object".Length]}BaseObject>();",
+                    $"CreateMap<View{file.Name[..^"Object".Length]}BaseObject, View{file.Name[..^"Object".Length]}BaseDTO>();",
+                    $"CreateMap<View{file.Name[..^"Object".Length]}BaseDTO, View{file.Name[..^"Object".Length]}BaseObject>();",
                     "",
                 ]);
+
+            if (HasViewFull(file))
+            {
+                content.AddRange([
+                    $"CreateMap<View{file.Name[..^"Object".Length]}FullObject, View{file.Name[..^"Object".Length]}FullDTO>();",
+                    $"CreateMap<View{file.Name[..^"Object".Length]}FullDTO, View{file.Name[..^"Object".Length]}FullObject>();",
+                    ""
+                ]);
+            }
 
             content.Add("");
 
@@ -1238,6 +1402,15 @@ namespace CodeGenerator.BLL
             string viewPath;
 
             viewPath = fileModel.Path.Replace(fileModel.Name, $"View{fileModel.Name}");
+
+            return File.Exists(viewPath);
+        }
+
+        private bool HasViewFull(FileModel fileModel)
+        {
+            string viewPath;
+
+            viewPath = fileModel.Path.Replace(fileModel.Name, $"View{fileModel.Name[..^"Object".Length]}FullObject");
 
             return File.Exists(viewPath);
         }
@@ -1341,15 +1514,13 @@ namespace CodeGenerator.BLL
                 $"        private readonly SAMMAIContext _context;",
                 $"        private readonly Global _global;",
                 $"        private readonly IMapper _mapper;",
-                $"        private readonly GeneralService _generalService;",
             ];
 
             defaultParameters = [
                 $"            ILogger<{entityUpper}Service> logger,",
                 $"            SAMMAIContext context,",
                 $"            Global global,",
-                $"            IMapper mapper,",
-                $"            GeneralService generalService)",
+                $"            IMapper mapper)",
                 $"            : base(context, global)",
             ];
 
@@ -1358,7 +1529,6 @@ namespace CodeGenerator.BLL
                 $"            _context = context ?? throw new ArgumentNullException(nameof(context));",
                 $"            _global = global ?? throw new ArgumentNullException(nameof(global));",
                 $"            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));",
-                $"            _generalService = generalService ?? throw new ArgumentNullException(nameof(generalService));",
             ];
 
             content = Utilities.GetConstructor(

@@ -14,7 +14,7 @@ internal class Program
 
         Console.WriteLine("Start ...");
 
-        response = Execute(InputEnum.SPsTableGenerator, context, rootPathBaseWorkDirectory, rootPathSAMMAIDirectory);
+        response = Execute(InputEnum.MapDataBase, context, rootPathBaseWorkDirectory, rootPathSAMMAIDirectory);
 
         Console.WriteLine($"Result: {response}");
         Console.WriteLine("End");
@@ -45,7 +45,8 @@ internal class Program
             case InputEnum.SPsTableGenerator:
                 spsTableGenerator = new SPsTableGenerator(
                     rootPath: Path.Combine(rootPathBaseWorkDirectory, "BaseScript"),
-                    destityPath: Path.Combine(rootPathBaseWorkDirectory, baseResponseFolder, "SPs"));
+                    destityPath: Path.Combine(rootPathBaseWorkDirectory, baseResponseFolder, "SPs"),
+                    customSPsPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DataBase", "SAMMAI.DBObjects\\StoreProcedures\\0_custom"));
 
                 response = string.Join(Environment.NewLine, spsTableGenerator.GenerateSPs());
 
@@ -178,7 +179,8 @@ internal class Program
             case InputEnum.BaseSPsTableGenerator:
                 spsTableGenerator = new SPsTableGenerator(
                     rootPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DataBase", "SAMMAI.DBObjects", "Views"),
-                    destityPath: Path.Combine(rootPathBaseWorkDirectory, baseResponseFolder, "SPs"));
+                    destityPath: Path.Combine(rootPathBaseWorkDirectory, baseResponseFolder, "SPs"),
+                    customSPsPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DataBase", "SAMMAI.DBObjects\\StoreProcedures\\0_custom"));
 
                 response = string.Join(Environment.NewLine, spsTableGenerator.GenerateBasicViews());
 

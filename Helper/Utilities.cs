@@ -190,6 +190,7 @@ namespace CodeGenerator.Helper
             string openBrackets = "        {";
             string closeBrackets = "        }";
             int lastBracket;
+            int indexContent;
 
             defaultContructor = [];
             defaultContructor.AddRange(defaultProperties);
@@ -224,6 +225,20 @@ namespace CodeGenerator.Helper
                     }
                 }
             }
+
+            //quitar los espacios
+            indexContent = content.FindIndex(x => x.TrimStart().StartsWith("public"));
+            if (indexContent > 3 && string.IsNullOrWhiteSpace(content[indexContent - 2]))
+                content.RemoveAt(indexContent - 2);
+
+            indexContent = content.FindIndex(x => x.TrimStart().StartsWith(':'));
+            if (indexContent > 3 && string.IsNullOrWhiteSpace(content[indexContent - 1]))
+                content.RemoveAt(indexContent - 1);
+
+            indexContent = content.FindIndex(x => x.TrimStart().StartsWith('}'));
+            if (indexContent > 3 && string.IsNullOrWhiteSpace(content[indexContent - 1]))
+                content.RemoveAt(indexContent - 1);
+
 
             return content;
         }

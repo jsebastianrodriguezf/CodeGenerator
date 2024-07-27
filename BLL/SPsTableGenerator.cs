@@ -9,15 +9,24 @@ namespace CodeGenerator.BLL
         private readonly List<string> _files;
         private readonly List<FileModel> _filesModel;
         private readonly string _destinyPath;
+        private readonly string _customSPsPath;
+        private readonly List<string> _customSPsFiles;
+        private readonly List<FileModel> _customSPsFilesModel;
 
         public SPsTableGenerator(
             string rootPath,
-            string destityPath)
+            string destityPath,
+            string customSPsPath)
         {
             _rootPath = rootPath;
             _destinyPath = destityPath;
+            _customSPsPath = customSPsPath;
             _files = [.. Directory.GetFiles(_rootPath)];
             _filesModel = Utilities.GetFilesModel(_files);
+
+            _customSPsFiles = [.. Directory.GetFiles(_customSPsPath)];
+            _customSPsFilesModel = Utilities.GetFilesModel(_customSPsFiles);
+
             Utilities.RegenerateDirectory(_destinyPath);
         }
 
@@ -33,11 +42,15 @@ namespace CodeGenerator.BLL
 
         public void GenerateSPs(FileModel fileModel)
         {
+            (List<string> drop, List<string> create) customSP;
             List<string> template;
             List<string> linesByTable;
             List<string> spRoot;
             List<string> spTableRoot;
             List<string> allNewLines;
+            List<string> finalScripts;
+            List<string> allTypes;
+            List<string> allDropTypeSP;
             string line;
             string tableName;
             string principalColumn;
@@ -51,6 +64,9 @@ namespace CodeGenerator.BLL
             spTableRoot = [];
             spRoot = [];
             allNewLines = [];
+            finalScripts = [];
+            allTypes = [];
+            allDropTypeSP = [];
             hasCmm = false;
 
             for (int i = 0; i < template.Count; i++)
@@ -64,14 +80,18 @@ namespace CodeGenerator.BLL
 
                     hasPrincipalColumn = linesByTable.Any(x => x.Contains($"[{principalColumn}] AS [{principalColumn}]"));
 
-                    spTableRoot = ExtractSPsByTable(tableName, linesByTable, hasCmm, hasPrincipalColumn, ref allNewLines);
+                    spTableRoot = ExtractSPsByTable(tableName, linesByTable, hasCmm, hasPrincipalColumn, ref allNewLines, ref allTypes);
 
                     allNewLines.Add("------------------------------------------");
                     allNewLines.Add($"PRINT '{tableName}'");
                     allNewLines.Add("------------------------------------------");
 
-                    spRoot.AddRange(spTableRoot);
+                    allTypes.Add("------------------------------------------");
+                    allTypes.Add($"PRINT 'typ_{tableName}'");
+                    allTypes.Add("------------------------------------------");
 
+                    spRoot.AddRange(spTableRoot);
+                    allDropTypeSP.AddRange(DropTypeSp(tableName));
                     Utilities.GenerateFile(_destinyPath, "Roots", tableName + ".txt", spTableRoot);
 
                     i += 1;
@@ -89,8 +109,59 @@ namespace CodeGenerator.BLL
                 }
             }
 
+            customSP = GetCustomSPS();
+
+            finalScripts.AddRange(customSP.drop);
+            finalScripts.AddRange(allDropTypeSP);
+            finalScripts.AddRange(allTypes);
+            finalScripts.AddRange(allNewLines);
+            finalScripts.AddRange(customSP.create);
+
             Utilities.GenerateFile(_destinyPath, "Roots", "01_All_" + fileModel.Name + ".txt", spRoot);
-            Utilities.GenerateFile(_destinyPath, "AllScripts", "01_All_scripts_" + fileModel.Name + ".sql", allNewLines);
+            Utilities.GenerateFile(_destinyPath, "AllScripts", "01_All_scripts_" + fileModel.Name + ".sql", finalScripts);
+        }
+
+        private (List<string> drop, List<string> create) GetCustomSPS()
+        {
+            List<string> content = [];
+            (List<string> drop, List<string> create) response;
+            response.drop = [];
+            response.create = [];
+
+            foreach (FileModel file in _customSPsFilesModel)
+            {
+                response.create.Add("GO");
+                response.create.AddRange(File.ReadAllLines(file.Path));
+                response.create.AddRange([
+                    "GO",
+                    "------------------------------------------",
+                    $"PRINT 'custom_sp_{file.Name}'",
+                    "------------------------------------------"
+                ]);
+                response.drop.AddRange([
+                    $"IF  EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[{file.Name}]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[{file.Name}]",
+                    $"GO",
+                    "------------------------------------------",
+                    $"PRINT 'custom_drop_{file.Name}'",
+                    "------------------------------------------"
+                ]);
+            }
+
+            return response;
+        }
+
+        private List<string> DropTypeSp(string tableName)
+        {
+            string tableNameSimple = tableName.Replace('.', '_');
+            return [
+                $"IF  EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[ins_{tableNameSimple}_bulk]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[ins_{tableNameSimple}_bulk]",
+                $"GO",
+                $"IF  EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[upd_{tableNameSimple}_bulk]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[upd_{tableNameSimple}_bulk]",
+                $"GO",
+                "------------------------------------------",
+                $"PRINT 'sp_{tableName}'",
+                "------------------------------------------"
+            ];
         }
 
         private string GetTableName(string line)
@@ -104,27 +175,35 @@ namespace CodeGenerator.BLL
             return tableName;
         }
 
-        private List<string> ExtractSPsByTable(string tableName, List<string> templateTable, bool hasCmm, bool hasPrincipalColumn, ref List<string> allNewLines)
+        private List<string> ExtractSPsByTable(string tableName, List<string> templateTable, bool hasCmm, bool hasPrincipalColumn, ref List<string> allNewLines, ref List<string> allTypes)
         {
             List<string> sp;
             List<string> spRoot;
             string line;
             string spName;
             string viewName;
+            string insertName;
             string idParamSelMSP;
             bool isView;
+            bool isInsert;
+            bool isActive;
             bool isSelMSP;
             bool isSelAllSP;
 
             const string separator = "----------------------";
             const string ifExists = "IF  EXISTS (SELECT * FROM ";
 
+            bool hasParentTable = HasParentTable(tableName);
+
             sp = [];
             spRoot = [];
             spName = "SPNoName";
             viewName = "VIEWNoName";
+            insertName = "INSERTNoName";
             idParamSelMSP = "";
             isView = false;
+            isInsert = false;
+            isActive = false;
             isSelMSP = false;
             isSelAllSP = false;
 
@@ -150,9 +229,37 @@ namespace CodeGenerator.BLL
                         Utilities.GenerateFile(_destinyPath, Path.Combine("Views", tableName), viewName, viewContent);
                         spRoot.Add(Path.Combine("Views", tableName, viewName).Replace(@"\", "/"));
 
+                        if (hasParentTable)
+                            GenerateParentFullView(viewContent, tableName, ref spRoot, ref allNewLines);
+
                         GenerateBasicView(viewContent, tableName, ref spRoot, ref allNewLines);
 
+                        //a store procedure that is a side of main view
                         sp = sp.GetRange(endViewIndex, sp.Count - endViewIndex);
+                    }
+
+                    if (isInsert)
+                    {
+                        GenerateType(sp, tableName, ref spRoot, ref allTypes);
+
+                        allNewLines.Add("------------------------------------------");
+                        allNewLines.AddRange(sp);
+                        Utilities.GenerateFile(_destinyPath, Path.Combine("StoreProcedures", tableName), spName, sp);
+                        spRoot.Add(Path.Combine("StoreProcedures", tableName, spName).Replace(@"\", "/"));
+
+                        List<string> updateContent = GenerateBulkUpdate(sp, tableName, ref spRoot, ref allNewLines, hasCmm);
+                        allNewLines.Add("------------------------------------------");
+                        allNewLines.AddRange(updateContent);
+                        Utilities.GenerateFile(_destinyPath, Path.Combine("StoreProcedures", tableName), $"upd_{tableName.Replace('.', '_')}_bulk.sql", updateContent);
+                        spRoot.Add(Path.Combine("StoreProcedures", tableName, $"upd_{tableName.Replace('.', '_')}_bulk.sql").Replace(@"\", "/"));
+
+                        sp = GenerateBulkInsert(sp, tableName, ref spRoot, ref allNewLines, hasCmm);
+                        spName = spName.Replace(".sql", "_bulk.sql");
+                    }
+
+                    if (isActive)
+                    {
+                        sp = UpdateActiveSP(sp, tableName);
                     }
 
                     allNewLines.Add("------------------------------------------");
@@ -161,6 +268,7 @@ namespace CodeGenerator.BLL
                     spRoot.Add(Path.Combine("StoreProcedures", tableName, spName).Replace(@"\", "/"));
 
                     isView = false;
+                    isInsert = false;
                     isSelMSP = false;
                     sp = [];
                     spName = "NoName";
@@ -188,6 +296,18 @@ namespace CodeGenerator.BLL
                             viewName = spName;
                             spName = string.Empty;
                         }
+
+                        if (!isInsert)
+                            isInsert = spName.StartsWith($"ins_{tableName.Replace('.', '_')}");
+
+                        if (isInsert && spName.StartsWith($"ins_{tableName.Replace('.', '_')}"))
+                        {
+                            insertName = spName;
+                            //spName = string.Empty;
+                        }
+
+                        if (!isActive)
+                            isActive = spName.StartsWith($"act_{tableName.Replace('.', '_')}");
                     }
 
                     if (isSelMSP && line.Contains("@p_eid as varchar(50)"))
@@ -202,7 +322,7 @@ namespace CodeGenerator.BLL
                     if (isSelMSP && line.Contains("BEGIN"))
                     {
                         i += 1;
-                        sp.AddRange(GetSelSP(ref i, tableName, templateTable, hasCmm, idParamSelMSP));
+                        sp.AddRange(GetSelSP(ref i, tableName, templateTable, hasCmm, idParamSelMSP, hasParentTable));
                         i -= 1;
                     }
 
@@ -218,7 +338,7 @@ namespace CodeGenerator.BLL
                     if (isSelAllSP && line.Contains("BEGIN"))
                     {
                         i += 1;
-                        sp.AddRange(GetAllSP(ref i, tableName, templateTable, hasCmm, hasPrincipalColumn));
+                        sp.AddRange(GetAllSP(ref i, tableName, templateTable, hasCmm, hasPrincipalColumn, hasParentTable));
                         i += 2;
                     }
                 }
@@ -228,6 +348,11 @@ namespace CodeGenerator.BLL
                 GenerateUpdateCmmSP(tableName, ref allNewLines, ref spRoot);
 
             return spRoot;
+        }
+
+        private bool HasParentTable(string tableName)
+        {
+            return (tableName.StartsWith("doc_documento.") || tableName.StartsWith("cat_catalogo.")) && tableName.Split('.').Length == 2 && !tableName.Split('.')[1].Contains('_');
         }
 
         private List<string> GenerateUpdateCmmSP(string tableName, ref List<string> allNewLines, ref List<string> spRoot)
@@ -272,9 +397,9 @@ namespace CodeGenerator.BLL
             }
 
             sp.AddRange([
-                $"SET QUOTED_IDENTIFIER OFF",
+                $"SET QUOTED_IDENTIFIER ON",
                 $"GO",
-                $"SET ANSI_NULLS OFF",
+                $"SET ANSI_NULLS ON",
                 $"GO",
                 $"",
                 $"IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[{spName}]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[{spName}]",
@@ -306,7 +431,7 @@ namespace CodeGenerator.BLL
                 $"GO",
                 $"SET QUOTED_IDENTIFIER OFF ",
                 $"GO",
-                $"SET ANSI_NULLS ON",
+                $"SET ANSI_NULLS OFF",
                 $"GO",
                 $"",
             ]);
@@ -320,7 +445,7 @@ namespace CodeGenerator.BLL
             return sp;
         }
 
-        private List<string> GetSelSP(ref int index, string tableName, List<string> template, bool hasCmm, string idParamSelMSP)
+        private List<string> GetSelSP(ref int index, string tableName, List<string> template, bool hasCmm, string idParamSelMSP, bool hasParentTable)
         {
             List<string> content = [];
             List<string> originalContent = [];
@@ -356,7 +481,7 @@ namespace CodeGenerator.BLL
                         switch (t)
                         {
                             case 0:
-                                line = line.Replace($"FROM [view_{tableName}]", $"FROM [{tableName}]");
+                                line = line.Replace($"FROM [view_{tableName}]", $"FROM [{(hasParentTable ? $"view_{tableName.Replace(".", "_")}_full" : tableName)}]");
                                 break;
                             case 1:
                                 line = line.Replace($"FROM [view_{tableName}]", $"FROM [view_{tableName.Replace(".", "_")}]");
@@ -384,7 +509,7 @@ namespace CodeGenerator.BLL
             return content;
         }
 
-        private List<string> GetAllSP(ref int index, string tableName, List<string> template, bool hasCmm, bool hasPrincipalColumn)
+        private List<string> GetAllSP(ref int index, string tableName, List<string> template, bool hasCmm, bool hasPrincipalColumn, bool hasParentTable)
         {
             List<string> content;
             List<string> cmmCondition;
@@ -421,7 +546,7 @@ namespace CodeGenerator.BLL
                 $"	IF @p_retorno = 0 -- TABLE",
                 $"	BEGIN",
                 $"		SELECT *",
-                $"		FROM [{tableName}]",
+                $"		FROM [{(hasParentTable ? $"view_{tableWithoutDot}_full" : tableName)}]",
                 $"		WHERE",
                 $"			([active] = 1) AND",
             ]);
@@ -569,6 +694,666 @@ namespace CodeGenerator.BLL
             spRoot.Add(Path.Combine("Views", tableName, $"{basicViewName}.sql").Replace(@"\", "/"));
 
             return basicViewContent;
+        }
+
+        private List<string> GenerateParentFullView(List<string> seedViewContent, string tableName, ref List<string> spRoot, ref List<string> allNewLines)
+        {
+            List<string> basicViewContent = [];
+            string tableNameNotDot = tableName.Replace(".", "_");
+            string basicViewName = $"view_{tableNameNotDot}_full";
+            string viewName = $"view_{tableNameNotDot}";
+
+            int indexSELECT = seedViewContent.FindIndex(x => x.StartsWith($"SELECT 	[{tableName}]", StringComparison.CurrentCultureIgnoreCase));
+            int indexFROM = seedViewContent.FindIndex(x => x.StartsWith($"FROM [{tableName}]", StringComparison.CurrentCultureIgnoreCase));
+            int indexWHERE = seedViewContent.FindIndex(x => x.Contains($"WHERE [{tableName}].active=1", StringComparison.CurrentCultureIgnoreCase));
+
+            for (int i = 0; i < seedViewContent.Count; i++)
+            {
+                string line = seedViewContent[i];
+                if (line.Contains($"[{viewName}]"))
+                    line = line.Replace($"[{viewName}]", $"[{basicViewName}]");
+
+                if ((i > indexSELECT && i < indexFROM && !(line.TrimStart().StartsWith($"[{tableName}]") || line.TrimStart().StartsWith($"[{tableNameNotDot}]"))) ||
+                    (i > indexFROM && i < indexWHERE && !line.Contains($"ON [{tableName}].id = [{tableNameNotDot}].id")) ||
+                    i == indexWHERE)
+                    continue;
+
+                if (i > indexSELECT && i < indexFROM && line.TrimStart().StartsWith($"[{tableNameNotDot}]"))
+                {
+                    line = line.Replace($"{tableNameNotDot}_", "");
+                    if (line.Contains($"[{tableNameNotDot}].[cmm] AS [cmm]"))
+                        continue;
+                }
+
+                if (i == indexFROM)
+                    basicViewContent[^1] = basicViewContent[^1].Replace(",", string.Empty);
+
+                basicViewContent.Add(line);
+            }
+
+            allNewLines.Add("------------------------------------------");
+            allNewLines.AddRange(basicViewContent);
+            Utilities.GenerateFile(_destinyPath, Path.Combine("Views", tableName), $"{basicViewName}.sql", basicViewContent);
+            spRoot.Add(Path.Combine("Views", tableName, $"{basicViewName}.sql").Replace(@"\", "/"));
+
+            return basicViewContent;
+        }
+
+        private List<string> GenerateType(List<string> seedContent, string tableName, ref List<string> spRoot, ref List<string> allTypes)
+        {
+            List<string> content = [];
+            int indexFirstColumn;
+            int indexLastColumn;
+            string line;
+            string column;
+            string tableNameSimple = tableName.Replace('.', '_');
+
+            const string prefix = "@p_";
+
+            indexFirstColumn = seedContent.FindIndex(x => x.Contains($"@p_id_usuario_creo int", StringComparison.CurrentCultureIgnoreCase)) + 1;
+            indexLastColumn = seedContent.FindIndex(x => x.TrimStart().StartsWith($"AS", StringComparison.CurrentCultureIgnoreCase)) - 1;
+
+            content.AddRange([
+                $"SET QUOTED_IDENTIFIER OFF",
+                $"GO",
+                $"SET ANSI_NULLS OFF",
+                $"GO",
+                $"",
+                $"IF EXISTS (SELECT 1 FROM sys.types WHERE name = 'typ_{tableNameSimple}' AND is_table_type = 1)DROP TYPE [dbo].[typ_{tableNameSimple}]",
+                $"GO",
+                $"CREATE TYPE [typ_{tableNameSimple}] AS TABLE",
+                $"(",
+                $"	id int,",
+                $"	uid varchar(500),",
+                $"	eid varchar(50),",
+                $"	usuario_modifico int,",
+                $"	usuario_creo int,",
+                $"	fechaModificacion smalldatetime,",
+                $"	fechaCreacion smalldatetime,",
+                $"	active bit,",
+            ]);
+
+            for (int i = indexFirstColumn; i <= indexLastColumn; i++)
+            {
+                line = seedContent[i];
+                column = line.TrimStart().Replace(prefix, string.Empty);
+
+                if (tableName == "doc_documento" && column.TrimStart().StartsWith("cmm"))
+                    content.Add($"	identificador varchar(25),");
+
+                content.Add($"	{column}");
+            }
+
+            if (HasParentTable(tableName) && tableName.StartsWith("doc_documento."))
+            {
+                content[^1] = content[^1] + ",";
+                content.Add($"	identificador varchar(25)");
+            }
+
+            content.AddRange([
+                $");",
+                $"GO",
+                $"SET QUOTED_IDENTIFIER OFF ",
+                $"GO",
+                $"SET ANSI_NULLS ON",
+                $"GO",
+            ]);
+
+            Utilities.GenerateFile(_destinyPath, Path.Combine("Types", tableName), $"typ_{tableNameSimple}.sql", content);
+            spRoot.Add(Path.Combine("Types", tableName, $"typ_{tableNameSimple}.sql").Replace(@"\", "/"));
+
+            allTypes.AddRange(content);
+
+            return content;
+        }
+
+        private List<string> GenerateBulkInsert(List<string> seedContent, string tableName, ref List<string> spRoot, ref List<string> allNewLines, bool hasCmm)
+        {
+            List<string> content = [];
+            List<string> columns = [];
+            (string? tableName, List<string> content) parentInsert;
+            bool hasParentTable;
+            bool isParentTable;
+            int indexFirstColumn;
+            int indexLastColumn;
+            string line;
+            string column;
+
+            string tableNameSimple = tableName.Replace('.', '_');
+
+            isParentTable = tableName == "doc_documento" || tableName == "cat_catalogo";
+            parentInsert = GetParentInsert(tableName, hasCmm);
+            hasParentTable = !string.IsNullOrEmpty(parentInsert.tableName);
+
+            indexFirstColumn = seedContent.FindIndex(x => x.Contains($"[fechaCreacion]", StringComparison.CurrentCultureIgnoreCase)) + 1;
+            indexLastColumn = seedContent.FindIndex(x => x.Contains($"VALUES", StringComparison.CurrentCultureIgnoreCase)) - 1;
+
+            for (int i = indexFirstColumn; i <= indexLastColumn; i++)
+            {
+                line = seedContent[i];
+                column = line.TrimStart();
+                columns.Add($"		{column}");
+            }
+
+            content.AddRange([
+                $"SET QUOTED_IDENTIFIER ON",
+                $"GO",
+                $"SET ANSI_NULLS ON",
+                $"GO",
+                $"",
+                $"IF  EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[ins_{tableNameSimple}_bulk]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[ins_{tableNameSimple}_bulk]",
+                $"GO",
+                $"CREATE PROCEDURE [ins_{tableNameSimple}_bulk]",
+                $"	@p_{tableNameSimple} AS typ_{tableNameSimple} READONLY,",
+                $"	@p_uid varchar(500),",
+                $"	@p_eid varchar(50),",
+                $"	@p_id_usuario int",
+                $"AS",
+                $"BEGIN",
+                $"	DECLARE @v_ids AS typ_ids"
+            ]);
+
+            content.AddRange(parentInsert.content);
+
+            content.AddRange([
+                $"",
+                $"	INSERT INTO [{tableName}]",
+            ]);
+
+            if (hasParentTable)
+                content.Add("		([id],");
+
+            content.AddRange([
+                $"		{(hasParentTable ? "" : "(")}[uid],",
+                $"		[eid],",
+                $"		[id_usuario_creo],",
+                $"		[id_usuario_modifico],",
+                $"		[fechaCreacion],",
+                $"		[fechaModificacion],",
+            ]);
+
+            content.AddRange(columns);
+
+            content.AddRange([
+                $"	OUTPUT inserted.id INTO @v_ids",
+                $"	SELECT",
+            ]);
+
+            if (hasParentTable)
+                content.AddRange([$"		{parentInsert.tableName}.id,"]);
+
+            content.AddRange([
+                $"		@p_uid,",
+                $"		@p_eid,",
+                $"		@p_id_usuario,",
+                $"		@p_id_usuario,",
+                $"		GETDATE(),",
+                $"		GETDATE(),",
+            ]);
+
+            content.AddRange(columns.Select(x => x.Replace('.', '_')).Select(x =>
+            {
+                if (isParentTable && tableName == "doc_documento")
+                {
+                    x = x switch
+                    {
+                        "		[documento_numero]," => $"		doc_subtipoDocumento.consecutivo + ROW_NUMBER() OVER (PARTITION BY doc_subtipoDocumento.id ORDER BY doc_subtipoDocumento.id),",
+                        "		[prefijo]," => $"		doc_subtipoDocumento.[prefijo],",
+                        _ => x,
+                    };
+                }
+
+                if (hasParentTable && x.Contains("[cmm]"))
+                {
+                    x = $"		''" + (x.Contains(',') ? "," : "");
+                }
+
+                if (isParentTable && tableName == "doc_documento" && x.Contains("[cmm]"))
+                {
+                    x = x.Replace("[cmm]", $"{tableNameSimple}.[cmm]");
+                }
+
+
+                return x;
+            }));
+            content[^1] = content[^1].Replace(")", "");
+
+            if (isParentTable && tableName == "doc_documento")
+            {
+                content.AddRange([
+                    $"	FROM @p_{tableNameSimple} {tableNameSimple}",
+                    $"		INNER JOIN doc_subtipoDocumento",
+                    $"	ON {tableNameSimple}.id_subtipoDocumento = doc_subtipoDocumento.id",
+                    $"	WHERE",
+                    $"		doc_subtipoDocumento.eid = @p_eid AND",
+                    $"		doc_subtipoDocumento.active = 1",
+                    $"",
+                ]);
+            }
+            else if (!hasParentTable)
+            {
+                content.AddRange([
+                    $"	FROM @p_{tableNameSimple}",
+                    $"",
+                ]);
+            }
+            else
+            {
+                content.AddRange([
+                    $"	FROM @v_{tableNameSimple} {tableNameSimple}",
+                    $"	    INNER JOIN @v_{parentInsert.tableName} {parentInsert.tableName}",
+                    $"	ON {tableNameSimple}.cmm = {parentInsert.tableName}.cmm",
+                    $"",
+                ]);
+            }
+
+            if (hasCmm && !isParentTable)
+                content.AddRange([
+                    $"	BEGIN TRY",
+                    $"		EXEC upd_{tableNameSimple}_cmm @v_ids, @p_id_usuario, @p_eid",
+                    $"	END TRY",
+                    $"	BEGIN CATCH",
+                    $"		PRINT 'ERROR [{tableName}]: ' + ERROR_MESSAGE();",
+                    $"	END CATCH;",
+                    $"",
+                ]);
+
+            if (isParentTable && tableName == "doc_documento")
+            {
+                content.AddRange([
+                    $"	UPDATE doc_subtipoDocumento",
+                    $"	SET ",
+                    $"		consecutivo = temp.numero,",
+                    $"		fechaModificacion = GETDATE(),",
+                    $"		id_usuario_modifico = @p_id_usuario",
+                    $"	FROM doc_subtipoDocumento",
+                    $"		JOIN (",
+                    $"			SELECT MAX(doc_documento.documento_numero) numero, doc_documento.id_subtipoDocumento",
+                    $"			FROM @v_ids ids",
+                    $"				INNER JOIN doc_documento",
+                    $"			ON ids.Id = doc_documento.id",
+                    $"			GROUP BY doc_documento.id_subtipoDocumento",
+                    $"		) AS temp ",
+                    $"	ON doc_subtipoDocumento.id = temp.id_subtipoDocumento",
+                    $"",
+                ]);
+            }
+
+            if (hasParentTable)
+            {
+                content.AddRange([
+                    $"	SELECT [view_{tableName.Replace('.', '_')}_full].*",
+                    $"	FROM [view_{tableName.Replace('.', '_')}_full]",
+                    $"		INNER JOIN @v_ids ids",
+                    $"	ON [view_{tableName.Replace('.', '_')}_full].id = ids.id",
+                ]);
+            }
+            else
+            {
+                content.AddRange([
+                    $"	SELECT [{tableName}].*",
+                    $"	FROM [{tableName}]",
+                    $"		INNER JOIN @v_ids ids",
+                    $"	ON [{tableName}].id = ids.id",
+                ]);
+            }
+
+            content.AddRange([
+                $"END",
+                $"GO",
+                $"SET QUOTED_IDENTIFIER OFF",
+                $"GO",
+                $"SET ANSI_NULLS OFF",
+                $"GO",
+            ]);
+
+            //allNewLines.AddRange(content);
+            return content;
+        }
+
+        private (string? parentTable, List<string> parentInsert) GetParentInsert(string tableName, bool hasCmm)
+        {
+            (string? parentTable, List<string> parentInsert) response;
+            List<string> content = [];
+            string column;
+            int indexFirstColumn;
+            int indexLastColumn;
+            string tableNameSimple = tableName.Replace('.', '_');
+
+            if ((tableName.StartsWith("doc_documento.") || tableName.StartsWith("cat_catalogo.")) && tableNameSimple.Split('_').Length == 3)
+            {
+                response.parentTable = tableName.Split('.').First();
+                List<string> parentTypeColumns = [];
+                List<string> mainTypeColumns = [];
+
+                List<string> template = [.. File.ReadAllLines(Path.Combine(_destinyPath, "Types", response.parentTable, $"typ_{response.parentTable}.sql"))];
+                List<string> templateMain = [.. File.ReadAllLines(Path.Combine(_destinyPath, "Types", tableName, $"typ_{tableNameSimple}.sql"))];
+                List<string> parentColumns;
+                List<string> allMainColumns;
+                int indexCmm;
+
+                indexFirstColumn = template.FindIndex(x => x.Contains($"	active bit,", StringComparison.CurrentCultureIgnoreCase)) + 1;
+                indexLastColumn = template.FindIndex(x => x.Contains($");", StringComparison.CurrentCultureIgnoreCase)) - 1;
+
+                parentColumns = template.GetRange(indexFirstColumn, indexLastColumn - indexFirstColumn + 1);
+
+                indexCmm = parentColumns.FindIndex(x => x.Contains("cmm ", StringComparison.CurrentCultureIgnoreCase));
+                if (indexCmm > -1)
+                    parentColumns.RemoveAt(indexCmm);
+
+                if (parentColumns.Count > 0 && !parentColumns[^1].TrimEnd().EndsWith(','))
+                    parentColumns[^1] = parentColumns[^1] + ",";
+
+                for (int i = 0; i < parentColumns.Count; i++)
+                {
+                    column = parentColumns[i].TrimStart().Split(' ').First() + (i < parentColumns.Count - 1 ? "," : "");
+
+                    if (column.TrimStart().StartsWith("identificador") && tableName.StartsWith("doc_documento."))
+                        continue;
+                    parentTypeColumns.Add($"		{column}");
+                }
+
+                if (hasCmm)
+                {
+                    if (tableName.StartsWith("cat_catalogo."))
+                        parentTypeColumns[^1] = parentTypeColumns[^1] + ",";
+                    parentTypeColumns.Add($"		cmm");
+                }
+
+
+                indexFirstColumn = templateMain.FindIndex(x => x.Contains($"CREATE TYPE ", StringComparison.CurrentCultureIgnoreCase)) + 2;
+                indexLastColumn = templateMain.FindIndex(x => x.Contains($");", StringComparison.CurrentCultureIgnoreCase)) - 1;
+                allMainColumns = templateMain.GetRange(indexFirstColumn, indexLastColumn - indexFirstColumn + 1);
+
+                for (int i = 0; i < allMainColumns.Count; i++)
+                {
+                    column = allMainColumns[i].TrimStart().Split(' ').First() + (i < allMainColumns.Count - 1 ? "," : "");
+                    mainTypeColumns.Add($"		{column}");
+                }
+
+                content.AddRange([
+                     $"	DECLARE @v_{tableNameSimple} AS typ_{tableNameSimple}",
+                     $"	DECLARE @v_{response.parentTable} AS typ_{response.parentTable}",
+                     $"",
+                     $"	INSERT INTO @v_{tableNameSimple} (",
+                ]);
+
+                content.AddRange(mainTypeColumns);
+
+                content.AddRange([
+                    "	)",
+                    $"	SELECT"
+                ]);
+
+                content.AddRange(mainTypeColumns.Select(x =>
+                {
+                    if (x.TrimStart().StartsWith("cmm,"))
+                    {
+                        x = "		ROW_NUMBER() OVER (ORDER BY id),";
+                    }
+
+                    return x;
+                }));
+
+                content.AddRange([
+                    $"	FROM @p_{tableNameSimple}",
+                ]);
+
+
+                content.AddRange([
+                     $"",
+                     $"	INSERT INTO @v_{response.parentTable} (",
+                ]);
+
+                content.AddRange(parentTypeColumns);
+
+                content.AddRange([
+                    "	)",
+                    $"	SELECT"
+                ]);
+
+                content.AddRange(parentTypeColumns.Select(x =>
+                {
+                    if (x.TrimStart().StartsWith("catalogo,"))
+                    {
+                        x = x.Replace("catalogo", "catalogo" + "_" + tableNameSimple.Split('_')[2]);
+                    }
+
+                    if (x.TrimStart().StartsWith("documento,"))
+                    {
+                        x = x.Replace("documento", "documento" + "_" + tableNameSimple.Split('_')[2]);
+                    }
+
+                    return x;
+                }));
+
+                content.AddRange([
+                    $"	FROM @v_{tableNameSimple}",
+                    $"",
+                    $"	INSERT INTO @v_{response.parentTable}",
+                    $"	EXEC [ins_{response.parentTable}_bulk] @v_{response.parentTable}, @p_uid, @p_eid, @p_id_usuario",
+                    $"",
+                    $"	DELETE FROM @v_{response.parentTable} WHERE id IS NULL",
+                ]);
+
+            }
+            else
+                response.parentTable = null;
+
+            response.parentInsert = content;
+
+            return response;
+        }
+
+        private List<string> GenerateBulkUpdate(List<string> seedContent, string tableName, ref List<string> spRoot, ref List<string> allNewLines, bool hasCmm)
+        {
+            List<string> content = [];
+            List<string> columns = [];
+            (string? tableName, List<string> content) parentUpdate;
+            bool hasParentTable;
+            bool isParentTable;
+            int indexFirstColumn;
+            int indexLastColumn;
+            string line;
+            string column;
+
+            string tableNameSimple = tableName.Replace('.', '_');
+
+            isParentTable = tableName == "doc_documento" || tableName == "cat_catalogo";
+            parentUpdate = GetParentUpdate(tableName, hasCmm);
+            hasParentTable = !string.IsNullOrEmpty(parentUpdate.tableName);
+
+            indexFirstColumn = seedContent.FindIndex(x => x.Contains($"[fechaCreacion]", StringComparison.CurrentCultureIgnoreCase)) + 1;
+            indexLastColumn = seedContent.FindIndex(x => x.Contains($"VALUES", StringComparison.CurrentCultureIgnoreCase)) - 1;
+
+            for (int i = indexFirstColumn; i <= indexLastColumn; i++)
+            {
+                line = seedContent[i];
+                column = line.TrimStart().Replace(",", "").Replace(")", "");
+                columns.Add($"		[{tableName}].{column} = ISNULL([source].{column.Replace('.', '_')}, [{tableName}].{column}),");
+            }
+            columns[^1] = columns[^1].TrimEnd()[..^1];
+
+            content.AddRange([
+                $"SET QUOTED_IDENTIFIER ON",
+                $"GO",
+                $"SET ANSI_NULLS ON",
+                $"GO",
+                $"",
+                $"IF  EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[upd_{tableNameSimple}_bulk]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[upd_{tableNameSimple}_bulk]",
+                $"GO",
+                $"CREATE PROCEDURE [upd_{tableNameSimple}_bulk]",
+                $"	@p_{tableNameSimple} AS typ_{tableNameSimple} READONLY,",
+                $"	@p_uid varchar(500),",
+                $"	@p_eid varchar(50),",
+                $"	@p_id_usuario int",
+                 $"AS",
+                $"BEGIN",
+            ]);
+
+            if (hasCmm && !isParentTable)
+                content.Add($"	DECLARE @v_ids AS typ_ids");
+
+            content.AddRange(parentUpdate.content);
+
+            content.AddRange([
+                "",
+                $"	UPDATE [{tableName}]",
+                $"	SET	[{tableName}].[id_usuario_modifico] = ISNULL(@p_id_usuario, [{tableName}].[id_usuario_modifico]),",
+                $"		[{tableName}].[fechaModificacion] = GETDATE(),",
+            ]);
+
+            content.AddRange(columns);
+
+            content.AddRange([
+                $"	FROM [{tableName}]",
+                $"		INNER JOIN @p_{tableNameSimple} [source]",
+                $"	ON [{tableName}].id = [source].id",
+                $"	WHERE ",
+                $"		[{tableName}].eid = @p_eid AND",
+                $"		[{tableName}].active = 1",
+                ""
+            ]);
+
+            if (hasCmm && !isParentTable)
+                content.AddRange([
+                    $"	BEGIN TRY",
+                    $"		INSERT INTO @v_ids",
+                    $"		SELECT id",
+                    $"		FROM @p_{tableNameSimple}",
+                    "",
+                    $"		EXEC upd_{tableNameSimple}_cmm @v_ids, @p_id_usuario, @p_eid",
+                    $"	END TRY",
+                    $"	BEGIN CATCH",
+                    $"		PRINT 'ERROR [{tableName}]: ' + ERROR_MESSAGE();",
+                    $"	END CATCH;",
+                    $"",
+                ]);
+
+            content.AddRange([
+                $"END",
+                $"GO",
+                $"SET QUOTED_IDENTIFIER OFF ",
+                $"GO",
+                $"SET ANSI_NULLS OFF",
+                $"GO",
+            ]);
+
+            //allNewLines.AddRange(content);
+            return content;
+        }
+
+        private (string? parentTable, List<string> parentInsert) GetParentUpdate(string tableName, bool hasCmm)
+        {
+            (string? parentTable, List<string> parentInsert) response;
+            List<string> content = [];
+            string column;
+            int indexFirstColumn;
+            int indexLastColumn;
+            string tableNameSimple = tableName.Replace('.', '_');
+
+            if ((tableName.StartsWith("doc_documento.") || tableName.StartsWith("cat_catalogo.")) && tableName.Replace('.', '_').Split('_').Length == 3)
+            {
+                response.parentTable = tableName.Split('.').First();
+                List<string> parentTypeColumns = [];
+
+                List<string> template = [.. File.ReadAllLines(Path.Combine(_destinyPath, "Types", response.parentTable, $"typ_{response.parentTable}.sql"))];
+                List<string> parentColumns;
+                int indexCmm;
+
+                indexFirstColumn = template.FindIndex(x => x.Contains($"	active bit,", StringComparison.CurrentCultureIgnoreCase)) + 1;
+                indexLastColumn = template.FindIndex(x => x.Contains($");", StringComparison.CurrentCultureIgnoreCase)) - 1;
+
+                parentColumns = template.GetRange(indexFirstColumn, indexLastColumn - indexFirstColumn + 1);
+
+                indexCmm = parentColumns.FindIndex(x => x.Contains("cmm ", StringComparison.CurrentCultureIgnoreCase));
+                if (indexCmm > -1)
+                    parentColumns.RemoveAt(indexCmm);
+
+                if (parentColumns.Count > 0 && !parentColumns[^1].TrimEnd().EndsWith(','))
+                    parentColumns[^1] = parentColumns[^1] + ",";
+
+                parentTypeColumns.Add($"		id,");
+                for (int i = 0; i < parentColumns.Count; i++)
+                {
+                    column = parentColumns[i].TrimStart().Split(' ').First() + (i < parentColumns.Count - 1 ? "," : "");
+
+                    if (column.TrimStart().StartsWith("identificador") && tableName.StartsWith("doc_documento."))
+                        continue;
+
+                    parentTypeColumns.Add($"		{column}");
+                }
+
+                if (hasCmm)
+                {
+                    if (tableName.StartsWith("cat_catalogo."))
+                        parentTypeColumns[^1] = parentTypeColumns[^1] + ",";
+                    parentTypeColumns.Add($"		cmm");
+                }
+
+                content.AddRange([
+                     $"	DECLARE @v_{response.parentTable} AS typ_{response.parentTable}",
+                     $"",
+                     $"	INSERT INTO @v_{response.parentTable} (",
+                ]);
+
+                content.AddRange(parentTypeColumns);
+
+                content.AddRange([
+                    "	)",
+                    $"	SELECT"
+                ]);
+
+                content.AddRange(parentTypeColumns.Select(x =>
+                {
+                    if (x.TrimStart().StartsWith("catalogo,"))
+                    {
+                        x = x.Replace("catalogo", "catalogo" + "_" + tableNameSimple.Split('_')[2]);
+                    }
+
+                    if (x.TrimStart().StartsWith("documento,"))
+                    {
+                        x = x.Replace("documento", "documento" + "_" + tableNameSimple.Split('_')[2]);
+                    }
+
+                    return x;
+                }));
+
+                content.AddRange([
+                    $"	FROM @p_{tableNameSimple}",
+                    $"",
+                    $"	EXEC [upd_{response.parentTable}_bulk] @v_{response.parentTable}, @p_uid, @p_eid, @p_id_usuario",
+                ]);
+
+            }
+            else
+                response.parentTable = null;
+
+            response.parentInsert = content;
+
+            return response;
+        }
+
+        private List<string> UpdateActiveSP(List<string> template, string tableName)
+        {
+            int index;
+
+            const string QUOTED_IDENTIFIER = "SET QUOTED_IDENTIFIER";
+            const string ANSI_NULLS = "SET ANSI_NULLS";
+
+            index = template.FindIndex(x => x.Contains(QUOTED_IDENTIFIER));
+            template[index] = template[index].Replace("OFF", "ON");
+
+            index = template.FindIndex(x => x.Contains(ANSI_NULLS));
+            template[index] = template[index].Replace("OFF", "ON");
+
+            index = template.FindLastIndex(x => x.Contains(QUOTED_IDENTIFIER));
+            template[index] = template[index].Replace("ON", "OFF");
+
+            index = template.FindLastIndex(x => x.Contains(ANSI_NULLS));
+            template[index] = template[index].Replace("ON", "OFF");
+
+            return template;
         }
     }
 }
