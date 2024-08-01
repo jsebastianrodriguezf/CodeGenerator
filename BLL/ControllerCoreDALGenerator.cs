@@ -1125,7 +1125,7 @@ namespace CodeGenerator.BLL
                 "        {",
                 $"            {className}Object? {entityLower};",
                 $"",
-                $"            {entityLower} = id > 0 ? await _dataBaseRepository.GetById<{className}Object>({entityUpper}BaseController, id) : null;",
+                $"            {entityLower} = id > 0 ? await _dataBaseRepository.GetById<{className}Object>(BaseController.{entityUpper}, id) : null;",
                 $"            if ({entityLower} is null && !nullable) throw new ApiException(StatusCodeEnum.NOT_FOUND);",
                 $"",
                 $"            return {entityLower};",
@@ -1140,7 +1140,7 @@ namespace CodeGenerator.BLL
                     "        {",
                     $"            View{prefix}{entityUpper}Object? {entityLower};",
                     $"",
-                    $"            {entityLower} = id > 0 ? await _dataBaseRepository.GetFullById<View{prefix}{entityUpper}Object>({entityUpper}BaseController, id) : null;",
+                    $"            {entityLower} = id > 0 ? await _dataBaseRepository.GetFullById<View{prefix}{entityUpper}Object>(BaseController.{entityUpper}, id) : null;",
                     $"            if ({entityLower} is null && !nullable) throw new ApiException(StatusCodeEnum.NOT_FOUND);",
                     $"",
                     $"            return {entityLower};",
@@ -1150,7 +1150,7 @@ namespace CodeGenerator.BLL
                     "        {",
                     $"            View{prefix}{entityUpperBase}BaseObject? {entityLower};",
                     $"",
-                    $"            {entityLower} = id > 0 ? await _dataBaseRepository.GetBaseById<View{prefix}{entityUpperBase}BaseObject>({entityUpper}BaseController, id) : null;",
+                    $"            {entityLower} = id > 0 ? await _dataBaseRepository.GetBaseById<View{prefix}{entityUpperBase}BaseObject>(BaseController.{entityUpper}, id) : null;",
                     $"            if ({entityLower} is null && !nullable) throw new ApiException(StatusCodeEnum.NOT_FOUND);",
                     $"",
                     $"            return {entityLower};",
@@ -1162,7 +1162,7 @@ namespace CodeGenerator.BLL
             content.AddRange([
                 $"        public async Task<List<{className}Object>> GetSetByIds(List<int> ids)",
                 "        {",
-                $"            return ids.Count > 0 ? await _dataBaseRepository.GetSetByIds<{className}Object>({entityUpper}BaseController, ids) : [];",
+                $"            return ids.Count > 0 ? await _dataBaseRepository.GetSetByIds<{className}Object>(BaseController.{entityUpper}, ids) : [];",
                 "        }",
                 $""
             ]);
@@ -1172,12 +1172,12 @@ namespace CodeGenerator.BLL
                 content.AddRange([
                     $"        public async Task<List<View{prefix}{entityUpper}Object>> GetFullSetByIds(List<int> ids)",
                     "        {",
-                    $"            return ids.Count > 0 ? await _dataBaseRepository.GetFullSetByIds<View{prefix}{entityUpper}Object>({entityUpper}BaseController, ids) : [];",
+                    $"            return ids.Count > 0 ? await _dataBaseRepository.GetFullSetByIds<View{prefix}{entityUpper}Object>(BaseController.{entityUpper}, ids) : [];",
                     "        }",
                     $"",
                     $"        public async Task<List<View{prefix}{entityUpperBase}BaseObject>> GetBaseSetByIds(List<int> ids)",
                     "        {",
-                    $"            return ids.Count > 0 ? await _dataBaseRepository.GetBaseSetByIds<View{prefix}{entityUpperBase}BaseObject>({entityUpper}BaseController, ids) : [];",
+                    $"            return ids.Count > 0 ? await _dataBaseRepository.GetBaseSetByIds<View{prefix}{entityUpperBase}BaseObject>(BaseController.{entityUpper}, ids) : [];",
                     "        }",
                     $""
                 ]);
@@ -1190,7 +1190,7 @@ namespace CodeGenerator.BLL
                     "        {",
                     $"            {className}Object? {entityLower};",
                     $"",
-                    $"            {entityLower} = await _dataBaseRepository.GetByCode<{className}Object>({entityUpper}BaseController, code);",
+                    $"            {entityLower} = await _dataBaseRepository.GetByCode<{className}Object>(BaseController.{entityUpper}, code);",
                     $"            if ({entityLower} is null && !nullable) throw new ApiException(StatusCodeEnum.NOT_FOUND);",
                     $"",
                     $"            return {entityLower};",
@@ -1205,7 +1205,7 @@ namespace CodeGenerator.BLL
                         "        {",
                         $"            View{prefix}{entityUpper}Object? {entityLower};",
                         $"",
-                        $"            {entityLower} = await _dataBaseRepository.GetFullByCode<View{prefix}{entityUpper}Object>({entityUpper}BaseController, code);",
+                        $"            {entityLower} = await _dataBaseRepository.GetFullByCode<View{prefix}{entityUpper}Object>(BaseController.{entityUpper}, code);",
                         $"            if ({entityLower} is null && !nullable) throw new ApiException(StatusCodeEnum.NOT_FOUND);",
                         $"",
                         $"            return {entityLower};",
@@ -1215,7 +1215,7 @@ namespace CodeGenerator.BLL
                         "        {",
                         $"            View{prefix}{entityUpperBase}BaseObject? {entityLower};",
                         $"",
-                        $"            {entityLower} = await _dataBaseRepository.GetBaseByCode<View{prefix}{entityUpperBase}BaseObject>({entityUpper}BaseController, code);",
+                        $"            {entityLower} = await _dataBaseRepository.GetBaseByCode<View{prefix}{entityUpperBase}BaseObject>(BaseController.{entityUpper}, code);",
                         $"            if ({entityLower} is null && !nullable) throw new ApiException(StatusCodeEnum.NOT_FOUND);",
                         $"",
                         $"            return {entityLower};",
@@ -1229,7 +1229,7 @@ namespace CodeGenerator.BLL
                     content.AddRange([
                         $"        public async Task<List<{className}Object>> GetSetByCodes(List<string> codes)",
                         "        {",
-                        $"            return codes.Count > 0 ? await _dataBaseRepository.GetSetByCodes<{className}Object>({entityUpper}BaseController, codes) : [];",
+                        $"            return codes.Count > 0 ? await _dataBaseRepository.GetSetByCodes<{className}Object>(BaseController.{entityUpper}, codes) : [];",
                         "        }",
                         $""
                     ]);
@@ -1239,12 +1239,12 @@ namespace CodeGenerator.BLL
                         content.AddRange([
                             $"        public async Task<List<View{prefix}{entityUpper}Object>> GetFullSetByCodes(List<string> codes)",
                             "        {",
-                            $"            return codes.Count > 0 ? await _dataBaseRepository.GetFullSetByCodes<View{prefix}{entityUpper}Object>({entityUpper}BaseController, codes) : [];",
+                            $"            return codes.Count > 0 ? await _dataBaseRepository.GetFullSetByCodes<View{prefix}{entityUpper}Object>(BaseController.{entityUpper}, codes) : [];",
                             "        }",
                             $"",
                             $"        public async Task<List<View{prefix}{entityUpperBase}BaseObject>> GetBaseSetByCodes(List<string> codes)",
                             "        {",
-                            $"            return codes.Count > 0 ? await _dataBaseRepository.GetBaseSetByCodes<View{prefix}{entityUpperBase}BaseObject>({entityUpper}BaseController, codes) : [];",
+                            $"            return codes.Count > 0 ? await _dataBaseRepository.GetBaseSetByCodes<View{prefix}{entityUpperBase}BaseObject>(BaseController.{entityUpper}, codes) : [];",
                             "        }",
                             $""
                         ]);
@@ -1257,7 +1257,7 @@ namespace CodeGenerator.BLL
                 content.AddRange([
                     $"        public async Task<List<{className}Object>> GetAll(string? cmmKeyword = null)",
                     "        {",
-                    $"            return await _dataBaseRepository.GetAll<{className}Object>({entityUpper}BaseController, cmmKeyword);",
+                    $"            return await _dataBaseRepository.GetAll<{className}Object>(BaseController.{entityUpper}, cmmKeyword);",
                     "        }",
                     $""
                 ]);
@@ -1267,12 +1267,12 @@ namespace CodeGenerator.BLL
                     content.AddRange([
                         $"        public async Task<List<View{prefix}{entityUpper}Object>> GetAllFull(string? cmmKeyword = null)",
                         "        {",
-                        $"            return await _dataBaseRepository.GetAllFull<View{prefix}{entityUpper}Object>({entityUpper}BaseController, cmmKeyword);",
+                        $"            return await _dataBaseRepository.GetAllFull<View{prefix}{entityUpper}Object>(BaseController.{entityUpper}, cmmKeyword);",
                         "        }",
                         $"",
                         $"        public async Task<List<View{prefix}{entityUpperBase}BaseObject>> GetAllBase(string? cmmKeyword = null)",
                         "        {",
-                        $"            return await _dataBaseRepository.GetAllBase<View{prefix}{entityUpperBase}BaseObject>({entityUpper}BaseController, cmmKeyword);",
+                        $"            return await _dataBaseRepository.GetAllBase<View{prefix}{entityUpperBase}BaseObject>(BaseController.{entityUpper}, cmmKeyword);",
                         "        }"
                     ]);
                 }
@@ -1282,7 +1282,7 @@ namespace CodeGenerator.BLL
                 content.AddRange([
                    $"        public async Task<List<{className}Object>> GetAll()",
                     "        {",
-                    $"            return await _dataBaseRepository.GetAll<{className}Object>({entityUpper}BaseController);",
+                    $"            return await _dataBaseRepository.GetAll<{className}Object>(BaseController.{entityUpper});",
                     "        }",
                     $""
                ]);
@@ -1292,12 +1292,12 @@ namespace CodeGenerator.BLL
                     content.AddRange([
                         $"        public async Task<List<View{prefix}{entityUpper}Object>> GetAllFull()",
                         "        {",
-                        $"            return await _dataBaseRepository.GetAllFull<View{prefix}{entityUpper}Object>({entityUpper}BaseController);",
+                        $"            return await _dataBaseRepository.GetAllFull<View{prefix}{entityUpper}Object>(BaseController.{entityUpper});",
                         "        }",
                         $"",
                         $"        public async Task<List<View{prefix}{entityUpperBase}BaseObject>> GetAllBase()",
                         "        {",
-                        $"            return await _dataBaseRepository.GetAllBase<View{prefix}{entityUpperBase}BaseObject>({entityUpper}BaseController);",
+                        $"            return await _dataBaseRepository.GetAllBase<View{prefix}{entityUpperBase}BaseObject>(BaseController.{entityUpper});",
                         "        }"
                     ]);
                 }
@@ -1415,7 +1415,7 @@ namespace CodeGenerator.BLL
                 $"        private readonly ILogger<{entityUpper}Service> _logger;",
                 $"        protected readonly IMapper _mapper;",
                 $"        protected readonly DataBaseRepository _dataBaseRepository;",
-                $"        private readonly DataBase _sammaiDataBaseOptions;",
+                $"        protected readonly DataBase _sammaiDataBaseOptions;",
             ];
 
             defaultParameters = [
