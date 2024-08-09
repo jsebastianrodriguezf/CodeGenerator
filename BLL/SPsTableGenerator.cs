@@ -69,6 +69,8 @@ namespace CodeGenerator.BLL
             allDropTypeSP = [];
             hasCmm = false;
 
+            List<string> atributoWhiteList = ["equ_equipoAtributo", "doc_documentoAtributo", "cat_atributo_opcionAtributo", "cat_usoSeccionAtributo", "cat_pruebaCheckList_atributo", "cat_atributo", "equ_opcionAtributo"];
+
             for (int i = 0; i < template.Count; i++)
             {
                 line = template[i];
@@ -76,6 +78,13 @@ namespace CodeGenerator.BLL
                 if (line.StartsWith("print '") && line.EndsWith("'"))
                 {
                     tableName = GetTableName(line);
+                    if (tableName.EndsWith("atributo", StringComparison.CurrentCultureIgnoreCase) && !atributoWhiteList.Contains(tableName))
+                    {
+                        i += 1;
+                        linesByTable = [];
+                        hasCmm = false;
+                        continue;
+                    }
                     principalColumn = tableName.Remove(0, 4);
 
                     hasPrincipalColumn = linesByTable.Any(x => x.Contains($"[{principalColumn}] AS [{principalColumn}]"));
@@ -187,6 +196,7 @@ namespace CodeGenerator.BLL
             bool isView;
             bool isInsert;
             bool isActive;
+            bool isUpdate;
             bool isSelMSP;
             bool isSelAllSP;
 
@@ -204,6 +214,7 @@ namespace CodeGenerator.BLL
             isView = false;
             isInsert = false;
             isActive = false;
+            isUpdate = false;
             isSelMSP = false;
             isSelAllSP = false;
 
@@ -240,6 +251,7 @@ namespace CodeGenerator.BLL
 
                     if (isInsert)
                     {
+                        sp = CleanInsertSP(sp, tableName, hasCmm);
                         GenerateType(sp, tableName, ref spRoot, ref allTypes);
 
                         allNewLines.Add("------------------------------------------");
@@ -258,9 +270,10 @@ namespace CodeGenerator.BLL
                     }
 
                     if (isActive)
-                    {
                         sp = UpdateActiveSP(sp, tableName);
-                    }
+
+                    if (isUpdate)
+                        sp = CleanUpdateSP(sp, tableName, hasCmm);
 
                     allNewLines.Add("------------------------------------------");
                     allNewLines.AddRange(sp);
@@ -269,6 +282,7 @@ namespace CodeGenerator.BLL
 
                     isView = false;
                     isInsert = false;
+                    isUpdate = false;
                     isSelMSP = false;
                     sp = [];
                     spName = "NoName";
@@ -308,6 +322,9 @@ namespace CodeGenerator.BLL
 
                         if (!isActive)
                             isActive = spName.StartsWith($"act_{tableName.Replace('.', '_')}");
+
+                        if (!isUpdate)
+                            isUpdate = spName.StartsWith($"upd_{tableName.Replace('.', '_')}");
                     }
 
                     if (isSelMSP && line.Contains("@p_eid as varchar(50)"))
@@ -1354,6 +1371,116 @@ namespace CodeGenerator.BLL
             template[index] = template[index].Replace("ON", "OFF");
 
             return template;
+        }
+
+        private List<string> CleanInsertSP(List<string> template, string tableName, bool tableHasCmm)
+        {
+            bool hasCmm;
+            bool IsParentOrHasParent;
+            List<string> newSP;
+
+            IsParentOrHasParent = IsParentOrHasParentTable(tableName, tableHasCmm);
+
+            hasCmm = false;
+            newSP = [];
+
+            for (int i = 0; i < template.Count; i++)
+            {
+                string line = template[i];
+                if (IsParentOrHasParent)
+                {
+                    if (hasCmm && line.Contains("@p_cmm varchar"))
+                    {
+                        if (!line.TrimEnd().EndsWith(','))
+                            newSP[^1] = newSP[^1][..^1];
+
+                        continue;
+                    }
+
+                    if (!hasCmm && line.Contains("@p_cmm varchar"))
+                        hasCmm = true;
+
+                    if (line.Contains("@p_identificador") || line.Contains("[identificador]"))
+                    {
+                        if (!line.TrimEnd().EndsWith(','))
+                            newSP[^1] = newSP[^1][..^1];
+
+                        continue;
+                    }
+                }
+
+                if (line.Contains("(-1)", StringComparison.CurrentCultureIgnoreCase))
+                    line = line.Replace("(-1)", "(MAX)");
+
+                if (line.Contains("varbinary", StringComparison.CurrentCultureIgnoreCase))
+                    line = line.Replace("varbinary", "varbinary(MAX)");
+
+                newSP.Add(line);
+            }
+
+            return newSP;
+        }
+
+        private List<string> CleanUpdateSP(List<string> template, string tableName, bool tableHasCmm)
+        {
+            bool hasCmm;
+            bool IsParentOrHasParent;
+            List<string> newSP;
+
+            IsParentOrHasParent = IsParentOrHasParentTable(tableName, tableHasCmm);
+
+            hasCmm = false;
+            newSP = [];
+
+            for (int i = 0; i < template.Count; i++)
+            {
+                string line = template[i];
+
+                if (IsParentOrHasParent)
+                {
+                    if (hasCmm && line.Contains("@p_cmm varchar"))
+                    {
+                        if (!line.TrimEnd().EndsWith(','))
+                            newSP[^1] = newSP[^1][..^1];
+
+                        continue;
+                    }
+
+                    if (!hasCmm && line.Contains("@p_cmm varchar"))
+                        hasCmm = true;
+
+                    if (line.Contains("@p_identificador") || line.Contains("[identificador]"))
+                    {
+                        if (!line.TrimEnd().EndsWith(','))
+                            newSP[^1] = newSP[^1][..^1];
+
+                        continue;
+                    }
+                }
+
+                if (line.Contains("(-1)", StringComparison.CurrentCultureIgnoreCase))
+                    line = line.Replace("(-1)", "(MAX)");
+
+                if (line.Contains("varbinary", StringComparison.CurrentCultureIgnoreCase))
+                    line = line.Replace("varbinary", "varbinary(MAX)");
+
+                newSP.Add(line);
+            }
+
+            return newSP;
+        }
+
+        private bool IsParentOrHasParentTable(string tableName, bool hasCmm)
+        {
+            bool isParentTable;
+            bool hasParentTable;
+            (string? tableName, List<string> content) parentUpdate;
+
+            isParentTable = tableName == "doc_documento" || tableName == "cat_catalogo";
+            parentUpdate = GetParentUpdate(tableName, hasCmm);
+            hasParentTable = !string.IsNullOrEmpty(parentUpdate.tableName);
+
+            return isParentTable || hasParentTable;
         }
     }
 }
