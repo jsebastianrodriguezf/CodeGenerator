@@ -115,6 +115,8 @@ namespace CodeGenerator.BLL
                 "doc_documento.salida",
                 "doc_documento.solicitud",
                 "doc_documento.traslado",
+                "doc_documento.contrato",
+                "doc_documento.prestamo",
                 "doc_documentoAtributo",
                 "doc_documentoComentario",
                 "doc_estadoTipoDocumento",

@@ -16,8 +16,7 @@ namespace CodeGenerator.BLL
         private readonly List<FileModel> _filesModel;
         private readonly TranstaleService _transtaleService;
         private readonly I18NModel _localization;
-
-        private const string _i18nPath = "C:\\Workspaces\\GIT\\CodeGenerator\\BaseScript\\I18N.json";
+        private readonly string _i18nPath;
 
         public I18NDictionaryGenerator(
             string contextName,
@@ -30,6 +29,7 @@ namespace CodeGenerator.BLL
             _files = [.. Directory.GetFiles(_rootPath)];
             _filesModel = Utilities.GetFilesModel(_files);
             _transtaleService = new TranstaleService(Languages.Spanish, Languages.English);
+            _i18nPath = Path.Combine(Directory.GetParent(AppContext.BaseDirectory)?.Parent?.Parent?.Parent?.FullName ?? "", "BaseScript\\I18N.json");
             _localization = Utilities.MapJsonFile<I18NModel>(_i18nPath);
         }
 
