@@ -54,6 +54,7 @@ namespace CodeGenerator.BLL
         {
             List<string> tables;
             tables = [
+                "_tablas",
                 "alq_detalleLiquidacion",
                 "alq_historicoAlquiler",
                 "alq_periodoAlquiler",
@@ -267,6 +268,8 @@ namespace CodeGenerator.BLL
 
                     foreach (string text in value.Split('.'))
                     {
+                        if (string.IsNullOrEmpty(text))
+                            continue;
                         tableTranslated += _transtaleServiceEs.Translate(text[..1].ToUpper() + text[1..]).Result;
                     }
 
@@ -282,7 +285,7 @@ namespace CodeGenerator.BLL
             List<string> responses = [];
             string response;
 
-            List<FileModel> files = _filesModel.Where(x => x.Name.Substring(3, 1) == x.Name.Substring(3, 1).ToUpper()).ToList();
+            List<FileModel> files = _filesModel.Where(x => x.Name.Substring(3, 1) == x.Name.Substring(3, 1).ToUpper() || x.Name == "TablesObject").ToList();
             List<string> contentDI = [];
             List<string> constants = [];
 
@@ -314,13 +317,27 @@ namespace CodeGenerator.BLL
             bool hasViewFull;
             bool hasCmm;
             bool hasPrincipalField;
+            bool isStandardTable;
 
             try
             {
                 prefix = entity[..3];
                 init = entity.Substring(3, 1);
-                entityUpper = string.Concat(init.ToUpper(), entity.AsSpan(4));
-                entityLower = string.Concat(init.ToLower(), entity.AsSpan(4));
+
+                isStandardTable = init.Equals(init.ToUpper(), StringComparison.CurrentCulture);
+
+                if (isStandardTable)
+                {
+                    entityUpper = string.Concat(init.ToUpper(), entity.AsSpan(4));
+                    entityLower = string.Concat(init.ToLower(), entity.AsSpan(4));
+                }
+                else
+                {
+                    prefix = string.Empty;
+                    init = entity[..1];
+                    entityUpper = string.Concat(init.ToUpper(), entity.AsSpan(1));
+                    entityLower = string.Concat(init.ToLower(), entity.AsSpan(1));
+                }
 
                 withCodigo =
                     HasWord(file.Path, $"public string? {entityUpper}Code {{ get; set; }}") ||
@@ -1326,8 +1343,22 @@ namespace CodeGenerator.BLL
 
         public string GenerateDI(string entity)
         {
-            string service = $"{entity.AsSpan(3).ToString()[..^"Object".Length]}Service";
-            return $"services.AddScoped<Services.DAL.Interfaces.I{service}, Services.DAL.Implementations.{service}> ();";
+            string init;
+            string entityUpper;
+
+            entity = entity[..^"Object".Length];
+            init = entity.Substring(3, 1);
+
+            if (init.Equals(init.ToUpper(), StringComparison.CurrentCulture))
+            {
+                entityUpper = string.Concat(init.ToUpper(), entity.AsSpan(4));
+            }
+            else
+            {
+                init = entity[..1];
+                entityUpper = string.Concat(init.ToUpper(), entity.AsSpan(1));
+            }
+            return $"services.AddScoped<Services.DAL.Interfaces.I{entityUpper}Service, Services.DAL.Implementations.{entityUpper}Service> ();";
         }
 
         #region Utilities
