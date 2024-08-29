@@ -94,7 +94,6 @@ namespace CodeGenerator.BLL
                 "cnt_pagosContrato",
                 "cnt_periodoContrato",
                 "cnt_tiempoRespuesta",
-                "cnt_tipoContrato",
                 "cnt_visitaFija",
                 "com_comision",
                 "dis_estadoEvento",
