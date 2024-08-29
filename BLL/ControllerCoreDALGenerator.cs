@@ -55,6 +55,7 @@ namespace CodeGenerator.BLL
             List<string> tables;
             tables = [
                 "_tablas",
+                "_columnas",
                 "alq_detalleLiquidacion",
                 "alq_historicoAlquiler",
                 "alq_periodoAlquiler",
@@ -285,7 +286,7 @@ namespace CodeGenerator.BLL
             List<string> responses = [];
             string response;
 
-            List<FileModel> files = _filesModel.Where(x => x.Name.Substring(3, 1) == x.Name.Substring(3, 1).ToUpper() || x.Name == "TablesObject").ToList();
+            List<FileModel> files = _filesModel.Where(x => x.Name.Substring(3, 1) == x.Name.Substring(3, 1).ToUpper() || x.Name == "TablesObject" || x.Name == "ColumnsObject").ToList();
             List<string> contentDI = [];
             List<string> constants = [];
 
