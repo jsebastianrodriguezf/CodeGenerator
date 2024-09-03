@@ -46,7 +46,7 @@ internal class Program
                 spsTableGenerator = new SPsTableGenerator(
                     rootPath: Path.Combine(rootPathBaseWorkDirectory, "BaseScript"),
                     destityPath: Path.Combine(rootPathBaseWorkDirectory, baseResponseFolder, "SPs"),
-                    customSPsPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DataBase", "SAMMAI.DBObjects\\StoreProcedures\\0_custom"));
+                    customSPsPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DBObjects", "SAMMAI.DBObjects\\StoreProcedures\\0_custom"));
 
                 response = string.Join(Environment.NewLine, spsTableGenerator.GenerateSPs());
 
