@@ -87,7 +87,6 @@ namespace CodeGenerator.BLL
                 "cat_tipoReemplazo",
                 "cat_usoSeccionAtributo",
                 "cat_versionEquipo",
-                "cnt_configContrato",
                 "cnt_configuracionProyeccion",
                 "cnt_contrato",
                 "cnt_corrimientoVisitaFija",
