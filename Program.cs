@@ -46,7 +46,8 @@ internal class Program
                 spsTableGenerator = new SPsTableGenerator(
                     rootPath: Path.Combine(rootPathBaseWorkDirectory, "BaseScript"),
                     destityPath: Path.Combine(rootPathBaseWorkDirectory, baseResponseFolder, "SPs"),
-                    customSPsPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DBObjects", "SAMMAI.DBObjects\\StoreProcedures\\0_custom"));
+                    customSPsPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DBObjects", "SAMMAI.DBObjects\\StoreProcedures\\0_custom"),
+                    customFunctionsPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DBObjects", "SAMMAI.DBObjects\\Functions"));
 
                 response = string.Join(Environment.NewLine, spsTableGenerator.GenerateSPs());
 
@@ -180,7 +181,8 @@ internal class Program
                 spsTableGenerator = new SPsTableGenerator(
                     rootPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DataBase", "SAMMAI.DBObjects", "Views"),
                     destityPath: Path.Combine(rootPathBaseWorkDirectory, baseResponseFolder, "SPs"),
-                    customSPsPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DataBase", "SAMMAI.DBObjects\\StoreProcedures\\0_custom"));
+                    customSPsPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DataBase", "SAMMAI.DBObjects\\StoreProcedures\\0_custom"),
+                    customFunctionsPath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.DataBase", "SAMMAI.DBObjects\\Functions"));
 
                 response = string.Join(Environment.NewLine, spsTableGenerator.GenerateBasicViews());
 

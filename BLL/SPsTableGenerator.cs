@@ -12,20 +12,28 @@ namespace CodeGenerator.BLL
         private readonly string _customSPsPath;
         private readonly List<string> _customSPsFiles;
         private readonly List<FileModel> _customSPsFilesModel;
+        private readonly string _customFunctionsPath;
+        private readonly List<string> _customFunctionsFiles;
+        private readonly List<FileModel> _customFunctionsFilesModel;
 
         public SPsTableGenerator(
             string rootPath,
             string destityPath,
-            string customSPsPath)
+            string customSPsPath,
+            string customFunctionsPath)
         {
             _rootPath = rootPath;
             _destinyPath = destityPath;
             _customSPsPath = customSPsPath;
+            _customFunctionsPath = customFunctionsPath;
             _files = [.. Directory.GetFiles(_rootPath)];
             _filesModel = Utilities.GetFilesModel(_files);
 
             _customSPsFiles = [.. Directory.GetFiles(_customSPsPath)];
             _customSPsFilesModel = Utilities.GetFilesModel(_customSPsFiles);
+
+            _customFunctionsFiles = [.. Directory.GetFiles(_customFunctionsPath)];
+            _customFunctionsFilesModel = Utilities.GetFilesModel(_customFunctionsFiles);
 
             Utilities.RegenerateDirectory(_destinyPath);
         }
@@ -43,6 +51,7 @@ namespace CodeGenerator.BLL
         public void GenerateSPs(FileModel fileModel)
         {
             (List<string> drop, List<string> create) customSP;
+            (List<string> drop, List<string> create) customFunction;
             List<string> template;
             List<string> linesByTable;
             List<string> spRoot;
@@ -119,8 +128,10 @@ namespace CodeGenerator.BLL
             }
 
             customSP = GetCustomSPS();
+            customFunction = GetCustomFunctions();
 
             finalScripts.AddRange(customSP.drop);
+            finalScripts.AddRange(customFunction.drop);
             finalScripts.AddRange(allDropTypeSP);
             finalScripts.AddRange(allTypes);
             finalScripts.AddRange(allNewLines);
@@ -149,6 +160,35 @@ namespace CodeGenerator.BLL
                 ]);
                 response.drop.AddRange([
                     $"IF  EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[{file.Name}]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[{file.Name}]",
+                    $"GO",
+                    "------------------------------------------",
+                    $"PRINT 'custom_drop_{file.Name}'",
+                    "------------------------------------------"
+                ]);
+            }
+
+            return response;
+        }
+
+        private (List<string> drop, List<string> create) GetCustomFunctions()
+        {
+            List<string> content = [];
+            (List<string> drop, List<string> create) response;
+            response.drop = [];
+            response.create = [];
+
+            foreach (FileModel file in _customFunctionsFilesModel)
+            {
+                response.create.Add("GO");
+                response.create.AddRange(File.ReadAllLines(file.Path));
+                response.create.AddRange([
+                    "GO",
+                    "------------------------------------------",
+                    $"PRINT 'custom_function_{file.Name}'",
+                    "------------------------------------------"
+                ]);
+                response.drop.AddRange([
+                    $"IF  EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[{file.Name}]') AND type in (N'FN', N'IF', N'TF'))DROP FUNCTION [dbo].[{file.Name}]",
                     $"GO",
                     "------------------------------------------",
                     $"PRINT 'custom_drop_{file.Name}'",
