@@ -2543,6 +2543,14 @@
     {
       "Spanish": "Full",
       "English": "Full"
+    },
+    {
+      "Spanish": "Laborables",
+      "English": "Working"
+    },
+    {
+      "Spanish": "Jornada",
+      "English": "Workday"
     }
   ]
 }
