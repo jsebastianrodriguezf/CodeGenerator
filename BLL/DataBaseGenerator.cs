@@ -239,6 +239,9 @@ namespace CodeGenerator.BLL
                     if (line.Contains($" {className}1 {{ get; set; }}"))
                         line = line.Replace($" {className}1 {{ get; set; }}", $" {className} {{ get; set; }}");
 
+                    if (line.Contains("public TimeOnly"))
+                        line = line.Replace("public TimeOnly", "public TimeSpan");
+
                     content.Add(line);
                 }
             }
