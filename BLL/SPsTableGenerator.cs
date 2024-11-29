@@ -889,7 +889,7 @@ namespace CodeGenerator.BLL
             {
                 line = seedContent[i];
                 column = line.TrimStart();
-                columns.Add($"		{column}");
+                columns.Add($"			{column}");
             }
 
             content.AddRange([
@@ -912,40 +912,56 @@ namespace CodeGenerator.BLL
 
             content.AddRange(parentInsert.content);
 
+            if ( parentInsert.tableName is null)
+            {
+                if (!isParentTable)
+                    content.AddRange([
+                        $"",
+                        $"	SET TRANSACTION ISOLATION LEVEL READ COMMITTED;",
+                        $"",
+                        $"	BEGIN TRANSACTION;",
+                    ]);
+
+                content.AddRange([
+                    $"",
+                    $"	BEGIN TRY",
+                ]);
+            }
+
             content.AddRange([
                 $"",
-                $"	INSERT INTO [{tableName}]",
+                $"		INSERT INTO [{tableName}]",
             ]);
 
             if (hasParentTable)
-                content.Add("		([id],");
+                content.Add("			([id],");
 
             content.AddRange([
-                $"		{(hasParentTable ? "" : "(")}[uid],",
-                $"		[eid],",
-                $"		[id_usuario_creo],",
-                $"		[id_usuario_modifico],",
-                $"		[fechaCreacion],",
-                $"		[fechaModificacion],",
+                $"			{(hasParentTable ? "" : "(")}[uid],",
+                $"			[eid],",
+                $"			[id_usuario_creo],",
+                $"			[id_usuario_modifico],",
+                $"			[fechaCreacion],",
+                $"			[fechaModificacion],",
             ]);
 
             content.AddRange(columns);
 
             content.AddRange([
-                $"	OUTPUT inserted.id INTO @v_ids",
-                $"	SELECT",
+                $"		OUTPUT inserted.id INTO @v_ids",
+                $"		SELECT",
             ]);
 
             if (hasParentTable)
-                content.AddRange([$"		{parentInsert.tableName}.id,"]);
+                content.AddRange([$"			{parentInsert.tableName}.id,"]);
 
             content.AddRange([
-                $"		@p_uid,",
-                $"		@p_eid,",
-                $"		@p_id_usuario,",
-                $"		@p_id_usuario,",
-                $"		GETDATE(),",
-                $"		GETDATE(),",
+                $"			@p_uid,",
+                $"			@p_eid,",
+                $"			@p_id_usuario,",
+                $"			@p_id_usuario,",
+                $"			GETDATE(),",
+                $"			GETDATE(),",
             ]);
 
             content.AddRange(columns.Select(x => x.Replace('.', '_')).Select(x =>
@@ -954,15 +970,15 @@ namespace CodeGenerator.BLL
                 {
                     x = x switch
                     {
-                        "		[documento_numero]," => $"		doc_subtipoDocumento.consecutivo + ROW_NUMBER() OVER (PARTITION BY doc_subtipoDocumento.id ORDER BY doc_subtipoDocumento.id),",
-                        "		[prefijo]," => $"		doc_subtipoDocumento.[prefijo],",
+                        "			[documento_numero]," => $"			doc_subtipoDocumento.consecutivo + ROW_NUMBER() OVER (PARTITION BY doc_subtipoDocumento.id ORDER BY doc_subtipoDocumento.id),",
+                        "			[prefijo]," => $"			doc_subtipoDocumento.[prefijo],",
                         _ => x,
                     };
                 }
 
                 if (hasParentTable && x.Contains("[cmm]"))
                 {
-                    x = $"		''" + (x.Contains(',') ? "," : "");
+                    x = $"			''" + (x.Contains(',') ? "," : "");
                 }
 
                 if (isParentTable && tableName == "doc_documento" && x.Contains("[cmm]"))
@@ -978,31 +994,51 @@ namespace CodeGenerator.BLL
             if (isParentTable && tableName == "doc_documento")
             {
                 content.AddRange([
-                    $"	FROM @p_{tableNameSimple} {tableNameSimple}",
-                    $"		INNER JOIN doc_subtipoDocumento",
-                    $"	ON {tableNameSimple}.id_subtipoDocumento = doc_subtipoDocumento.id",
-                    $"	WHERE",
-                    $"		doc_subtipoDocumento.eid = @p_eid AND",
-                    $"		doc_subtipoDocumento.active = 1",
+                    $"		FROM @p_{tableNameSimple} {tableNameSimple}",
+                    $"			INNER JOIN doc_subtipoDocumento",
+                    $"		ON {tableNameSimple}.id_subtipoDocumento = doc_subtipoDocumento.id",
+                    $"		WHERE",
+                    $"			doc_subtipoDocumento.eid = @p_eid AND",
+                    $"			doc_subtipoDocumento.active = 1",
                     $"",
                 ]);
             }
             else if (!hasParentTable)
             {
                 content.AddRange([
-                    $"	FROM @p_{tableNameSimple}",
+                    $"		FROM @p_{tableNameSimple}",
                     $"",
                 ]);
             }
             else
             {
                 content.AddRange([
-                    $"	FROM @v_{tableNameSimple} {tableNameSimple}",
-                    $"	    INNER JOIN @v_{parentInsert.tableName} {parentInsert.tableName}",
-                    $"	ON {tableNameSimple}.cmm = {parentInsert.tableName}.cmm",
+                    $"		FROM @v_{tableNameSimple} {tableNameSimple}",
+                    $"		    INNER JOIN @v_{parentInsert.tableName} {parentInsert.tableName}",
+                    $"		ON {tableNameSimple}.cmm = {parentInsert.tableName}.cmm",
                     $"",
                 ]);
             }
+
+            if (!isParentTable)
+                content.AddRange([
+                    $"		COMMIT TRANSACTION;",
+                    $"",
+                    $"	END TRY",
+                    $"	BEGIN CATCH",
+                    $"		ROLLBACK TRANSACTION;",
+                    $"		THROW;",
+                    $"	END CATCH;",
+                    $"",
+                ]); 
+            else
+                content.AddRange([
+                    $"	END TRY",
+                    $"	BEGIN CATCH",
+                    $"		THROW;",
+                    $"	END CATCH;",
+                    $"",
+                ]);
 
             if (hasCmm && !isParentTable)
                 content.AddRange([
@@ -1132,6 +1168,8 @@ namespace CodeGenerator.BLL
                      $"	DECLARE @v_{tableNameSimple} AS typ_{tableNameSimple}",
                      $"	DECLARE @v_{response.parentTable} AS typ_{response.parentTable}",
                      $"",
+                     $"	SET TRANSACTION ISOLATION LEVEL READ COMMITTED;",
+                     $"",
                      $"	INSERT INTO @v_{tableNameSimple} (",
                 ]);
 
@@ -1187,10 +1225,14 @@ namespace CodeGenerator.BLL
                 content.AddRange([
                     $"	FROM @v_{tableNameSimple}",
                     $"",
-                    $"	INSERT INTO @v_{response.parentTable}",
-                    $"	EXEC [ins_{response.parentTable}_bulk] @v_{response.parentTable}, @p_uid, @p_eid, @p_id_usuario",
+                    $"	BEGIN TRANSACTION;",
                     $"",
-                    $"	DELETE FROM @v_{response.parentTable} WHERE id IS NULL",
+                    $"	BEGIN TRY",
+                    $"",
+                    $"		INSERT INTO @v_{response.parentTable}",
+                    $"		EXEC [ins_{response.parentTable}_bulk] @v_{response.parentTable}, @p_uid, @p_eid, @p_id_usuario",
+                    $"",
+                    $"		DELETE FROM @v_{response.parentTable} WHERE id IS NULL",
                 ]);
 
             }
@@ -1227,7 +1269,7 @@ namespace CodeGenerator.BLL
             {
                 line = seedContent[i];
                 column = line.TrimStart().Replace(",", "").Replace(")", "");
-                columns.Add($"		[{tableName}].{column} = ISNULL([source].{column.Replace('.', '_')}, [{tableName}].{column}),");
+                columns.Add($"			[{tableName}].{column} = ISNULL([source].{column.Replace('.', '_')}, [{tableName}].{column}),");
             }
             columns[^1] = columns[^1].TrimEnd()[..^1];
 
@@ -1253,24 +1295,60 @@ namespace CodeGenerator.BLL
 
             content.AddRange(parentUpdate.content);
 
+            if (parentUpdate.tableName is null)
+            {
+                if (!isParentTable)
+                    content.AddRange([
+                        "",
+                        $"	SET TRANSACTION ISOLATION LEVEL READ COMMITTED;",
+                        "",
+                        $"	BEGIN TRANSACTION;",
+                    ]);
+
+                content.AddRange([
+                    "",
+                    $"	BEGIN TRY",
+                ]);
+            }
+
             content.AddRange([
                 "",
-                $"	UPDATE [{tableName}]",
-                $"	SET	[{tableName}].[id_usuario_modifico] = ISNULL(@p_id_usuario, [{tableName}].[id_usuario_modifico]),",
-                $"		[{tableName}].[fechaModificacion] = GETDATE(),",
+                $"		UPDATE [{tableName}]",
+                $"		SET	[{tableName}].[id_usuario_modifico] = ISNULL(@p_id_usuario, [{tableName}].[id_usuario_modifico]),",
+                $"			[{tableName}].[fechaModificacion] = GETDATE(),",
             ]);
 
             content.AddRange(columns);
 
             content.AddRange([
-                $"	FROM [{tableName}]",
-                $"		INNER JOIN @p_{tableNameSimple} [source]",
-                $"	ON [{tableName}].id = [source].id",
-                $"	WHERE ",
-                $"		[{tableName}].eid = @p_eid AND",
-                $"		[{tableName}].active = 1",
+                $"		FROM [{tableName}]",
+                $"			INNER JOIN @p_{tableNameSimple} [source]",
+                $"		ON [{tableName}].id = [source].id",
+                $"		WHERE ",
+                $"			[{tableName}].eid = @p_eid AND",
+                $"			[{tableName}].active = 1",
                 ""
             ]);
+
+            if (!isParentTable)
+                content.AddRange([
+                    $"		COMMIT TRANSACTION;",
+                    $"",
+                    $"	END TRY",
+                    $"	BEGIN CATCH",
+                    $"		ROLLBACK TRANSACTION;",
+                    $"		THROW;",
+                    $"	END CATCH;",
+                    $"",
+                ]);
+            else
+                content.AddRange([
+                    $"	END TRY",
+                    $"	BEGIN CATCH",
+                    $"		THROW;",
+                    $"	END CATCH;",
+                    $"",
+                ]);
 
             if (hasCmm && !isParentTable)
                 content.AddRange([
@@ -1351,6 +1429,8 @@ namespace CodeGenerator.BLL
                 content.AddRange([
                      $"	DECLARE @v_{response.parentTable} AS typ_{response.parentTable}",
                      $"",
+                     $"	SET TRANSACTION ISOLATION LEVEL READ COMMITTED;",
+                     $"",
                      $"	INSERT INTO @v_{response.parentTable} (",
                 ]);
 
@@ -1378,8 +1458,11 @@ namespace CodeGenerator.BLL
 
                 content.AddRange([
                     $"	FROM @p_{tableNameSimple}",
-                    $"",
-                    $"	EXEC [upd_{response.parentTable}_bulk] @v_{response.parentTable}, @p_uid, @p_eid, @p_id_usuario",
+                    "",
+                    $"	BEGIN TRANSACTION;",
+                    "",
+                    $"	BEGIN TRY",
+                    $"		EXEC [upd_{response.parentTable}_bulk] @v_{response.parentTable}, @p_uid, @p_eid, @p_id_usuario",
                 ]);
 
             }
