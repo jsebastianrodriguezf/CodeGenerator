@@ -116,6 +116,7 @@ namespace CodeGenerator.BLL
                     entityLower += "Obj";
 
                 GenerateController(prefix, entityUpper, entityLower, withCode, hasView, hasCmm, isStandardTable, hasViewFull);
+                //GenerateServiceOld(prefix, entityUpper, entityLower, withCode, hasView, hasCmm, hasPrincipalField, isStandardTable, hasViewFull);
                 GenerateService(prefix, entityUpper, entityLower, withCode, hasView, hasCmm, hasPrincipalField, isStandardTable, hasViewFull);
 
                 return string.Empty;
@@ -472,7 +473,10 @@ namespace CodeGenerator.BLL
                     $"        /// </summary>",
                     $"        /// <param name=\"cmmKeyword\">Search by cmm</param>",
                     $"        /// <param name=\"spName\">Get data from this store procedure</param>",
+                    $"        /// <param name=\"foreignKey\">Filter by this foreign key column</param>",
                     $"        /// <param name=\"foreignValue\">Filter the store procedure with this value</param>",
+                    $"        /// <param name=\"idCurrentForm\">Filter by the current id form</param>",
+                    $"        /// <param name=\"idParentForm\">Filter by the id form parent</param>",
                     $"        /// <returns></returns>",
                     $"        /// <remarks>",
                     $"        /// Gets all {entityUpper}",
@@ -490,9 +494,9 @@ namespace CodeGenerator.BLL
                     $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<{className}Object>>), (int)StatusCodeEnum.OK)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
-                    $"        public async Task<ActionResult<object>> GetAll([FromQuery] string? cmmKeyword = null, [FromQuery] string? spName = null, [FromQuery] int? foreignValue = null)",
+                    $"        public async Task<ActionResult<object>> GetAll([FromQuery] string? cmmKeyword = null, [FromQuery] string? spName = null, [FromQuery] int? foreignKey = null, [FromQuery] int? foreignValue = null, [FromQuery] int? idCurrentForm = null, [FromQuery] int? idParentForm = null)",
                     "        {",
-                    $"            List<{className}Object> response = await _{entityLower}Service.GetAll(cmmKeyword, spName, foreignValue);",
+                    $"            List<{className}Object> response = await _{entityLower}Service.GetAll(cmmKeyword, spName, foreignKey, foreignValue, idCurrentForm, idParentForm);",
                     $"",
                     $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                     "        }",
@@ -507,7 +511,10 @@ namespace CodeGenerator.BLL
                         $"        /// </summary>",
                         $"        /// <param name=\"cmmKeyword\">Search by cmm</param>",
                         $"        /// <param name=\"spName\">Get data from this store procedure</param>",
+                        $"        /// <param name=\"foreignKey\">Filter by this foreign key column</param>",
                         $"        /// <param name=\"foreignValue\">Filter the store procedure with this value</param>",
+                        $"        /// <param name=\"idCurrentForm\">Filter by the current id form</param>",
+                        $"        /// <param name=\"idParentForm\">Filter by the id form parent</param>",
                         $"        /// <returns></returns>",
                         $"        /// <remarks>",
                         $"        /// Gets all full {entityUpper}",
@@ -525,9 +532,9 @@ namespace CodeGenerator.BLL
                         $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<View{prefix}{entityUpper}Object>>), (int)StatusCodeEnum.OK)]",
                         $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                         $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
-                        $"        public async Task<ActionResult<object>> GetAllFull([FromQuery] string? cmmKeyword = null, [FromQuery] string? spName = null, [FromQuery] int? foreignValue = null)",
+                        $"        public async Task<ActionResult<object>> GetAllFull([FromQuery] string? cmmKeyword = null, [FromQuery] string? spName = null, [FromQuery] int? foreignKey = null, [FromQuery] int? foreignValue = null, [FromQuery] int? idCurrentForm = null, [FromQuery] int? idParentForm = null)",
                         "        {",
-                        $"            List<View{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAllFull(cmmKeyword, spName, foreignValue);",
+                        $"            List<View{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAllFull(cmmKeyword, spName, foreignKey, foreignValue, idCurrentForm, idParentForm);",
                         $"",
                         $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                         "        }",
@@ -540,7 +547,10 @@ namespace CodeGenerator.BLL
                         $"        /// </summary>",
                         $"        /// <param name=\"cmmKeyword\">Search by cmm</param>",
                         $"        /// <param name=\"spName\">Get data from this store procedure</param>",
+                        $"        /// <param name=\"foreignKey\">Filter by this foreign key column</param>",
                         $"        /// <param name=\"foreignValue\">Filter the store procedure with this value</param>",
+                        $"        /// <param name=\"idCurrentForm\">Filter by the current id form</param>",
+                        $"        /// <param name=\"idParentForm\">Filter by the id form parent</param>",
                         $"        /// <returns></returns>",
                         $"        /// <remarks>",
                         $"        /// Gets all base {entityUpper}",
@@ -558,9 +568,9 @@ namespace CodeGenerator.BLL
                         $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<View{prefix}{entityUpperBase}BaseObject>>), (int)StatusCodeEnum.OK)]",
                         $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                         $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
-                        $"        public async Task<ActionResult<object>> GetAllBase([FromQuery] string? cmmKeyword = null, [FromQuery] string? spName = null, [FromQuery] int? foreignValue = null)",
+                        $"        public async Task<ActionResult<object>> GetAllBase([FromQuery] string? cmmKeyword = null, [FromQuery] string? spName = null, [FromQuery] int? foreignKey = null, [FromQuery] int? foreignValue = null, [FromQuery] int? idCurrentForm = null, [FromQuery] int? idParentForm = null)",
                         "        {",
-                        $"            List<View{prefix}{entityUpperBase}BaseObject> response = await _{entityLower}Service.GetAllBase(cmmKeyword, spName, foreignValue);",
+                        $"            List<View{prefix}{entityUpperBase}BaseObject> response = await _{entityLower}Service.GetAllBase(cmmKeyword, spName, foreignKey, foreignValue, idCurrentForm, idParentForm);",
                         $"",
                         $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                         "        }",
@@ -579,7 +589,10 @@ namespace CodeGenerator.BLL
                 if (isStandardTable)
                     content.AddRange([
                         $"        /// <param name=\"spName\">Get data from this store procedure</param>",
+                        $"        /// <param name=\"foreignKey\">Filter by this foreign key column</param>",
                         $"        /// <param name=\"foreignValue\">Filter the store procedure with this value</param>",
+                        $"        /// <param name=\"idCurrentForm\">Filter by the current id form</param>",
+                        $"        /// <param name=\"idParentForm\">Filter by the id form parent</param>",
                     ]);
 
                 content.AddRange([
@@ -600,9 +613,9 @@ namespace CodeGenerator.BLL
                     $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<{className}Object>>), (int)StatusCodeEnum.OK)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                     $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
-                    $"        public async Task<ActionResult<object>> GetAll({(isStandardTable ? "[FromQuery] string? spName = null, [FromQuery] int? foreignValue = null" : "")})",
+                    $"        public async Task<ActionResult<object>> GetAll({(isStandardTable ? "[FromQuery] string? spName = null, [FromQuery] int? foreignKey = null, [FromQuery] int? foreignValue = null, [FromQuery] int? idCurrentForm = null, [FromQuery] int? idParentForm = null" : "")})",
                     "        {",
-                    $"            List<{className}Object> response = await _{entityLower}Service.GetAll({(isStandardTable ? "spName, foreignValue" : "")});",
+                    $"            List<{className}Object> response = await _{entityLower}Service.GetAll({(isStandardTable ? "null, spName, foreignKey, foreignValue, idCurrentForm, idParentForm" : "")});",
                     $"",
                     $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                     "        }",
@@ -616,7 +629,10 @@ namespace CodeGenerator.BLL
                         $"        /// Gets all full {entityUpper}",
                         $"        /// </summary>",
                         $"        /// <param name=\"spName\">Get data from this store procedure</param>",
+                        $"        /// <param name=\"foreignKey\">Filter by this foreign key column</param>",
                         $"        /// <param name=\"foreignValue\">Filter the store procedure with this value</param>",
+                        $"        /// <param name=\"idCurrentForm\">Filter by the current id form</param>",
+                        $"        /// <param name=\"idParentForm\">Filter by the id form parent</param>",
                         $"        /// <returns></returns>",
                         $"        /// <remarks>",
                         $"        /// Gets all full {entityUpper}",
@@ -634,9 +650,9 @@ namespace CodeGenerator.BLL
                         $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<View{prefix}{entityUpper}Object>>), (int)StatusCodeEnum.OK)]",
                         $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                         $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
-                        $"        public async Task<ActionResult<object>> GetAllFull([FromQuery] string? spName = null, [FromQuery] int? foreignValue = null)",
+                        $"        public async Task<ActionResult<object>> GetAllFull([FromQuery] string? spName = null, [FromQuery] int? foreignKey = null, [FromQuery] int? foreignValue = null, [FromQuery] int? idCurrentForm = null, [FromQuery] int? idParentForm = null)",
                         "        {",
-                        $"            List<View{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAllFull(spName, foreignValue);",
+                        $"            List<View{prefix}{entityUpper}Object> response = await _{entityLower}Service.GetAllFull(null, spName, foreignKey, foreignValue, idCurrentForm, idParentForm);",
                         $"",
                         $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                         "        }",
@@ -648,7 +664,10 @@ namespace CodeGenerator.BLL
                         $"        /// Gets all base {entityUpper}",
                         $"        /// </summary>",
                         $"        /// <param name=\"spName\">Get data from this store procedure</param>",
+                        $"        /// <param name=\"foreignKey\">Filter by this foreign key column</param>",
                         $"        /// <param name=\"foreignValue\">Filter the store procedure with this value</param>",
+                        $"        /// <param name=\"idCurrentForm\">Filter by the current id form</param>",
+                        $"        /// <param name=\"idParentForm\">Filter by the id form parent</param>",
                         $"        /// <returns></returns>",
                         $"        /// <remarks>",
                         $"        /// Gets all base {entityUpper}",
@@ -666,9 +685,9 @@ namespace CodeGenerator.BLL
                         $"        [ProducesResponseType(typeof(BaseSuccessApiResponseWithData<List<View{prefix}{entityUpperBase}BaseObject>>), (int)StatusCodeEnum.OK)]",
                         $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.BAD_REQUEST)]",
                         $"        [ProducesResponseType(typeof(BaseBadRequestApiResponse), (int)StatusCodeEnum.INTERNAL_SERVER_ERROR)]",
-                        $"        public async Task<ActionResult<object>> GetAllBase([FromQuery] string? spName = null, [FromQuery] int? foreignValue = null)",
+                        $"        public async Task<ActionResult<object>> GetAllBase([FromQuery] string? spName = null, [FromQuery] int? foreignKey = null, [FromQuery] int? foreignValue = null, [FromQuery] int? idCurrentForm = null, [FromQuery] int? idParentForm = null)",
                         "        {",
-                        $"            List<View{prefix}{entityUpperBase}BaseObject> response = await _{entityLower}Service.GetAllBase(spName, foreignValue);",
+                        $"            List<View{prefix}{entityUpperBase}BaseObject> response = await _{entityLower}Service.GetAllBase(null, spName, foreignKey, foreignValue, idCurrentForm, idParentForm);",
                         $"",
                         $"            return Ok(ResponseHelper.SetSuccessResponseWithData(response));",
                         "        }",
@@ -946,7 +965,7 @@ namespace CodeGenerator.BLL
             GenerateFile("Controllers", $"{entityUpper}Controller.cs", content);
         }
 
-        public void GenerateService(string prefix, string entityUpper, string entityLower, bool WithCode, bool hasView, bool hasCmm, bool hasPrincipalField, bool isStandardTable, bool hasViewFull)
+        public void GenerateServiceOld(string prefix, string entityUpper, string entityLower, bool WithCode, bool hasView, bool hasCmm, bool hasPrincipalField, bool isStandardTable, bool hasViewFull)
         {
             List<string> content;
             string viewGenerics;
@@ -1292,6 +1311,91 @@ namespace CodeGenerator.BLL
             GenerateFile("Services", $"{entityUpper}Service.cs", content);
         }
 
+        private string GetAbstractClass(bool WithCode, bool hasView, bool hasCmm, bool isStandardTable)
+        {
+            string abstractServiceName;
+
+            if (WithCode && hasView && isStandardTable)
+            {
+                abstractServiceName = "FullServiceAbstract";
+            }
+            else if (!WithCode && !hasView && hasCmm && isStandardTable)
+            {
+                abstractServiceName = "BasicServiceAbstract";
+            }
+            else if (WithCode && !hasView && hasCmm && isStandardTable)
+            {
+                abstractServiceName = "CodeServiceAbstract";
+            }
+            else if (!WithCode && hasView && hasCmm && isStandardTable)
+            {
+                abstractServiceName = "ViewServiceAbstract";
+            }
+            else if (WithCode && !isStandardTable)
+            {
+                abstractServiceName = "CodeNotStandardServiceAbstract";
+            }
+            else if (!isStandardTable)
+            {
+                abstractServiceName = "NotStandardServiceAbstract";
+            }
+            else
+            {
+                abstractServiceName = "ERROR";
+            }
+            
+            return abstractServiceName;
+        }
+
+        public void GenerateService(string prefix, string entityUpper, string entityLower, bool WithCode, bool hasView, bool hasCmm, bool hasPrincipalField, bool isStandardTable, bool hasViewFull)
+        {
+            List<string> content;
+            string viewGenerics;
+            string entityUpperBase;
+
+            string className = GetClassName(prefix, entityUpper, hasViewFull);
+
+            entityUpperBase = entityUpper;
+
+            if (_filesModel.Any(x => x.Name == $"View{prefix}{entityUpper}sBaseObject"))
+                entityUpperBase += "s";
+
+            viewGenerics = hasView ?
+                $"View{prefix}{entityUpper}, View{prefix}{entityUpperBase}Base, {className}Object, View{prefix}{entityUpper}Object, View{prefix}{entityUpperBase}BaseObject" :
+                $"{prefix}{entityUpper}Object";
+
+
+            string abstractService = GetAbstractClass(WithCode, hasView, hasCmm, isStandardTable);
+
+            content = GetNamespacesService(entityUpper);
+
+            content.AddRange([
+                $"",
+                $"namespace SAMMAI.DataBase.Services.Implementations",
+                "{",
+                $"    public class {entityUpper}Service : {abstractService}<{className}, {viewGenerics}>",
+                "    {",
+            ]);
+
+            content.AddRange(GetConstructorService(entityUpper, entityLower));
+
+            content.AddRange([
+                "",
+                $"        #region Custom Services"
+            ]);
+
+            content.AddRange(Utilities.GetCustomCode(_serviceModel.FirstOrDefault(x => x.Name == $"{entityUpper}Service"), "Services"));
+            //content.AddRange(Utilities.GetCustomCode(_serviceModel.FirstOrDefault(x => x.Name == $"{_transtaleService.Translate(entityUpper).Result}Service"), "Services"));
+
+            content.AddRange([
+                $"        #endregion",
+                "    }",
+                "}"
+            ]);
+
+            GenerateFile("Services", $"{entityUpper}Service.cs", content);
+        }
+
         public string GenerateDI(string entity)
         {
             string init;
@@ -1460,6 +1564,7 @@ namespace CodeGenerator.BLL
                 $"using SAMMAI.DataBase.Repository.Context;",
                 $"using SAMMAI.DataBase.Repository.Entities;",
                 $"using SAMMAI.DataBase.Repository.Manager;",
+                $"using SAMMAI.DataBase.Services.Base;",
                 $"using System.Data;",
             ];
 
@@ -1521,7 +1626,7 @@ namespace CodeGenerator.BLL
                 $"            SAMMAIContext context,",
                 $"            Global global,",
                 $"            IMapper mapper)",
-                $"            : base(context, global)",
+                $"            : base(logger, context, global, mapper)",
             ];
 
             defaultContent = [

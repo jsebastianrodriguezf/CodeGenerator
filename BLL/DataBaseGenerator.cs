@@ -190,14 +190,30 @@ namespace CodeGenerator.BLL
                 List<string> template = [.. File.ReadAllLines(file.Path)];
                 classObjectName = Utilities.GetRealName(file.Name);
 
-                contentObject = [
-                    "namespace SAMMAI.Transverse.Models.Objects;",
-                    "",
-                    $"public class {classObjectName}Object",
-                    "{"
-                ];
+                (int, List<string>, bool isStandard) resp = ExtractEntityObject(template, classObjectName);
 
-                (int, List<string>) resp = ExtractEntityObject(template, classObjectName);
+                if (resp.isStandard)
+                {
+                    contentObject = [
+                        "using SAMMAI.Transverse.Models.Interfaces;",
+                        "",
+                        "namespace SAMMAI.Transverse.Models.Objects;",
+                        "",
+                        $"public class {classObjectName}Object : IBaseObject",
+                        "{"
+                    ];
+                }
+                else
+                {
+                    contentObject = [
+                        "using SAMMAI.Transverse.Models.Interfaces;",
+                        "",
+                        "namespace SAMMAI.Transverse.Models.Objects;",
+                        "",
+                        $"public class {classObjectName}Object : IBaseIdentifier",
+                        "{"
+                    ];
+                }
 
                 contentObject.AddRange(resp.Item2);
                 contentObject.Add("}");
@@ -219,11 +235,12 @@ namespace CodeGenerator.BLL
             }
         }
 
-        public (int, List<string>) ExtractEntityObject(List<string> template, string className)
+        public (int, List<string>, bool isStandard) ExtractEntityObject(List<string> template, string className)
         {
             const int indexStart = 7;
             List<string> content = [];
             int i = indexStart;
+            bool isStandard = false;
 
             for (; i < template.Count; i++)
             {
@@ -234,7 +251,11 @@ namespace CodeGenerator.BLL
                 if (line != "")
                 {
                     if (line.Contains("public string Eid { get; set; } = null!;") || line.Contains("public string Uid { get; set; } = null!;"))
+                    {
+                        isStandard = true;
                         line = line.Replace("string", "string?").Replace(" = null!;", string.Empty);
+                    }
+                     
 
                     if (line.Contains($" {className}1 {{ get; set; }}"))
                         line = line.Replace($" {className}1 {{ get; set; }}", $" {className} {{ get; set; }}");
@@ -246,7 +267,7 @@ namespace CodeGenerator.BLL
                 }
             }
 
-            return (i, content);
+            return (i, content, isStandard);
         }
 
         public List<string> ExtractEntityEntity(int startIndex, List<string> template)
