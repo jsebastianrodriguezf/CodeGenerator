@@ -371,7 +371,8 @@ namespace CodeGenerator.BLL
                     {
                         idParamSelMSP = sp[^2].Split(" ").Where(x => !string.IsNullOrWhiteSpace(x)).First().TrimStart();
                         sp[^2] = "	@p_id INT, -- " + idParamSelMSP.Replace("@p_", string.Empty);
-                        sp[^1] = line + ",";
+                        sp[^1] = "	@p_idsMain typ_ids READONLY,";
+                        sp.Add("	@p_eid VARCHAR(50) = '',");
                         sp.Add("	@p_cmm VARCHAR(300) = NULL,");
                         sp.Add("	@p_retorno INT = 1");
                     }
@@ -379,12 +380,14 @@ namespace CodeGenerator.BLL
                     if (isSelMSP && line.Contains("BEGIN"))
                     {
                         i += 1;
-                        sp.AddRange(GetSelSP(ref i, tableName, templateTable, hasCmm, idParamSelMSP, hasParentTable));
+                        sp.AddRange(GetSelSP(ref i, tableName, templateTable, hasCmm, idParamSelMSP, hasParentTable, hasPrincipalColumn));
                         i -= 1;
                     }
 
                     if (isSelAllSP && line.Contains("@p_eid as varchar (50)='',"))
                     {
+                        sp[^1] = "	@p_idsMain typ_ids READONLY,";
+                        sp.Add("	@p_eid VARCHAR(50) = '',");
                         sp.Add("	@p_cmm VARCHAR(300) = NULL,");
                         sp.Add("	@p_retorno INT = 1");
                         sp.Add("AS");
@@ -502,7 +505,7 @@ namespace CodeGenerator.BLL
             return sp;
         }
 
-        private List<string> GetSelSP(ref int index, string tableName, List<string> template, bool hasCmm, string idParamSelMSP, bool hasParentTable)
+        private List<string> GetSelSP(ref int index, string tableName, List<string> template, bool hasCmm, string idParamSelMSP, bool hasParentTable, bool hasPrincipalColumn)
         {
             List<string> content = [];
             List<string> originalContent = [];
@@ -519,6 +522,14 @@ namespace CodeGenerator.BLL
 
                 originalContent.Add("	" + line);
             }
+
+            content.AddRange([
+                $"	DECLARE @hasIdsMain BIT = 0",
+                $"",
+                $"	IF EXISTS (SELECT TOP 1 1 FROM @p_idsMain)",
+                $"		SET @hasIdsMain = 1",
+                $"",
+            ]);
 
             for (int t = 0; t < returnType.Count; t++)
             {
@@ -538,13 +549,13 @@ namespace CodeGenerator.BLL
                         switch (t)
                         {
                             case 0:
-                                line = line.Replace($"FROM [view_{tableName}]", $"FROM [{(hasParentTable ? $"view_{tableName.Replace(".", "_")}_full" : tableName)}]");
+                                line = line.Replace($"FROM [view_{tableName}]", $"FROM [{(hasParentTable ? $"view_{tableName.Replace(".", "_")}_full" : tableName)}] AS tabla");
                                 break;
                             case 1:
-                                line = line.Replace($"FROM [view_{tableName}]", $"FROM [view_{tableName.Replace(".", "_")}]");
+                                line = line.Replace($"FROM [view_{tableName}]", $"FROM [view_{tableName.Replace(".", "_")}] AS tabla");
                                 break;
                             case 2:
-                                line = line.Replace($"FROM [view_{tableName}]", $"FROM [view_{tableName.Replace(".", "_")}_base]");
+                                line = line.Replace($"FROM [view_{tableName}]", $"FROM [view_{tableName.Replace(".", "_")}_base] AS tabla");
                                 break;
                             default:
                                 break;
@@ -555,9 +566,20 @@ namespace CodeGenerator.BLL
                     content.Add(line);
 
                 }
+
+                if (content.Last().Contains("eid LIKE"))
+                    content.RemoveAt(content.Count - 1);
+
                 content.AddRange([
-                       $"		AND (@p_cmm IS NULL{(hasCmm ? " OR [cmm] LIKE '%' + @p_cmm + '%'" : "")})",
-                       $"		AND ([active] = 1)",
+                       $"			AND (@hasIdsMain = 0 OR EXISTS (SELECT 1 FROM @p_idsMain AS idsMain WHERE idsMain.id = tabla.id))",
+                       $"			AND ([active] = 1)",
+                       $"			AND (eid LIKE @p_eid + '%')",
+                   ]);
+
+                if (hasCmm)
+                    content.AddRange(GetCmmConditions(tableName, hasPrincipalColumn));
+
+                content.AddRange([
                        $"	END",
                        ""
                    ]);
@@ -570,48 +592,39 @@ namespace CodeGenerator.BLL
         {
             List<string> content;
             List<string> cmmCondition;
-            string principalColumn;
+            List<string> mandatoryCondition;
             string tableWithoutDot;
 
             content = [];
-            principalColumn = tableName.Remove(0, 4);
             tableWithoutDot = tableName.Replace(".", "_");
 
-            cmmCondition = [
-                $"			(eid LIKE @p_eid+'%') AND",
-                $"			(",
-                $"				@p_cmm IS NULL OR",
-                $"				(",
+            mandatoryCondition = [
+                $"			(@hasIdsMain = 0 OR EXISTS (SELECT 1 FROM @p_idsMain AS idsMain WHERE idsMain.id = tabla.id))",
+                $"			AND ([active] = 1)",
+                $"			AND (eid LIKE @p_eid + '%')",
             ];
 
-            if (hasPrincipalColumn)
-                cmmCondition.AddRange([
-                    $"					([cmm] IS NULL AND [{principalColumn}] LIKE '%' + @p_cmm + '%') OR ",
-                    $"					([cmm] IS NOT NULL AND [cmm] LIKE '%' + @p_cmm + '%')",
-                ]);
-            else
-                cmmCondition.AddRange([
-                   $"					[cmm] IS NOT NULL AND [cmm] LIKE '%' + @p_cmm + '%'",
-                ]);
+            cmmCondition = GetCmmConditions(tableName, hasPrincipalColumn);
 
-            cmmCondition.AddRange([
-                $"				)",
-                $"			)",
+            content.AddRange([
+                $"	DECLARE @hasIdsMain BIT = 0",
+                $"",
+                $"	IF EXISTS (SELECT TOP 1 1 FROM @p_idsMain)",
+                $"		SET @hasIdsMain = 1",
+                $"",
             ]);
 
             content.AddRange([
                 $"	IF @p_retorno = 0 -- TABLE",
                 $"	BEGIN",
                 $"		SELECT *",
-                $"		FROM [{(hasParentTable ? $"view_{tableWithoutDot}_full" : tableName)}]",
+                $"		FROM [{(hasParentTable ? $"view_{tableWithoutDot}_full" : tableName)}] AS tabla",
                 $"		WHERE",
-                $"			([active] = 1) AND",
             ]);
 
+            content.AddRange(mandatoryCondition);
             if (hasCmm)
                 content.AddRange(cmmCondition);
-            else
-                content.Add($"			(eid LIKE @p_eid+'%')");
 
             content.AddRange([
                 $"	END",
@@ -619,15 +632,13 @@ namespace CodeGenerator.BLL
                 $"	ELSE IF @p_retorno = 1 -- VIEW",
                 $"	BEGIN",
                 $"		SELECT *",
-                $"		FROM [view_{tableWithoutDot}]",
+                $"		FROM [view_{tableWithoutDot}] AS tabla",
                 $"		WHERE",
-                $"			([active] = 1) AND",
             ]);
 
+            content.AddRange(mandatoryCondition);
             if (hasCmm)
                 content.AddRange(cmmCondition);
-            else
-                content.Add($"			(eid LIKE @p_eid+'%')");
 
             content.AddRange([
                 $"	END",
@@ -635,21 +646,50 @@ namespace CodeGenerator.BLL
                 $"	ELSE IF @p_retorno = 2 -- VIEWBASE",
                 $"	BEGIN",
                 $"		SELECT *",
-                $"		FROM [view_{tableWithoutDot}_base]",
+                $"		FROM [view_{tableWithoutDot}_base] AS tabla",
                 $"		WHERE",
-                $"			([active] = 1) AND",
             ]);
 
+            content.AddRange(mandatoryCondition);
             if (hasCmm)
                 content.AddRange(cmmCondition);
-            else
-                content.Add($"			(eid LIKE @p_eid+'%')");
 
             content.AddRange([
                 $"	END",
             ]);
 
             return content;
+        }
+
+        private static List<string> GetCmmConditions(string tableName, bool hasPrincipalColumn)
+        {
+            List<string> cmmCondition;
+            string principalColumn;
+
+            principalColumn = tableName.Remove(0, 4);
+
+            cmmCondition = [
+                $"			AND (",
+                $"					@p_cmm IS NULL OR",
+                $"					(",
+            ];
+
+            if (hasPrincipalColumn)
+                cmmCondition.AddRange([
+                    $"						([cmm] IS NULL AND [{principalColumn}] LIKE '%' + @p_cmm + '%') OR ",
+                    $"						([cmm] IS NOT NULL AND [cmm] LIKE '%' + @p_cmm + '%')",
+                ]);
+            else
+                cmmCondition.AddRange([
+                   $"						[cmm] IS NOT NULL AND [cmm] LIKE '%' + @p_cmm + '%'",
+                ]);
+
+            cmmCondition.AddRange([
+                $"					)",
+                $"				)",
+            ]);
+
+            return cmmCondition;
         }
 
         public string GenerateBasicViews()

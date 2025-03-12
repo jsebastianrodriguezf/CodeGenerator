@@ -993,7 +993,7 @@ namespace CodeGenerator.BLL
                 "    {",
             ]);
 
-            content.AddRange(GetConstructorService(entityUpper, entityLower));
+            content.AddRange(GetConstructorService(entityUpper, entityLower, "        #region Base"));
 
             content.AddRange([
                 $"",
@@ -1377,7 +1377,7 @@ namespace CodeGenerator.BLL
                 "    {",
             ]);
 
-            content.AddRange(GetConstructorService(entityUpper, entityLower));
+            content.AddRange(GetConstructorService(entityUpper, entityLower, "        #region Custom"));
 
             content.AddRange([
                 "",
@@ -1599,13 +1599,13 @@ namespace CodeGenerator.BLL
 
             content = Utilities.GetConstructor(
                 _controllerModel.FirstOrDefault(x => x.Name == $"{entityUpper}Controller"),
-                constructorMethod, defaultProperties, defaultParameters, defaultContent);
+                constructorMethod, defaultProperties, defaultParameters, defaultContent, "        #region Base");
 
 
             return content;
         }
 
-        private List<string> GetConstructorService(string entityUpper, string entityLower)
+        private List<string> GetConstructorService(string entityUpper, string entityLower, string endKeyConstructor)
         {
             List<string> content;
             List<string> defaultProperties;
@@ -1638,7 +1638,7 @@ namespace CodeGenerator.BLL
 
             content = Utilities.GetConstructor(
                 _serviceModel.FirstOrDefault(x => x.Name == $"{entityUpper}Service"),
-                constructorMethod, defaultProperties, defaultParameters, defaultContent);
+                constructorMethod, defaultProperties, defaultParameters, defaultContent, endKeyConstructor);
 
             return content;
         }

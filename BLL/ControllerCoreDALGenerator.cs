@@ -1422,7 +1422,7 @@ namespace CodeGenerator.BLL
 
             content = Utilities.GetConstructor(
                 _controllerModel.FirstOrDefault(x => x.Name == $"{entityUpper}Controller"),
-                constructorMethod, defaultProperties, defaultParameters, defaultContent);
+                constructorMethod, defaultProperties, defaultParameters, defaultContent, "        #region Base");
 
 
             return content;
@@ -1460,7 +1460,7 @@ namespace CodeGenerator.BLL
 
             content = Utilities.GetConstructor(
                 _serviceModel.FirstOrDefault(x => x.Name == $"{entityUpper}Service"),
-                constructorMethod, defaultProperties, defaultParameters, defaultContent);
+                constructorMethod, defaultProperties, defaultParameters, defaultContent, "        #region Base");
 
             return content;
         }

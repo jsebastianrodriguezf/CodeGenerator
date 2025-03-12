@@ -25842,6 +25842,7 @@ BEGIN
 		[configuracionProyeccion] AS [configuracionProyeccion],
 		[configuracionProyeccion_codigo] AS [configuracionProyeccion_codigo],
 		[id_equipo] AS [id_equipo],
+		[id_documento.contrato] AS [id_documento.contrato],
 		[fecha_inicio_ff] AS [fecha_inicio_ff],
 		[fecha_fin_ff] AS [fecha_fin_ff],
 		[frecuencia] AS [frecuencia],
@@ -25860,8 +25861,7 @@ BEGIN
 		[id_estadoTipoDocumento_inicial] AS [id_estadoTipoDocumento_inicial],
 		[id_subtipoDocumento_padre] AS [id_subtipoDocumento_padre],
 		[id_estadoTipoDocumento_inicial_padre] AS [id_estadoTipoDocumento_inicial_padre],
-		[cmm] AS [cmm],
-		[id_documento.contrato] AS [id_documento.contrato]
+		[cmm] AS [cmm]
 	FROM [cnt_configuracionProyeccion]
 	WHERE	(id = @p_id)
 
@@ -26165,6 +26165,27 @@ GO
 SET ANSI_NULLS OFF
 GO
 
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_cnt_configuracionProyeccionesXdocumento_contrato]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_cnt_configuracionProyeccionesXdocumento_contrato]
+GO
+CREATE PROCEDURE [sel_cnt_configuracionProyeccionesXdocumento_contrato]
+	@p_id_documento_contrato INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_cnt_configuracionProyeccion]
+	WHERE ([id_documento.contrato]= @p_id_documento_contrato)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_cnt_configuracionProyeccionesXtipoServicio]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_cnt_configuracionProyeccionesXtipoServicio]
 GO
 CREATE PROCEDURE [sel_cnt_configuracionProyeccionesXtipoServicio]
@@ -26291,27 +26312,6 @@ GO
 SET ANSI_NULLS OFF
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_cnt_configuracionProyeccionesXdocumento_contrato]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_cnt_configuracionProyeccionesXdocumento_contrato]
-GO
-CREATE PROCEDURE [sel_cnt_configuracionProyeccionesXdocumento_contrato]
-	@p_id_documento_contrato INT
-AS
-BEGIN
-	SELECT * 
-	FROM [view_cnt_configuracionProyeccion]
-	WHERE ([id_documento.contrato]= @p_id_documento_contrato)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_cnt_configuracionProyecciones]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_cnt_configuracionProyecciones]
 GO
 CREATE PROCEDURE [sel_cnt_configuracionProyecciones]
@@ -26369,6 +26369,7 @@ CREATE PROCEDURE [upd_cnt_configuracionProyeccion]
 		@p_configuracionProyeccion varchar(300) = null,
 		@p_configuracionProyeccion_codigo varchar(100) = null,
 		@p_id_equipo int = null,
+		@p_id_documento_contrato int = null,
 		@p_fecha_inicio_ff smalldatetime = null,
 		@p_fecha_fin_ff smalldatetime = null,
 		@p_frecuencia int = null,
@@ -26387,8 +26388,7 @@ CREATE PROCEDURE [upd_cnt_configuracionProyeccion]
 		@p_id_estadoTipoDocumento_inicial int = null,
 		@p_id_subtipoDocumento_padre int = null,
 		@p_id_estadoTipoDocumento_inicial_padre int = null,
-		@p_cmm varchar(300) = null,
-		@p_id_documento_contrato int = null
+		@p_cmm varchar(300) = null
 AS
 BEGIN
 		UPDATE [cnt_configuracionProyeccion]
@@ -26400,6 +26400,7 @@ BEGIN
 			[configuracionProyeccion] = isnull(@p_configuracionProyeccion,[configuracionProyeccion]),
 			[configuracionProyeccion_codigo] = isnull(@p_configuracionProyeccion_codigo,[configuracionProyeccion_codigo]),
 			[id_equipo] = isnull(@p_id_equipo,[id_equipo]),
+			[id_documento.contrato] = isnull(@p_id_documento_contrato,[id_documento.contrato]),
 			[fecha_inicio_ff] = isnull(@p_fecha_inicio_ff,[fecha_inicio_ff]),
 			[fecha_fin_ff] = isnull(@p_fecha_fin_ff,[fecha_fin_ff]),
 			[frecuencia] = isnull(@p_frecuencia,[frecuencia]),
@@ -26418,8 +26419,7 @@ BEGIN
 			[id_estadoTipoDocumento_inicial] = isnull(@p_id_estadoTipoDocumento_inicial,[id_estadoTipoDocumento_inicial]),
 			[id_subtipoDocumento_padre] = isnull(@p_id_subtipoDocumento_padre,[id_subtipoDocumento_padre]),
 			[id_estadoTipoDocumento_inicial_padre] = isnull(@p_id_estadoTipoDocumento_inicial_padre,[id_estadoTipoDocumento_inicial_padre]),
-			[cmm] = isnull(@p_cmm,[cmm]),
-			[id_documento.contrato] = isnull(@p_id_documento_contrato,[id_documento.contrato])
+			[cmm] = isnull(@p_cmm,[cmm])
 		WHERE (id = @p_id)
 END
 GO
@@ -26443,6 +26443,7 @@ CREATE PROCEDURE [ins_cnt_configuracionProyeccion]
 		@p_configuracionProyeccion varchar(300),
 		@p_configuracionProyeccion_codigo varchar(100),
 		@p_id_equipo int,
+		@p_id_documento_contrato int,
 		@p_fecha_inicio_ff smalldatetime,
 		@p_fecha_fin_ff smalldatetime,
 		@p_frecuencia int,
@@ -26461,8 +26462,7 @@ CREATE PROCEDURE [ins_cnt_configuracionProyeccion]
 		@p_id_estadoTipoDocumento_inicial int,
 		@p_id_subtipoDocumento_padre int,
 		@p_id_estadoTipoDocumento_inicial_padre int,
-		@p_cmm varchar(300),
-		@p_id_documento_contrato int
+		@p_cmm varchar(300)
 AS
 BEGIN
 	DECLARE @v_id int
@@ -26476,6 +26476,7 @@ BEGIN
 			[configuracionProyeccion],
 			[configuracionProyeccion_codigo],
 			[id_equipo],
+			[id_documento.contrato],
 			[fecha_inicio_ff],
 			[fecha_fin_ff],
 			[frecuencia],
@@ -26494,8 +26495,7 @@ BEGIN
 			[id_estadoTipoDocumento_inicial],
 			[id_subtipoDocumento_padre],
 			[id_estadoTipoDocumento_inicial_padre],
-			[cmm],
-			[id_documento.contrato])
+			[cmm])
 		VALUES(	@p_uid,
 			@p_eid,
 			@p_id_usuario_modifico,
@@ -26505,6 +26505,7 @@ BEGIN
 			@p_configuracionProyeccion,
 			@p_configuracionProyeccion_codigo,
 			@p_id_equipo,
+			@p_id_documento_contrato,
 			@p_fecha_inicio_ff,
 			@p_fecha_fin_ff,
 			@p_frecuencia,
@@ -26523,8 +26524,7 @@ BEGIN
 			@p_id_estadoTipoDocumento_inicial,
 			@p_id_subtipoDocumento_padre,
 			@p_id_estadoTipoDocumento_inicial_padre,
-			@p_cmm,
-			@p_id_documento_contrato)
+			@p_cmm)
 		SET @v_id = scope_identity()
 UPDATE [cnt_configuracionProyeccion] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
 SELECT @v_id as id
@@ -26585,6 +26585,7 @@ BEGIN
 		[configuracionProyeccion] AS [configuracionProyeccion],
 		[configuracionProyeccion_codigo] AS [configuracionProyeccion_codigo],
 		[id_equipo] AS [id_equipo],
+		[id_documento.contrato] AS [id_documento.contrato],
 		[fecha_inicio_ff] AS [fecha_inicio_ff],
 		[fecha_fin_ff] AS [fecha_fin_ff],
 		[frecuencia] AS [frecuencia],
@@ -26603,8 +26604,7 @@ BEGIN
 		[id_estadoTipoDocumento_inicial] AS [id_estadoTipoDocumento_inicial],
 		[id_subtipoDocumento_padre] AS [id_subtipoDocumento_padre],
 		[id_estadoTipoDocumento_inicial_padre] AS [id_estadoTipoDocumento_inicial_padre],
-		[cmm] AS [cmm],
-		[id_documento.contrato] AS [id_documento.contrato]
+		[cmm] AS [cmm]
 	FROM [cnt_configuracionProyeccion]
 	WHERE	(id = @p_id)
 	AND	(eid LIKE @p_eid+'%')
@@ -26677,6 +26677,29 @@ BEGIN
 	SELECT *
 	FROM [view_cnt_configuracionProyeccion]
 	WHERE ([id_equipo]= @p_id_equipo)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_cnt_configuracionProyeccionesXdocumento_contrato_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_cnt_configuracionProyeccionesXdocumento_contrato_m]
+GO
+CREATE PROCEDURE [sel_cnt_configuracionProyeccionesXdocumento_contrato_m]
+	@p_id_documento_contrato INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_cnt_configuracionProyeccion]
+	WHERE ([id_documento.contrato]= @p_id_documento_contrato)
 	AND	(eid LIKE @p_eid+'%')
 END
 GO
@@ -26828,29 +26851,6 @@ GO
 SET ANSI_NULLS OFF
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_cnt_configuracionProyeccionesXdocumento_contrato_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_cnt_configuracionProyeccionesXdocumento_contrato_m]
-GO
-CREATE PROCEDURE [sel_cnt_configuracionProyeccionesXdocumento_contrato_m]
-	@p_id_documento_contrato INT,
-	@p_eid as varchar(50) = ''
-AS
-BEGIN
-	SELECT *
-	FROM [view_cnt_configuracionProyeccion]
-	WHERE ([id_documento.contrato]= @p_id_documento_contrato)
-	AND	(eid LIKE @p_eid+'%')
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_cnt_configuracionProyecciones_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_cnt_configuracionProyecciones_m]
 GO
 CREATE PROCEDURE [sel_cnt_configuracionProyecciones_m]
@@ -26932,7 +26932,6 @@ SET QUOTED_IDENTIFIER OFF
 GO
 SET ANSI_NULLS OFF
 GO
-
 
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[reg_cnt_corrimientoVisitaFija]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[reg_cnt_corrimientoVisitaFija]
 GO
@@ -27445,8 +27444,8 @@ BEGIN
 		[pagosContrato_codigo] AS [pagosContrato_codigo],
 		[fecha_ff] AS [fecha_ff],
 		[valor] AS [valor],
-		[cmm] AS [cmm],
-		[id_documento.contrato] AS [id_documento.contrato]
+		[id_documento.contrato] AS [id_documento.contrato],
+		[cmm] AS [cmm]
 	FROM [cnt_pagosContrato]
 	WHERE	(id = @p_id)
 
@@ -27476,7 +27475,6 @@ SELECT 	[cnt_pagosContrato].[id] AS [id],
 		[cnt_pagosContrato].[pagosContrato_codigo] AS [pagosContrato_codigo],
 		[cnt_pagosContrato].[fecha_ff] AS [fecha_ff],
 		[cnt_pagosContrato].[valor] AS [valor],
-		[cnt_pagosContrato].[cmm] AS [cmm],
 		[cnt_pagosContrato].[id_documento.contrato] AS [id_documento.contrato],
 [doc_documento.contrato].[documento.contrato] as [doc_documento.contrato_documento.contrato],
 [doc_documento.contrato].[numero] as [doc_documento.contrato_numero],
@@ -27519,6 +27517,7 @@ SELECT 	[cnt_pagosContrato].[id] AS [id],
 		[doc_documento_contrato].[id_usuario_enUso] AS [doc_documento_contrato_id_usuario_enUso],
 		[doc_documento_contrato].[identificador] AS [doc_documento_contrato_identificador],
 		[doc_documento_contrato].[cmm] AS [doc_documento_contrato_cmm],
+		[cnt_pagosContrato].[cmm] AS [cmm],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [cnt_pagosContrato]
 	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[cnt_pagosContrato].[id_usuario_modifico]
@@ -27658,8 +27657,8 @@ CREATE PROCEDURE [upd_cnt_pagosContrato]
 		@p_pagosContrato_codigo varchar(100) = null,
 		@p_fecha_ff smalldatetime = null,
 		@p_valor money = null,
-		@p_cmm varchar(300) = null,
-		@p_id_documento_contrato int = null
+		@p_id_documento_contrato int = null,
+		@p_cmm varchar(300) = null
 AS
 BEGIN
 		UPDATE [cnt_pagosContrato]
@@ -27672,8 +27671,8 @@ BEGIN
 			[pagosContrato_codigo] = isnull(@p_pagosContrato_codigo,[pagosContrato_codigo]),
 			[fecha_ff] = isnull(@p_fecha_ff,[fecha_ff]),
 			[valor] = isnull(@p_valor,[valor]),
-			[cmm] = isnull(@p_cmm,[cmm]),
-			[id_documento.contrato] = isnull(@p_id_documento_contrato,[id_documento.contrato])
+			[id_documento.contrato] = isnull(@p_id_documento_contrato,[id_documento.contrato]),
+			[cmm] = isnull(@p_cmm,[cmm])
 		WHERE (id = @p_id)
 END
 GO
@@ -27698,8 +27697,8 @@ CREATE PROCEDURE [ins_cnt_pagosContrato]
 		@p_pagosContrato_codigo varchar(100),
 		@p_fecha_ff smalldatetime,
 		@p_valor money,
-		@p_cmm varchar(300),
-		@p_id_documento_contrato int
+		@p_id_documento_contrato int,
+		@p_cmm varchar(300)
 AS
 BEGIN
 	DECLARE @v_id int
@@ -27714,8 +27713,8 @@ BEGIN
 			[pagosContrato_codigo],
 			[fecha_ff],
 			[valor],
-			[cmm],
-			[id_documento.contrato])
+			[id_documento.contrato],
+			[cmm])
 		VALUES(	@p_uid,
 			@p_eid,
 			@p_id_usuario_modifico,
@@ -27726,8 +27725,8 @@ BEGIN
 			@p_pagosContrato_codigo,
 			@p_fecha_ff,
 			@p_valor,
-			@p_cmm,
-			@p_id_documento_contrato)
+			@p_id_documento_contrato,
+			@p_cmm)
 		SET @v_id = scope_identity()
 UPDATE [cnt_pagosContrato] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
 SELECT @v_id as id
@@ -27789,8 +27788,8 @@ BEGIN
 		[pagosContrato_codigo] AS [pagosContrato_codigo],
 		[fecha_ff] AS [fecha_ff],
 		[valor] AS [valor],
-		[cmm] AS [cmm],
-		[id_documento.contrato] AS [id_documento.contrato]
+		[id_documento.contrato] AS [id_documento.contrato],
+		[cmm] AS [cmm]
 	FROM [cnt_pagosContrato]
 	WHERE	(id = @p_id)
 	AND	(eid LIKE @p_eid+'%')
@@ -28397,8 +28396,8 @@ BEGIN
 		[tiempoLimite] AS [tiempoLimite],
 		[id_prioridadDocumento] AS [id_prioridadDocumento],
 		[id_estrategiaPrioridad] AS [id_estrategiaPrioridad],
-		[cmm] AS [cmm],
-		[id_documento.contrato] AS [id_documento.contrato]
+		[id_documento.contrato] AS [id_documento.contrato],
+		[cmm] AS [cmm]
 	FROM [cnt_tiempoRespuesta]
 	WHERE	(id = @p_id)
 
@@ -28455,7 +28454,6 @@ SELECT 	[cnt_tiempoRespuesta].[id] AS [id],
 [doc_estrategiaPrioridad].[festivoIni_hh] as [doc_estrategiaPrioridad_festivoIni_hh],
 [doc_estrategiaPrioridad].[festivoFin_hh] as [doc_estrategiaPrioridad_festivoFin_hh],
 [doc_estrategiaPrioridad].[cmm] as [doc_estrategiaPrioridad_cmm],
-		[cnt_tiempoRespuesta].[cmm] AS [cmm],
 		[cnt_tiempoRespuesta].[id_documento.contrato] AS [id_documento.contrato],
 [doc_documento.contrato].[documento.contrato] as [doc_documento.contrato_documento.contrato],
 [doc_documento.contrato].[numero] as [doc_documento.contrato_numero],
@@ -28498,6 +28496,7 @@ SELECT 	[cnt_tiempoRespuesta].[id] AS [id],
 		[doc_documento_contrato].[id_usuario_enUso] AS [doc_documento_contrato_id_usuario_enUso],
 		[doc_documento_contrato].[identificador] AS [doc_documento_contrato_identificador],
 		[doc_documento_contrato].[cmm] AS [doc_documento_contrato_cmm],
+		[cnt_tiempoRespuesta].[cmm] AS [cmm],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [cnt_tiempoRespuesta]
 	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[cnt_tiempoRespuesta].[id_usuario_modifico]
@@ -28682,8 +28681,8 @@ CREATE PROCEDURE [upd_cnt_tiempoRespuesta]
 		@p_tiempoLimite int = null,
 		@p_id_prioridadDocumento int = null,
 		@p_id_estrategiaPrioridad int = null,
-		@p_cmm varchar(300) = null,
-		@p_id_documento_contrato int = null
+		@p_id_documento_contrato int = null,
+		@p_cmm varchar(300) = null
 AS
 BEGIN
 		UPDATE [cnt_tiempoRespuesta]
@@ -28697,8 +28696,8 @@ BEGIN
 			[tiempoLimite] = isnull(@p_tiempoLimite,[tiempoLimite]),
 			[id_prioridadDocumento] = isnull(@p_id_prioridadDocumento,[id_prioridadDocumento]),
 			[id_estrategiaPrioridad] = isnull(@p_id_estrategiaPrioridad,[id_estrategiaPrioridad]),
-			[cmm] = isnull(@p_cmm,[cmm]),
-			[id_documento.contrato] = isnull(@p_id_documento_contrato,[id_documento.contrato])
+			[id_documento.contrato] = isnull(@p_id_documento_contrato,[id_documento.contrato]),
+			[cmm] = isnull(@p_cmm,[cmm])
 		WHERE (id = @p_id)
 END
 GO
@@ -28724,8 +28723,8 @@ CREATE PROCEDURE [ins_cnt_tiempoRespuesta]
 		@p_tiempoLimite int,
 		@p_id_prioridadDocumento int,
 		@p_id_estrategiaPrioridad int,
-		@p_cmm varchar(300),
-		@p_id_documento_contrato int
+		@p_id_documento_contrato int,
+		@p_cmm varchar(300)
 AS
 BEGIN
 	DECLARE @v_id int
@@ -28741,8 +28740,8 @@ BEGIN
 			[tiempoLimite],
 			[id_prioridadDocumento],
 			[id_estrategiaPrioridad],
-			[cmm],
-			[id_documento.contrato])
+			[id_documento.contrato],
+			[cmm])
 		VALUES(	@p_uid,
 			@p_eid,
 			@p_id_usuario_modifico,
@@ -28754,8 +28753,8 @@ BEGIN
 			@p_tiempoLimite,
 			@p_id_prioridadDocumento,
 			@p_id_estrategiaPrioridad,
-			@p_cmm,
-			@p_id_documento_contrato)
+			@p_id_documento_contrato,
+			@p_cmm)
 		SET @v_id = scope_identity()
 UPDATE [cnt_tiempoRespuesta] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
 SELECT @v_id as id
@@ -28818,8 +28817,8 @@ BEGIN
 		[tiempoLimite] AS [tiempoLimite],
 		[id_prioridadDocumento] AS [id_prioridadDocumento],
 		[id_estrategiaPrioridad] AS [id_estrategiaPrioridad],
-		[cmm] AS [cmm],
-		[id_documento.contrato] AS [id_documento.contrato]
+		[id_documento.contrato] AS [id_documento.contrato],
+		[cmm] AS [cmm]
 	FROM [cnt_tiempoRespuesta]
 	WHERE	(id = @p_id)
 	AND	(eid LIKE @p_eid+'%')
@@ -29158,6 +29157,7 @@ SELECT 	[cnt_visitaFija].[id] AS [id],
 [cnt_configuracionProyeccion].[configuracionProyeccion] as [cnt_configuracionProyeccion_configuracionProyeccion],
 [cnt_configuracionProyeccion].[configuracionProyeccion_codigo] as [cnt_configuracionProyeccion_configuracionProyeccion_codigo],
 [cnt_configuracionProyeccion].[id_equipo] as [cnt_configuracionProyeccion_id_equipo],
+[cnt_configuracionProyeccion].[id_documento.contrato] as [cnt_configuracionProyeccion_id_documento.contrato],
 [cnt_configuracionProyeccion].[fecha_inicio_ff] as [cnt_configuracionProyeccion_fecha_inicio_ff],
 [cnt_configuracionProyeccion].[fecha_fin_ff] as [cnt_configuracionProyeccion_fecha_fin_ff],
 [cnt_configuracionProyeccion].[frecuencia] as [cnt_configuracionProyeccion_frecuencia],
@@ -29177,7 +29177,6 @@ SELECT 	[cnt_visitaFija].[id] AS [id],
 [cnt_configuracionProyeccion].[id_subtipoDocumento_padre] as [cnt_configuracionProyeccion_id_subtipoDocumento_padre],
 [cnt_configuracionProyeccion].[id_estadoTipoDocumento_inicial_padre] as [cnt_configuracionProyeccion_id_estadoTipoDocumento_inicial_padre],
 [cnt_configuracionProyeccion].[cmm] as [cnt_configuracionProyeccion_cmm],
-[cnt_configuracionProyeccion].[id_documento.contrato] as [cnt_configuracionProyeccion_id_documento.contrato],
 		[cnt_visitaFija].[cmm] AS [cmm],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [cnt_visitaFija]
@@ -45591,8 +45590,8 @@ BEGIN
 		[id_sistema] AS [id_sistema],
 		[id_departamentoSolicitud] AS [id_departamentoSolicitud],
 		[id_zona] AS [id_zona],
-		[cmm] AS [cmm],
-		[id_documento.contrato] AS [id_documento.contrato]
+		[id_documento.contrato] AS [id_documento.contrato],
+		[cmm] AS [cmm]
 	FROM [doc_documento.ot]
 	WHERE	(id = @p_id)
 
@@ -45748,7 +45747,6 @@ SELECT 	[doc_documento.ot].[id] AS [id],
 [gen_zona].[id_zona] as [gen_zona_id_zona],
 [gen_zona].[codigoExterno] as [gen_zona_codigoExterno],
 [gen_zona].[cmm] as [gen_zona_cmm],
-		[doc_documento.ot].[cmm] AS [cmm],
 		[doc_documento.ot].[id_documento.contrato] AS [id_documento.contrato],
 [doc_documento.contrato].[documento.contrato] as [doc_documento.contrato_documento.contrato],
 [doc_documento.contrato].[numero] as [doc_documento.contrato_numero],
@@ -45791,6 +45789,7 @@ SELECT 	[doc_documento.ot].[id] AS [id],
 		[doc_documento_contrato].[id_usuario_enUso] AS [doc_documento_contrato_id_usuario_enUso],
 		[doc_documento_contrato].[identificador] AS [doc_documento_contrato_identificador],
 		[doc_documento_contrato].[cmm] AS [doc_documento_contrato_cmm],
+		[doc_documento.ot].[cmm] AS [cmm],
 [doc_documento_ot].[documento_codigo] AS [doc_documento_ot_documento_codigo],
 [doc_documento_ot].[documento_numero] AS [doc_documento_ot_documento_numero],
 [doc_documento_ot].[prefijo] AS [doc_documento_ot_prefijo],
@@ -46361,8 +46360,8 @@ CREATE PROCEDURE [upd_doc_documento_ot]
 		@p_id_sistema int = null,
 		@p_id_departamentoSolicitud int = null,
 		@p_id_zona int = null,
-		@p_cmm varchar(300) = null,
 		@p_id_documento_contrato int = null,
+		@p_cmm varchar(300) = null,
 		@p_documento_codigo varchar(100),
 		@p_documento_numero int,
 		@p_prefijo varchar(10),
@@ -46472,8 +46471,8 @@ exec [upd_doc_documento]
 			[id_sistema] = isnull(@p_id_sistema,[id_sistema]),
 			[id_departamentoSolicitud] = isnull(@p_id_departamentoSolicitud,[id_departamentoSolicitud]),
 			[id_zona] = isnull(@p_id_zona,[id_zona]),
-			[cmm] = isnull(@p_cmm,[cmm]),
-			[id_documento.contrato] = isnull(@p_id_documento_contrato,[id_documento.contrato])
+			[id_documento.contrato] = isnull(@p_id_documento_contrato,[id_documento.contrato]),
+			[cmm] = isnull(@p_cmm,[cmm])
 		WHERE (id = @p_id)
 END
 GO
@@ -46524,8 +46523,8 @@ CREATE PROCEDURE [ins_doc_documento_ot]
 		@p_id_sistema int,
 		@p_id_departamentoSolicitud int,
 		@p_id_zona int,
-		@p_cmm varchar(300),
 		@p_id_documento_contrato int,
+		@p_cmm varchar(300),
 		@p_documento_codigo varchar(100),
 		@p_documento_numero int,
 		@p_prefijo varchar(10),
@@ -46635,8 +46634,8 @@ INSERT INTO [doc_documento.ot]
 			[id_sistema],
 			[id_departamentoSolicitud],
 			[id_zona],
-			[cmm],
-			[id_documento.contrato])
+			[id_documento.contrato],
+			[cmm])
 		VALUES( @v_id,
 			@p_uid,
 			@p_eid,
@@ -46674,8 +46673,8 @@ INSERT INTO [doc_documento.ot]
 			@p_id_sistema,
 			@p_id_departamentoSolicitud,
 			@p_id_zona,
-			@p_cmm,
-			@p_id_documento_contrato)
+			@p_id_documento_contrato,
+			@p_cmm)
 UPDATE [doc_documento.ot] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
 SELECT @v_id as id
 END
@@ -46765,8 +46764,8 @@ BEGIN
 		[id_sistema] AS [id_sistema],
 		[id_departamentoSolicitud] AS [id_departamentoSolicitud],
 		[id_zona] AS [id_zona],
-		[cmm] AS [cmm],
-		[id_documento.contrato] AS [id_documento.contrato]
+		[id_documento.contrato] AS [id_documento.contrato],
+		[cmm] AS [cmm]
 	FROM [doc_documento.ot]
 	WHERE	(id = @p_id)
 	AND	(eid LIKE @p_eid+'%')
@@ -47317,8 +47316,8 @@ SELECT 	[doc_documento.ot_centroCosto].[id] AS [id],
 [doc_documento.ot].[id_sistema] as [doc_documento.ot_id_sistema],
 [doc_documento.ot].[id_departamentoSolicitud] as [doc_documento.ot_id_departamentoSolicitud],
 [doc_documento.ot].[id_zona] as [doc_documento.ot_id_zona],
-[doc_documento.ot].[cmm] as [doc_documento.ot_cmm],
 [doc_documento.ot].[id_documento.contrato] as [doc_documento.ot_id_documento.contrato],
+[doc_documento.ot].[cmm] as [doc_documento.ot_cmm],
 		[doc_documento_ot].[documento_codigo] AS [doc_documento_ot_documento_codigo],
 		[doc_documento_ot].[documento_numero] AS [doc_documento_ot_documento_numero],
 		[doc_documento_ot].[prefijo] AS [doc_documento_ot_prefijo],
@@ -47903,8 +47902,8 @@ SELECT 	[doc_documento.ot_pruebaCheckList].[id] AS [id],
 [doc_documento.ot].[id_sistema] as [doc_documento.ot_id_sistema],
 [doc_documento.ot].[id_departamentoSolicitud] as [doc_documento.ot_id_departamentoSolicitud],
 [doc_documento.ot].[id_zona] as [doc_documento.ot_id_zona],
-[doc_documento.ot].[cmm] as [doc_documento.ot_cmm],
 [doc_documento.ot].[id_documento.contrato] as [doc_documento.ot_id_documento.contrato],
+[doc_documento.ot].[cmm] as [doc_documento.ot_cmm],
 		[doc_documento_ot].[documento_codigo] AS [doc_documento_ot_documento_codigo],
 		[doc_documento_ot].[documento_numero] AS [doc_documento_ot_documento_numero],
 		[doc_documento_ot].[prefijo] AS [doc_documento_ot_prefijo],
@@ -57674,571 +57673,6 @@ GO
 SET ANSI_NULLS OFF
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[reg_doc_documento_contacto]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[reg_doc_documento_contacto]
-GO
-CREATE PROCEDURE [reg_doc_documento_contacto]
-	@p_id INT
-AS
-BEGIN
-	SELECT 	[id] AS [id],
-		[uid] AS [uid],
-		[eid] AS [eid],
-		[id_usuario_modifico] AS [id_usuario_modifico],
-		[id_usuario_creo] AS [id_usuario_creo],
-		[fechaModificacion] AS [fechaModificacion],
-		[fechaCreacion] AS [fechaCreacion],
-		[active] AS [active],
-		[documento_contacto] AS [documento_contacto],
-		[id_documento] AS [id_documento],
-		[id_contacto] AS [id_contacto],
-		[cmm] AS [cmm]
-	FROM [doc_documento_contacto]
-	WHERE	(id = @p_id)
-
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-IF  EXISTS (SELECT * FROM sys.views WHERE object_id = OBJECT_ID(N'[dbo].[view_doc_documento_contacto]')) DROP VIEW [dbo].[view_doc_documento_contacto]
-GO
-CREATE  VIEW [view_doc_documento_contacto] AS
-SELECT 	[doc_documento_contacto].[id] AS [id],
-		[doc_documento_contacto].[uid] AS [uid],
-		[doc_documento_contacto].[eid] AS [eid],
-		[doc_documento_contacto].[id_usuario_modifico] AS [id_usuario_modifico],
-		[doc_documento_contacto].[id_usuario_creo] AS [id_usuario_creo],
-		[doc_documento_contacto].[fechaModificacion] AS [fechaModificacion],
-		[doc_documento_contacto].[fechaCreacion] AS [fechaCreacion],
-		[doc_documento_contacto].[active] AS [active],
-		[doc_documento_contacto].[documento_contacto] AS [documento_contacto],
-		[doc_documento_contacto].[id_documento] AS [id_documento],
-[doc_documento].[documento] as [doc_documento_documento],
-[doc_documento].[documento_codigo] as [doc_documento_documento_codigo],
-[doc_documento].[documento_numero] as [doc_documento_documento_numero],
-[doc_documento].[prefijo] as [doc_documento_prefijo],
-[doc_documento].[subtotal] as [doc_documento_subtotal],
-[doc_documento].[descuento] as [doc_documento_descuento],
-[doc_documento].[iva] as [doc_documento_iva],
-[doc_documento].[total] as [doc_documento_total],
-[doc_documento].[costo] as [doc_documento_costo],
-[doc_documento].[rentabilidad] as [doc_documento_rentabilidad],
-[doc_documento].[trm] as [doc_documento_trm],
-[doc_documento].[fecha_fh] as [doc_documento_fecha_fh],
-[doc_documento].[fechaSugerida_fh] as [doc_documento_fechaSugerida_fh],
-[doc_documento].[fechaCierre_ff] as [doc_documento_fechaCierre_ff],
-[doc_documento].[fechaLimite_fh] as [doc_documento_fechaLimite_fh],
-[doc_documento].[id_subtipoDocumento] as [doc_documento_id_subtipoDocumento],
-[doc_documento].[id_tercero_cliente] as [doc_documento_id_tercero_cliente],
-[doc_documento].[id_documento] as [doc_documento_id_documento],
-[doc_documento].[id_tercero_proveedor] as [doc_documento_id_tercero_proveedor],
-[doc_documento].[id_prioridadDocumento] as [doc_documento_id_prioridadDocumento],
-[doc_documento].[id_moneda] as [doc_documento_id_moneda],
-[doc_documento].[id_estadoTipoDocumento] as [doc_documento_id_estadoTipoDocumento],
-[doc_documento].[id_motivoestado] as [doc_documento_id_motivoestado],
-[doc_documento].[subtotalPlaneado] as [doc_documento_subtotalPlaneado],
-[doc_documento].[descuentoPlaneado] as [doc_documento_descuentoPlaneado],
-[doc_documento].[ivaPlaneado] as [doc_documento_ivaPlaneado],
-[doc_documento].[totalPlaneado] as [doc_documento_totalPlaneado],
-[doc_documento].[costoPlaneado] as [doc_documento_costoPlaneado],
-[doc_documento].[id_usuario_asignado] as [doc_documento_id_usuario_asignado],
-[doc_documento].[id_usuario_enUso] as [doc_documento_id_usuario_enUso],
-[doc_documento].[identificador] as [doc_documento_identificador],
-[doc_documento].[cmm] as [doc_documento_cmm],
-		[doc_documento_contacto].[id_contacto] AS [id_contacto],
-[ter_contacto].[contacto] as [ter_contacto_contacto],
-[ter_contacto].[contacto_codigo] as [ter_contacto_contacto_codigo],
-[ter_contacto].[telefono] as [ter_contacto_telefono],
-[ter_contacto].[Fax] as [ter_contacto_Fax],
-[ter_contacto].[Email] as [ter_contacto_Email],
-[ter_contacto].[Direccion] as [ter_contacto_Direccion],
-[ter_contacto].[telefonoMovil] as [ter_contacto_telefonoMovil],
-[ter_contacto].[id_tercero] as [ter_contacto_id_tercero],
-[ter_contacto].[id_usuario] as [ter_contacto_id_usuario],
-[ter_contacto].[cargo] as [ter_contacto_cargo],
-[ter_contacto].[codigoAcceso] as [ter_contacto_codigoAcceso],
-[ter_contacto].[id_cargoContacto] as [ter_contacto_id_cargoContacto],
-[ter_contacto].[accesoActivo] as [ter_contacto_accesoActivo],
-[ter_contacto].[ter_cargoContacto_id_usuario_Modifico] as [ter_contacto_ter_cargoContacto_id_usuario_Modifico],
-[ter_contacto].[ter_cargoContacto_id_usuario_Creo] as [ter_contacto_ter_cargoContacto_id_usuario_Creo],
-[ter_contacto].[cmm] as [ter_contacto_cmm],
-		[doc_documento_contacto].[cmm] AS [cmm],
-		[empresaCodigo].[empresa] As [multiempresa]
-FROM [doc_documento_contacto]
-	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[doc_documento_contacto].[id_usuario_modifico]
-	INNER JOIN [seg_usuario] AS [seg_usuario_creo] ON [seg_usuario_creo].id=[doc_documento_contacto].[id_usuario_creo]
-	INNER JOIN [doc_documento] ON [doc_documento].id=[doc_documento_contacto].[id_documento]
-	INNER JOIN [ter_contacto] ON [ter_contacto].id=[doc_documento_contacto].[id_contacto]
-	INNER JOIN [gen_empresa] AS empresaCodigo ON [doc_documento_contacto].eid = [empresaCodigo].[codigo] and empresaCodigo.active=1
-GO
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_doc_documento_contactosXusuario_modifico]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_doc_documento_contactosXusuario_modifico]
-GO
-CREATE PROCEDURE [sel_doc_documento_contactosXusuario_modifico]
-	@p_id_usuario_modifico INT
-AS
-BEGIN
-	SELECT * 
-	FROM [view_doc_documento_contacto]
-	WHERE ([id_usuario_modifico]= @p_id_usuario_modifico)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_doc_documento_contactosXusuario_creo]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_doc_documento_contactosXusuario_creo]
-GO
-CREATE PROCEDURE [sel_doc_documento_contactosXusuario_creo]
-	@p_id_usuario_creo INT
-AS
-BEGIN
-	SELECT * 
-	FROM [view_doc_documento_contacto]
-	WHERE ([id_usuario_creo]= @p_id_usuario_creo)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_doc_documento_contactosXdocumento]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_doc_documento_contactosXdocumento]
-GO
-CREATE PROCEDURE [sel_doc_documento_contactosXdocumento]
-	@p_id_documento INT
-AS
-BEGIN
-	SELECT * 
-	FROM [view_doc_documento_contacto]
-	WHERE ([id_documento]= @p_id_documento)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_doc_documento_contactosXcontacto]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_doc_documento_contactosXcontacto]
-GO
-CREATE PROCEDURE [sel_doc_documento_contactosXcontacto]
-	@p_id_contacto INT
-AS
-BEGIN
-	SELECT * 
-	FROM [view_doc_documento_contacto]
-	WHERE ([id_contacto]= @p_id_contacto)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_doc_documento_contactos]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_doc_documento_contactos]
-GO
-CREATE PROCEDURE [sel_doc_documento_contactos]
-	
-	@p_filtro as varchar (8000) = '1=1',
-	@p_orden as varchar (8000) = 'id',
-	@p_campos as varchar (8000) = '*' AS
-BEGIN
-exec ('SELECT '+ @p_campos +
-' FROM [view_doc_documento_contacto]
-WHERE (' + @p_filtro + ') ORDER BY ' + @p_orden)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[lis_doc_documento_contactos]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[lis_doc_documento_contactos]
-GO
-CREATE PROCEDURE [lis_doc_documento_contactos]
-	AS
-BEGIN
-	SELECT id AS id,
-[documento_contacto] AS [doc_documento_contacto]
-	FROM [doc_documento_contacto]
-	WHERE active = 1
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[upd_doc_documento_contacto]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[upd_doc_documento_contacto]
-GO
-CREATE PROCEDURE [upd_doc_documento_contacto]
-	@p_id int = null,
-		@p_uid varchar(500) = null,
-		@p_eid varchar(50) = null,
-		@p_id_usuario_modifico int = null,
-		@p_id_usuario_creo int = null,
-		@p_fechaCreacion smalldatetime = null,
-		@p_documento_contacto varchar(300) = null,
-		@p_id_documento int = null,
-		@p_id_contacto int = null,
-		@p_cmm varchar(300) = null
-AS
-BEGIN
-		UPDATE [doc_documento_contacto]
-		SET	[uid] = isnull(@p_uid,[uid]),
-			[eid] = isnull(@p_eid,[eid]),
-			[id_usuario_modifico] = isnull(@p_id_usuario_modifico,[id_usuario_modifico]),
-			[id_usuario_creo] = isnull(@p_id_usuario_creo,[id_usuario_creo]),
-			[fechaModificacion] = GETDATE(),
-			[documento_contacto] = isnull(@p_documento_contacto,[documento_contacto]),
-			[id_documento] = isnull(@p_id_documento,[id_documento]),
-			[id_contacto] = isnull(@p_id_contacto,[id_contacto]),
-			[cmm] = isnull(@p_cmm,[cmm])
-		WHERE (id = @p_id)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[ins_doc_documento_contacto]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[ins_doc_documento_contacto]
-GO
-CREATE PROCEDURE [ins_doc_documento_contacto]
-	@p_uid varchar(500),
-		@p_eid varchar(50),
-		@p_id_usuario_modifico int,
-		@p_id_usuario_creo int,
-		@p_documento_contacto varchar(300),
-		@p_id_documento int,
-		@p_id_contacto int,
-		@p_cmm varchar(300)
-AS
-BEGIN
-	DECLARE @v_id int
-		INSERT INTO [doc_documento_contacto]
-			([uid],
-			[eid],
-			[id_usuario_modifico],
-			[id_usuario_creo],
-			[fechaModificacion],
-			[fechaCreacion],
-			[documento_contacto],
-			[id_documento],
-			[id_contacto],
-			[cmm])
-		VALUES(	@p_uid,
-			@p_eid,
-			@p_id_usuario_modifico,
-			@p_id_usuario_creo,
-			GETDATE(),
-			GETDATE(),
-			@p_documento_contacto,
-			@p_id_documento,
-			@p_id_contacto,
-			@p_cmm)
-		SET @v_id = scope_identity()
-UPDATE [doc_documento_contacto] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
-SELECT @v_id as id
-RETURN @v_id
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[act_doc_documento_contacto]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[act_doc_documento_contacto]
-GO
-CREATE PROCEDURE [act_doc_documento_contacto]
-	@p_active BIT,
-	@p_id INT,
-@p_id_usuario_modifico int = null
-AS
-BEGIN
-	UPDATE [doc_documento_contacto]
-	SET active=@p_active,
-	[id_usuario_modifico] = isnull(@p_id_usuario_modifico,[id_usuario_modifico]),
-	[fechaModificacion] = GETDATE()
-	WHERE	(id = @p_id)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[reg_doc_documento_contacto_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[reg_doc_documento_contacto_m]
-GO
-CREATE PROCEDURE [reg_doc_documento_contacto_m]
-	@p_id INT,
-	@p_eid as varchar(50) = ''
-AS
-BEGIN
-	SELECT 	[id] AS [id],
-		[uid] AS [uid],
-		[eid] AS [eid],
-		[id_usuario_modifico] AS [id_usuario_modifico],
-		[id_usuario_creo] AS [id_usuario_creo],
-		[fechaModificacion] AS [fechaModificacion],
-		[fechaCreacion] AS [fechaCreacion],
-		[active] AS [active],
-		[documento_contacto] AS [documento_contacto],
-		[id_documento] AS [id_documento],
-		[id_contacto] AS [id_contacto],
-		[cmm] AS [cmm]
-	FROM [doc_documento_contacto]
-	WHERE	(id = @p_id)
-	AND	(eid LIKE @p_eid+'%')
-
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_doc_documento_contactosXusuario_modifico_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_doc_documento_contactosXusuario_modifico_m]
-GO
-CREATE PROCEDURE [sel_doc_documento_contactosXusuario_modifico_m]
-	@p_id_usuario_modifico INT,
-	@p_eid as varchar(50) = ''
-AS
-BEGIN
-	SELECT *
-	FROM [view_doc_documento_contacto]
-	WHERE ([id_usuario_modifico]= @p_id_usuario_modifico)
-	AND	(eid LIKE @p_eid+'%')
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_doc_documento_contactosXusuario_creo_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_doc_documento_contactosXusuario_creo_m]
-GO
-CREATE PROCEDURE [sel_doc_documento_contactosXusuario_creo_m]
-	@p_id_usuario_creo INT,
-	@p_eid as varchar(50) = ''
-AS
-BEGIN
-	SELECT *
-	FROM [view_doc_documento_contacto]
-	WHERE ([id_usuario_creo]= @p_id_usuario_creo)
-	AND	(eid LIKE @p_eid+'%')
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_doc_documento_contactosXdocumento_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_doc_documento_contactosXdocumento_m]
-GO
-CREATE PROCEDURE [sel_doc_documento_contactosXdocumento_m]
-	@p_id_documento INT,
-	@p_eid as varchar(50) = ''
-AS
-BEGIN
-	SELECT *
-	FROM [view_doc_documento_contacto]
-	WHERE ([id_documento]= @p_id_documento)
-	AND	(eid LIKE @p_eid+'%')
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_doc_documento_contactosXcontacto_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_doc_documento_contactosXcontacto_m]
-GO
-CREATE PROCEDURE [sel_doc_documento_contactosXcontacto_m]
-	@p_id_contacto INT,
-	@p_eid as varchar(50) = ''
-AS
-BEGIN
-	SELECT *
-	FROM [view_doc_documento_contacto]
-	WHERE ([id_contacto]= @p_id_contacto)
-	AND	(eid LIKE @p_eid+'%')
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_doc_documento_contactos_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_doc_documento_contactos_m]
-GO
-CREATE PROCEDURE [sel_doc_documento_contactos_m]
-	@p_eid as varchar (50)='',
-	@p_filtro as varchar (8000) = '1=1',
-	@p_orden as varchar (8000) = 'id',
-	@p_campos as varchar (8000) = '*' AS
-BEGIN
-exec ('SELECT '+ @p_campos +
-' FROM [view_doc_documento_contacto]
-WHERE  (eid like '''+@p_eid+'%'+''' ) AND (' + @p_filtro + ') ORDER BY ' + @p_orden)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[lis_doc_documento_contactos_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[lis_doc_documento_contactos_m]
-GO
-CREATE PROCEDURE [lis_doc_documento_contactos_m]
-	@p_eid as varchar(50) = ''
-AS
-BEGIN
-	SELECT id AS id,
-[documento_contacto] AS [doc_documento_contacto]
-	FROM [doc_documento_contacto]
-	WHERE active = 1
-	AND	(eid LIKE @p_eid+'%')
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[aud_doc_documento_contacto]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[aud_doc_documento_contacto]
-GO
-CREATE PROCEDURE [aud_doc_documento_contacto]
-	@p_filtro as varchar (8000) = '1=1'
-AS
-BEGIN
-exec(	'SELECT [doc_documento_contacto].id as id_tabla,
-	[doc_documento_contacto].id_usuario_modifico as id_usuario_modifico,
-	[doc_documento_contacto].id_usuario_creo as id_usuario_creo,
-	[doc_documento_contacto].fechaModificacion as fechaModificacion,
-	[doc_documento_contacto].fechaCreacion as fechaCreacion,
-	[doc_documento_contacto].active as active,
-	[doc_documento_contacto].[documento_contacto] as campoPrincipal,
-	[seg_usuario_creo].usuario as usuarioCreo,
-	[seg_usuario_modifico].usuario as usuarioModifico
-
-	FROM [doc_documento_contacto]
-	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[doc_documento_contacto].[id_usuario_modifico]
-	INNER JOIN [seg_usuario] AS [seg_usuario_creo] ON [seg_usuario_creo].id=[doc_documento_contacto].[id_usuario_creo]
-	where ' + @p_filtro)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-print 'doc_documento_contacto'
---------------------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[reg_doc_documento_estadoTipoDocumento]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[reg_doc_documento_estadoTipoDocumento]
 GO
 CREATE PROCEDURE [reg_doc_documento_estadoTipoDocumento]
@@ -60328,8 +59762,8 @@ CREATE PROCEDURE [upd_doc_documentoAtributo]
 		@p_id_usuario_modifico int = null,
 		@p_id_usuario_creo int = null,
 		@p_fechaCreacion smalldatetime = null,
-		@p_documentoAtributo nvarchar(-1) = null,
-		@p_documentoAtributo_codigo varchar(500) = null,
+		@p_documentoAtributo varchar(8000) = null,
+		@p_documentoAtributo_codigo varchar(100) = null,
 		@p_id_documento int = null,
 		@p_id_atributo int = null,
 		@p_id_opcionAtributo int = null
@@ -60366,8 +59800,8 @@ CREATE PROCEDURE [ins_doc_documentoAtributo]
 		@p_eid varchar(50),
 		@p_id_usuario_modifico int,
 		@p_id_usuario_creo int,
-		@p_documentoAtributo nvarchar(-1),
-		@p_documentoAtributo_codigo varchar(500),
+		@p_documentoAtributo varchar(8000),
+		@p_documentoAtributo_codigo varchar(100),
 		@p_id_documento int,
 		@p_id_atributo int,
 		@p_id_opcionAtributo int
@@ -60835,7 +60269,6 @@ SELECT 	[doc_documentoComentario].[id] AS [id],
 [ter_contacto].[Email] as [ter_contacto_Email],
 [ter_contacto].[Direccion] as [ter_contacto_Direccion],
 [ter_contacto].[telefonoMovil] as [ter_contacto_telefonoMovil],
-[ter_contacto].[id_tercero] as [ter_contacto_id_tercero],
 [ter_contacto].[id_usuario] as [ter_contacto_id_usuario],
 [ter_contacto].[cargo] as [ter_contacto_cargo],
 [ter_contacto].[codigoAcceso] as [ter_contacto_codigoAcceso],
@@ -60844,7 +60277,6 @@ SELECT 	[doc_documentoComentario].[id] AS [id],
 [ter_contacto].[ter_cargoContacto_id_usuario_Modifico] as [ter_contacto_ter_cargoContacto_id_usuario_Modifico],
 [ter_contacto].[ter_cargoContacto_id_usuario_Creo] as [ter_contacto_ter_cargoContacto_id_usuario_Creo],
 [ter_contacto].[cmm] as [ter_contacto_cmm],
-[ter_tercero].[tercero] As [ter_tercero_cliente],
 		[doc_documentoComentario].[fechaOrden] AS [fechaOrden],
 		[doc_documentoComentario].[fechaOriginal] AS [fechaOriginal],
 		[doc_documentoComentario].[id_usuarioOriginal] AS [id_usuarioOriginal],
@@ -60874,7 +60306,6 @@ FROM [doc_documentoComentario]
 	INNER JOIN [doc_tarea] ON [doc_tarea].id=[doc_documentoComentario].[id_tarea]
 	INNER JOIN [doc_documentoComentario] AS [doc_documentoComentario_padre] ON [doc_documentoComentario_padre].id=[doc_documentoComentario].[id_documentoComentario]
 	INNER JOIN [ter_contacto] ON [ter_contacto].id=[doc_documentoComentario].[id_contacto]
-	INNER JOIN [ter_tercero] ON [ter_tercero].id = [doc_documento].[id_tercero_cliente]
 	INNER JOIN [ort_reporteTecnico] ON [ort_reporteTecnico].id=[doc_documentoComentario].[id_reporteTecnico]
 	INNER JOIN [gen_empresa] AS empresaCodigo ON [doc_documentoComentario].eid = [empresaCodigo].[codigo] and empresaCodigo.active=1
 WHERE [doc_documentoComentario].active=1
@@ -79015,8 +78446,8 @@ SELECT 	[equ_campana_documento.OT].[id] AS [id],
 [doc_documento.ot].[id_sistema] as [doc_documento.ot_id_sistema],
 [doc_documento.ot].[id_departamentoSolicitud] as [doc_documento.ot_id_departamentoSolicitud],
 [doc_documento.ot].[id_zona] as [doc_documento.ot_id_zona],
-[doc_documento.ot].[cmm] as [doc_documento.ot_cmm],
 [doc_documento.ot].[id_documento.contrato] as [doc_documento.ot_id_documento.contrato],
+[doc_documento.ot].[cmm] as [doc_documento.ot_cmm],
 		[doc_documento_ot].[documento_codigo] AS [doc_documento_ot_documento_codigo],
 		[doc_documento_ot].[documento_numero] AS [doc_documento_ot_documento_numero],
 		[doc_documento_ot].[prefijo] AS [doc_documento_ot_prefijo],
@@ -83207,8 +82638,8 @@ CREATE PROCEDURE [ins_equ_prestamo_equipo]
 		@p_prestamo_equipo varchar(300),
 		@p_fechaDevolucion_ff smalldatetime,
 		@p_id_equipo int,
-		@p_cmm varchar(300),
-		@p_id_documento_prestamo int
+		@p_id_documento_prestamo int,
+		@p_cmm varchar(300)
 AS
 BEGIN
 	DECLARE @v_id int
@@ -83222,8 +82653,8 @@ BEGIN
 			[prestamo_equipo],
 			[fechaDevolucion_ff],
 			[id_equipo],
-			[cmm],
-			[id_documento.prestamo])
+			[id_documento.prestamo],
+			[cmm])
 		VALUES(	@p_uid,
 			@p_eid,
 			@p_id_usuario_modifico,
@@ -83233,8 +82664,8 @@ BEGIN
 			@p_prestamo_equipo,
 			@p_fechaDevolucion_ff,
 			@p_id_equipo,
-			@p_cmm,
-			@p_id_documento_prestamo)
+			@p_id_documento_prestamo,
+			@p_cmm)
 		SET @v_id = scope_identity()
 UPDATE [equ_prestamo_equipo] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
 SELECT @v_id as id
@@ -83263,8 +82694,8 @@ CREATE PROCEDURE [upd_equ_prestamo_equipo]
 		@p_prestamo_equipo varchar(300) = null,
 		@p_fechaDevolucion_ff smalldatetime = null,
 		@p_id_equipo int = null,
-		@p_cmm varchar(300) = null,
-		@p_id_documento_prestamo int = null
+		@p_id_documento_prestamo int = null,
+		@p_cmm varchar(300) = null
 AS
 BEGIN
 		UPDATE [equ_prestamo_equipo]
@@ -83276,136 +82707,7 @@ BEGIN
 			[prestamo_equipo] = isnull(@p_prestamo_equipo,[prestamo_equipo]),
 			[fechaDevolucion_ff] = isnull(@p_fechaDevolucion_ff,[fechaDevolucion_ff]),
 			[id_equipo] = isnull(@p_id_equipo,[id_equipo]),
-			[cmm] = isnull(@p_cmm,[cmm]),
-			[id_documento.prestamo] = isnull(@p_id_documento_prestamo,[id_documento.prestamo])
-		WHERE (id = @p_id)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contactosXequipo]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contactosXequipo]
-GO
-CREATE PROCEDURE [sel_ter_contactosXequipo]
-	@p_id_equ_equipo INT
-AS
-BEGIN
-	SELECT 	[ter_contacto_equipo].[id] AS [I_id],
-		[ter_contacto_equipo].[uid] AS [I_uid],
-		[ter_contacto_equipo].[eid] AS [I_eid],
-		[ter_contacto_equipo].[fechaModificacion] AS [I_fechaModificacion],
-		[ter_contacto_equipo].[fechaCreacion] AS [I_fechaCreacion],
-		[ter_contacto_equipo].[active] AS [I_active],
-		[ter_contacto_equipo].[contacto_equipo] AS [I_contacto_equipo],
-		[ter_contacto_equipo].[estado_contacto] AS [I_estado_contacto],
-		[ter_contacto_equipo].[cmm] AS [I_cmm]
-	FROM ter_contacto_equipo INNER JOIN ter_contacto
-	 ON [ter_contacto_equipo].[id_contacto] = [ter_contacto].id
-	WHERE	([ter_contacto_equipo].[id_equipo]= @p_id_equ_equipo)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[ins_ter_contacto_equipo]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[ins_ter_contacto_equipo]
-GO
-CREATE PROCEDURE [ins_ter_contacto_equipo]
-	@p_uid varchar(500),
-		@p_eid varchar(50),
-		@p_id_usuario_modifico int,
-		@p_id_usuario_creo int,
-		@p_contacto_equipo varchar(300),
-		@p_id_equipo int,
-		@p_id_usuario int,
-		@p_estado_contacto bit,
-		@p_id_contacto int,
-		@p_cmm varchar(300)
-AS
-BEGIN
-	DECLARE @v_id int
-		INSERT INTO [ter_contacto_equipo]
-			([uid],
-			[eid],
-			[id_usuario_modifico],
-			[id_usuario_creo],
-			[fechaModificacion],
-			[fechaCreacion],
-			[contacto_equipo],
-			[id_equipo],
-			[id_usuario],
-			[estado_contacto],
-			[id_contacto],
-			[cmm])
-		VALUES(	@p_uid,
-			@p_eid,
-			@p_id_usuario_modifico,
-			@p_id_usuario_creo,
-			GETDATE(),
-			GETDATE(),
-			@p_contacto_equipo,
-			@p_id_equipo,
-			@p_id_usuario,
-			@p_estado_contacto,
-			@p_id_contacto,
-			@p_cmm)
-		SET @v_id = scope_identity()
-UPDATE [ter_contacto_equipo] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
-SELECT @v_id as id
-RETURN @v_id
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[upd_ter_contacto_equipo]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[upd_ter_contacto_equipo]
-GO
-CREATE PROCEDURE [upd_ter_contacto_equipo]
-	@p_id int = null,
-		@p_uid varchar(500) = null,
-		@p_eid varchar(50) = null,
-		@p_id_usuario_modifico int = null,
-		@p_id_usuario_creo int = null,
-		@p_fechaCreacion smalldatetime = null,
-		@p_contacto_equipo varchar(300) = null,
-		@p_id_equipo int = null,
-		@p_id_usuario int = null,
-		@p_estado_contacto bit = null,
-		@p_id_contacto int = null,
-		@p_cmm varchar(300) = null
-AS
-BEGIN
-		UPDATE [ter_contacto_equipo]
-		SET	[uid] = isnull(@p_uid,[uid]),
-			[eid] = isnull(@p_eid,[eid]),
-			[id_usuario_modifico] = isnull(@p_id_usuario_modifico,[id_usuario_modifico]),
-			[id_usuario_creo] = isnull(@p_id_usuario_creo,[id_usuario_creo]),
-			[fechaModificacion] = GETDATE(),
-			[contacto_equipo] = isnull(@p_contacto_equipo,[contacto_equipo]),
-			[id_equipo] = isnull(@p_id_equipo,[id_equipo]),
-			[id_usuario] = isnull(@p_id_usuario,[id_usuario]),
-			[estado_contacto] = isnull(@p_estado_contacto,[estado_contacto]),
-			[id_contacto] = isnull(@p_id_contacto,[id_contacto]),
+			[id_documento.prestamo] = isnull(@p_id_documento_prestamo,[id_documento.prestamo]),
 			[cmm] = isnull(@p_cmm,[cmm])
 		WHERE (id = @p_id)
 END
@@ -87683,8 +86985,8 @@ SELECT 	[equ_overhall].[id] AS [id],
 [doc_documento.ot].[id_sistema] as [doc_documento.ot_id_sistema],
 [doc_documento.ot].[id_departamentoSolicitud] as [doc_documento.ot_id_departamentoSolicitud],
 [doc_documento.ot].[id_zona] as [doc_documento.ot_id_zona],
-[doc_documento.ot].[cmm] as [doc_documento.ot_cmm],
 [doc_documento.ot].[id_documento.contrato] as [doc_documento.ot_id_documento.contrato],
+[doc_documento.ot].[cmm] as [doc_documento.ot_cmm],
 		[doc_documento_ot].[documento_codigo] AS [doc_documento_ot_documento_codigo],
 		[doc_documento_ot].[documento_numero] AS [doc_documento_ot_documento_numero],
 		[doc_documento_ot].[prefijo] AS [doc_documento_ot_prefijo],
@@ -88775,8 +88077,8 @@ BEGIN
 		[prestamo_equipo] AS [prestamo_equipo],
 		[fechaDevolucion_ff] AS [fechaDevolucion_ff],
 		[id_equipo] AS [id_equipo],
-		[cmm] AS [cmm],
-		[id_documento.prestamo] AS [id_documento.prestamo]
+		[id_documento.prestamo] AS [id_documento.prestamo],
+		[cmm] AS [cmm]
 	FROM [equ_prestamo_equipo]
 	WHERE	(id = @p_id)
 
@@ -88834,7 +88136,6 @@ SELECT 	[equ_prestamo_equipo].[id] AS [id],
 [equ_equipo].[id_estadoEquipo] as [equ_equipo_id_estadoEquipo],
 [equ_equipo].[id_centroCosto] as [equ_equipo_id_centroCosto],
 [equ_equipo].[cmm] as [equ_equipo_cmm],
-		[equ_prestamo_equipo].[cmm] AS [cmm],
 		[equ_prestamo_equipo].[id_documento.prestamo] AS [id_documento.prestamo],
 [doc_documento.prestamo].[documento.prestamo] as [doc_documento.prestamo_documento.prestamo],
 [doc_documento.prestamo].[fechaPrestamo_ff] as [doc_documento.prestamo_fechaPrestamo_ff],
@@ -88873,6 +88174,7 @@ SELECT 	[equ_prestamo_equipo].[id] AS [id],
 		[doc_documento_prestamo].[id_usuario_enUso] AS [doc_documento_prestamo_id_usuario_enUso],
 		[doc_documento_prestamo].[identificador] AS [doc_documento_prestamo_identificador],
 		[doc_documento_prestamo].[cmm] AS [doc_documento_prestamo_cmm],
+		[equ_prestamo_equipo].[cmm] AS [cmm],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [equ_prestamo_equipo]
 	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[equ_prestamo_equipo].[id_usuario_modifico]
@@ -89032,8 +88334,8 @@ CREATE PROCEDURE [upd_equ_prestamo_equipo]
 		@p_prestamo_equipo varchar(300) = null,
 		@p_fechaDevolucion_ff smalldatetime = null,
 		@p_id_equipo int = null,
-		@p_cmm varchar(300) = null,
-		@p_id_documento_prestamo int = null
+		@p_id_documento_prestamo int = null,
+		@p_cmm varchar(300) = null
 AS
 BEGIN
 		UPDATE [equ_prestamo_equipo]
@@ -89045,8 +88347,8 @@ BEGIN
 			[prestamo_equipo] = isnull(@p_prestamo_equipo,[prestamo_equipo]),
 			[fechaDevolucion_ff] = isnull(@p_fechaDevolucion_ff,[fechaDevolucion_ff]),
 			[id_equipo] = isnull(@p_id_equipo,[id_equipo]),
-			[cmm] = isnull(@p_cmm,[cmm]),
-			[id_documento.prestamo] = isnull(@p_id_documento_prestamo,[id_documento.prestamo])
+			[id_documento.prestamo] = isnull(@p_id_documento_prestamo,[id_documento.prestamo]),
+			[cmm] = isnull(@p_cmm,[cmm])
 		WHERE (id = @p_id)
 END
 GO
@@ -89070,8 +88372,8 @@ CREATE PROCEDURE [ins_equ_prestamo_equipo]
 		@p_prestamo_equipo varchar(300),
 		@p_fechaDevolucion_ff smalldatetime,
 		@p_id_equipo int,
-		@p_cmm varchar(300),
-		@p_id_documento_prestamo int
+		@p_id_documento_prestamo int,
+		@p_cmm varchar(300)
 AS
 BEGIN
 	DECLARE @v_id int
@@ -89085,8 +88387,8 @@ BEGIN
 			[prestamo_equipo],
 			[fechaDevolucion_ff],
 			[id_equipo],
-			[cmm],
-			[id_documento.prestamo])
+			[id_documento.prestamo],
+			[cmm])
 		VALUES(	@p_uid,
 			@p_eid,
 			@p_id_usuario_modifico,
@@ -89096,8 +88398,8 @@ BEGIN
 			@p_prestamo_equipo,
 			@p_fechaDevolucion_ff,
 			@p_id_equipo,
-			@p_cmm,
-			@p_id_documento_prestamo)
+			@p_id_documento_prestamo,
+			@p_cmm)
 		SET @v_id = scope_identity()
 UPDATE [equ_prestamo_equipo] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
 SELECT @v_id as id
@@ -89158,8 +88460,8 @@ BEGIN
 		[prestamo_equipo] AS [prestamo_equipo],
 		[fechaDevolucion_ff] AS [fechaDevolucion_ff],
 		[id_equipo] AS [id_equipo],
-		[cmm] AS [cmm],
-		[id_documento.prestamo] AS [id_documento.prestamo]
+		[id_documento.prestamo] AS [id_documento.prestamo],
+		[cmm] AS [cmm]
 	FROM [equ_prestamo_equipo]
 	WHERE	(id = @p_id)
 	AND	(eid LIKE @p_eid+'%')
@@ -90221,8 +89523,8 @@ BEGIN
 		[id_cicloHorometro] AS [id_cicloHorometro],
 		[id_posicion] AS [id_posicion],
 		[id_estadoEquipo] AS [id_estadoEquipo],
-		[cmm] AS [cmm],
-		[id_documento.prestamo] AS [id_documento.prestamo]
+		[id_documento.prestamo] AS [id_documento.prestamo],
+		[cmm] AS [cmm]
 	FROM [equ_trazabilidad]
 	WHERE	(id = @p_id)
 
@@ -90492,7 +89794,6 @@ SELECT 	[equ_trazabilidad].[id] AS [id],
 [equ_estadoEquipo].[estadoEquipo_codigo] as [equ_estadoEquipo_estadoEquipo_codigo],
 [equ_estadoEquipo].[activo] as [equ_estadoEquipo_activo],
 [equ_estadoEquipo].[cmm] as [equ_estadoEquipo_cmm],
-		[equ_trazabilidad].[cmm] AS [cmm],
 		[equ_trazabilidad].[id_documento.prestamo] AS [id_documento.prestamo],
 [doc_documento.prestamo].[documento.prestamo] as [doc_documento.prestamo_documento.prestamo],
 [doc_documento.prestamo].[fechaPrestamo_ff] as [doc_documento.prestamo_fechaPrestamo_ff],
@@ -90531,6 +89832,7 @@ SELECT 	[equ_trazabilidad].[id] AS [id],
 		[doc_documento_prestamo].[id_usuario_enUso] AS [doc_documento_prestamo_id_usuario_enUso],
 		[doc_documento_prestamo].[identificador] AS [doc_documento_prestamo_identificador],
 		[doc_documento_prestamo].[cmm] AS [doc_documento_prestamo_cmm],
+		[equ_trazabilidad].[cmm] AS [cmm],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [equ_trazabilidad]
 	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[equ_trazabilidad].[id_usuario_modifico]
@@ -90948,8 +90250,8 @@ CREATE PROCEDURE [upd_equ_trazabilidad]
 		@p_id_cicloHorometro int = null,
 		@p_id_posicion int = null,
 		@p_id_estadoEquipo int = null,
-		@p_cmm varchar(300) = null,
-		@p_id_documento_prestamo int = null
+		@p_id_documento_prestamo int = null,
+		@p_cmm varchar(300) = null
 AS
 BEGIN
 		UPDATE [equ_trazabilidad]
@@ -90975,8 +90277,8 @@ BEGIN
 			[id_cicloHorometro] = isnull(@p_id_cicloHorometro,[id_cicloHorometro]),
 			[id_posicion] = isnull(@p_id_posicion,[id_posicion]),
 			[id_estadoEquipo] = isnull(@p_id_estadoEquipo,[id_estadoEquipo]),
-			[cmm] = isnull(@p_cmm,[cmm]),
-			[id_documento.prestamo] = isnull(@p_id_documento_prestamo,[id_documento.prestamo])
+			[id_documento.prestamo] = isnull(@p_id_documento_prestamo,[id_documento.prestamo]),
+			[cmm] = isnull(@p_cmm,[cmm])
 		WHERE (id = @p_id)
 END
 GO
@@ -91014,8 +90316,8 @@ CREATE PROCEDURE [ins_equ_trazabilidad]
 		@p_id_cicloHorometro int,
 		@p_id_posicion int,
 		@p_id_estadoEquipo int,
-		@p_cmm varchar(300),
-		@p_id_documento_prestamo int
+		@p_id_documento_prestamo int,
+		@p_cmm varchar(300)
 AS
 BEGIN
 	DECLARE @v_id int
@@ -91043,8 +90345,8 @@ BEGIN
 			[id_cicloHorometro],
 			[id_posicion],
 			[id_estadoEquipo],
-			[cmm],
-			[id_documento.prestamo])
+			[id_documento.prestamo],
+			[cmm])
 		VALUES(	@p_uid,
 			@p_eid,
 			@p_id_usuario_modifico,
@@ -91068,8 +90370,8 @@ BEGIN
 			@p_id_cicloHorometro,
 			@p_id_posicion,
 			@p_id_estadoEquipo,
-			@p_cmm,
-			@p_id_documento_prestamo)
+			@p_id_documento_prestamo,
+			@p_cmm)
 		SET @v_id = scope_identity()
 UPDATE [equ_trazabilidad] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
 SELECT @v_id as id
@@ -91144,8 +90446,8 @@ BEGIN
 		[id_cicloHorometro] AS [id_cicloHorometro],
 		[id_posicion] AS [id_posicion],
 		[id_estadoEquipo] AS [id_estadoEquipo],
-		[cmm] AS [cmm],
-		[id_documento.prestamo] AS [id_documento.prestamo]
+		[id_documento.prestamo] AS [id_documento.prestamo],
+		[cmm] AS [cmm]
 	FROM [equ_trazabilidad]
 	WHERE	(id = @p_id)
 	AND	(eid LIKE @p_eid+'%')
@@ -100162,7 +99464,6 @@ SELECT 	[gen_firmaContacto].[id] AS [id],
 [ter_contacto].[Email] as [ter_contacto_Email],
 [ter_contacto].[Direccion] as [ter_contacto_Direccion],
 [ter_contacto].[telefonoMovil] as [ter_contacto_telefonoMovil],
-[ter_contacto].[id_tercero] as [ter_contacto_id_tercero],
 [ter_contacto].[id_usuario] as [ter_contacto_id_usuario],
 [ter_contacto].[cargo] as [ter_contacto_cargo],
 [ter_contacto].[codigoAcceso] as [ter_contacto_codigoAcceso],
@@ -119451,8 +118752,8 @@ SELECT 	[ort_reporteTecnico_ot].[id] AS [id],
 [doc_documento.ot].[id_sistema] as [doc_documento.ot_id_sistema],
 [doc_documento.ot].[id_departamentoSolicitud] as [doc_documento.ot_id_departamentoSolicitud],
 [doc_documento.ot].[id_zona] as [doc_documento.ot_id_zona],
-[doc_documento.ot].[cmm] as [doc_documento.ot_cmm],
 [doc_documento.ot].[id_documento.contrato] as [doc_documento.ot_id_documento.contrato],
+[doc_documento.ot].[cmm] as [doc_documento.ot_cmm],
 		[doc_documento_ot].[documento_codigo] AS [doc_documento_ot_documento_codigo],
 		[doc_documento_ot].[documento_numero] AS [doc_documento_ot_documento_numero],
 		[doc_documento_ot].[prefijo] AS [doc_documento_ot_prefijo],
@@ -121000,8 +120301,8 @@ SELECT 	[ort_vale].[id] AS [id],
 [doc_documento.ot].[id_sistema] as [doc_documento.ot_id_sistema],
 [doc_documento.ot].[id_departamentoSolicitud] as [doc_documento.ot_id_departamentoSolicitud],
 [doc_documento.ot].[id_zona] as [doc_documento.ot_id_zona],
-[doc_documento.ot].[cmm] as [doc_documento.ot_cmm],
 [doc_documento.ot].[id_documento.contrato] as [doc_documento.ot_id_documento.contrato],
+[doc_documento.ot].[cmm] as [doc_documento.ot_cmm],
 		[doc_documento_ot].[documento_codigo] AS [doc_documento_ot_documento_codigo],
 		[doc_documento_ot].[documento_numero] AS [doc_documento_ot_documento_numero],
 		[doc_documento_ot].[prefijo] AS [doc_documento_ot_prefijo],
@@ -132930,7 +132231,6 @@ SELECT 	[pro_rol_contacto].[id] AS [id],
 [ter_contacto].[Email] as [ter_contacto_Email],
 [ter_contacto].[Direccion] as [ter_contacto_Direccion],
 [ter_contacto].[telefonoMovil] as [ter_contacto_telefonoMovil],
-[ter_contacto].[id_tercero] as [ter_contacto_id_tercero],
 [ter_contacto].[id_usuario] as [ter_contacto_id_usuario],
 [ter_contacto].[cargo] as [ter_contacto_cargo],
 [ter_contacto].[codigoAcceso] as [ter_contacto_codigoAcceso],
@@ -152487,7 +151787,6 @@ BEGIN
 		[Email] AS [Email],
 		[Direccion] AS [Direccion],
 		[telefonoMovil] AS [telefonoMovil],
-		[id_tercero] AS [id_tercero],
 		[id_usuario] AS [id_usuario],
 		[cargo] AS [cargo],
 		[codigoAcceso] AS [codigoAcceso],
@@ -152528,32 +151827,6 @@ SELECT 	[ter_contacto].[id] AS [id],
 		[ter_contacto].[Email] AS [Email],
 		[ter_contacto].[Direccion] AS [Direccion],
 		[ter_contacto].[telefonoMovil] AS [telefonoMovil],
-		[ter_contacto].[id_tercero] AS [id_tercero],
-[ter_tercero].[tercero] as [ter_tercero_tercero],
-[ter_tercero].[tercero_codigo] as [ter_tercero_tercero_codigo],
-[ter_tercero].[tercero_nit] as [ter_tercero_tercero_nit],
-[ter_tercero].[direccion] as [ter_tercero_direccion],
-[ter_tercero].[contacto] as [ter_tercero_contacto],
-[ter_tercero].[telefono] as [ter_tercero_telefono],
-[ter_tercero].[fax] as [ter_tercero_fax],
-[ter_tercero].[email] as [ter_tercero_email],
-[ter_tercero].[website] as [ter_tercero_website],
-[ter_tercero].[representante] as [ter_tercero_representante],
-[ter_tercero].[notas] as [ter_tercero_notas],
-[ter_tercero].[tercero_nombreCorto] as [ter_tercero_tercero_nombreCorto],
-[ter_tercero].[esCliente] as [ter_tercero_esCliente],
-[ter_tercero].[esProveedor] as [ter_tercero_esProveedor],
-[ter_tercero].[esTransportador] as [ter_tercero_esTransportador],
-[ter_tercero].[esFabricante] as [ter_tercero_esFabricante],
-[ter_tercero].[esEmpresaPropia] as [ter_tercero_esEmpresaPropia],
-[ter_tercero].[clasificacion] as [ter_tercero_clasificacion],
-[ter_tercero].[id_zona] as [ter_tercero_id_zona],
-[ter_tercero].[id_estadoTercero] as [ter_tercero_id_estadoTercero],
-[ter_tercero].[id_naturalezaTercero] as [ter_tercero_id_naturalezaTercero],
-[ter_tercero].[esProspecto] as [ter_tercero_esProspecto],
-[ter_tercero].[id_formaPago] as [ter_tercero_id_formaPago],
-[ter_tercero].[tiempoEntrega] as [ter_tercero_tiempoEntrega],
-[ter_tercero].[cmm] as [ter_tercero_cmm],
 		[ter_contacto].[id_usuario] AS [id_usuario],
 [seg_usuario].[usuario] as [seg_usuario_usuario],
 [seg_usuario].[usuario_codigo] as [seg_usuario_usuario_codigo],
@@ -152597,7 +151870,6 @@ SELECT 	[ter_contacto].[id] AS [id],
 FROM [ter_contacto]
 	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[ter_contacto].[id_usuario_modifico]
 	INNER JOIN [seg_usuario] AS [seg_usuario_creo] ON [seg_usuario_creo].id=[ter_contacto].[id_usuario_creo]
-	INNER JOIN [ter_tercero] ON [ter_tercero].id=[ter_contacto].[id_tercero]
 	INNER JOIN [seg_usuario] ON [seg_usuario].id=[ter_contacto].[id_usuario]
 	INNER JOIN [ter_cargoContacto] ON [ter_cargoContacto].id=[ter_contacto].[id_cargoContacto]
 	INNER JOIN [gen_empresa] AS empresaCodigo ON [ter_contacto].eid = [empresaCodigo].[codigo] and empresaCodigo.active=1
@@ -152642,27 +151914,6 @@ BEGIN
 	SELECT * 
 	FROM [view_ter_contacto]
 	WHERE ([id_usuario_creo]= @p_id_usuario_creo)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contactosXtercero]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contactosXtercero]
-GO
-CREATE PROCEDURE [sel_ter_contactosXtercero]
-	@p_id_tercero INT
-AS
-BEGIN
-	SELECT * 
-	FROM [view_ter_contacto]
-	WHERE ([id_tercero]= @p_id_tercero)
 END
 GO
 SET QUOTED_IDENTIFIER OFF 
@@ -152778,7 +152029,6 @@ CREATE PROCEDURE [upd_ter_contacto]
 		@p_Email varchar(100) = null,
 		@p_Direccion varchar(300) = null,
 		@p_telefonoMovil varchar(100) = null,
-		@p_id_tercero int = null,
 		@p_id_usuario int = null,
 		@p_cargo nvarchar(100) = null,
 		@p_codigoAcceso varchar(300) = null,
@@ -152802,7 +152052,6 @@ BEGIN
 			[Email] = isnull(@p_Email,[Email]),
 			[Direccion] = isnull(@p_Direccion,[Direccion]),
 			[telefonoMovil] = isnull(@p_telefonoMovil,[telefonoMovil]),
-			[id_tercero] = isnull(@p_id_tercero,[id_tercero]),
 			[id_usuario] = isnull(@p_id_usuario,[id_usuario]),
 			[cargo] = isnull(@p_cargo,[cargo]),
 			[codigoAcceso] = isnull(@p_codigoAcceso,[codigoAcceso]),
@@ -152838,7 +152087,6 @@ CREATE PROCEDURE [ins_ter_contacto]
 		@p_Email varchar(100),
 		@p_Direccion varchar(300),
 		@p_telefonoMovil varchar(100),
-		@p_id_tercero int,
 		@p_id_usuario int,
 		@p_cargo nvarchar(100),
 		@p_codigoAcceso varchar(300),
@@ -152864,7 +152112,6 @@ BEGIN
 			[Email],
 			[Direccion],
 			[telefonoMovil],
-			[id_tercero],
 			[id_usuario],
 			[cargo],
 			[codigoAcceso],
@@ -152886,7 +152133,6 @@ BEGIN
 			@p_Email,
 			@p_Direccion,
 			@p_telefonoMovil,
-			@p_id_tercero,
 			@p_id_usuario,
 			@p_cargo,
 			@p_codigoAcceso,
@@ -152959,7 +152205,6 @@ BEGIN
 		[Email] AS [Email],
 		[Direccion] AS [Direccion],
 		[telefonoMovil] AS [telefonoMovil],
-		[id_tercero] AS [id_tercero],
 		[id_usuario] AS [id_usuario],
 		[cargo] AS [cargo],
 		[codigoAcceso] AS [codigoAcceso],
@@ -153017,29 +152262,6 @@ BEGIN
 	SELECT *
 	FROM [view_ter_contacto]
 	WHERE ([id_usuario_creo]= @p_id_usuario_creo)
-	AND	(eid LIKE @p_eid+'%')
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contactosXtercero_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contactosXtercero_m]
-GO
-CREATE PROCEDURE [sel_ter_contactosXtercero_m]
-	@p_id_tercero INT,
-	@p_eid as varchar(50) = ''
-AS
-BEGIN
-	SELECT *
-	FROM [view_ter_contacto]
-	WHERE ([id_tercero]= @p_id_tercero)
 	AND	(eid LIKE @p_eid+'%')
 END
 GO
@@ -153179,124 +152401,6 @@ GO
 SET ANSI_NULLS OFF
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_doc_documentosXcontacto]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_doc_documentosXcontacto]
-GO
-CREATE PROCEDURE [sel_doc_documentosXcontacto]
-	@p_id_ter_contacto INT
-AS
-BEGIN
-	SELECT 	[doc_documento_contacto].[id] AS [I_id],
-		[doc_documento_contacto].[uid] AS [I_uid],
-		[doc_documento_contacto].[eid] AS [I_eid],
-		[doc_documento_contacto].[fechaModificacion] AS [I_fechaModificacion],
-		[doc_documento_contacto].[fechaCreacion] AS [I_fechaCreacion],
-		[doc_documento_contacto].[active] AS [I_active],
-		[doc_documento_contacto].[documento_contacto] AS [I_documento_contacto],
-		[doc_documento_contacto].[cmm] AS [I_cmm]
-	FROM doc_documento_contacto INNER JOIN doc_documento
-	 ON [doc_documento_contacto].[id_documento] = [doc_documento].id
-	WHERE	([doc_documento_contacto].[id_contacto]= @p_id_ter_contacto)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[ins_doc_documento_contacto]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[ins_doc_documento_contacto]
-GO
-CREATE PROCEDURE [ins_doc_documento_contacto]
-	@p_uid varchar(500),
-		@p_eid varchar(50),
-		@p_id_usuario_modifico int,
-		@p_id_usuario_creo int,
-		@p_documento_contacto varchar(300),
-		@p_id_documento int,
-		@p_id_contacto int,
-		@p_cmm varchar(300)
-AS
-BEGIN
-	DECLARE @v_id int
-		INSERT INTO [doc_documento_contacto]
-			([uid],
-			[eid],
-			[id_usuario_modifico],
-			[id_usuario_creo],
-			[fechaModificacion],
-			[fechaCreacion],
-			[documento_contacto],
-			[id_documento],
-			[id_contacto],
-			[cmm])
-		VALUES(	@p_uid,
-			@p_eid,
-			@p_id_usuario_modifico,
-			@p_id_usuario_creo,
-			GETDATE(),
-			GETDATE(),
-			@p_documento_contacto,
-			@p_id_documento,
-			@p_id_contacto,
-			@p_cmm)
-		SET @v_id = scope_identity()
-UPDATE [doc_documento_contacto] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
-SELECT @v_id as id
-RETURN @v_id
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[upd_doc_documento_contacto]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[upd_doc_documento_contacto]
-GO
-CREATE PROCEDURE [upd_doc_documento_contacto]
-	@p_id int = null,
-		@p_uid varchar(500) = null,
-		@p_eid varchar(50) = null,
-		@p_id_usuario_modifico int = null,
-		@p_id_usuario_creo int = null,
-		@p_fechaCreacion smalldatetime = null,
-		@p_documento_contacto varchar(300) = null,
-		@p_id_documento int = null,
-		@p_id_contacto int = null,
-		@p_cmm varchar(300) = null
-AS
-BEGIN
-		UPDATE [doc_documento_contacto]
-		SET	[uid] = isnull(@p_uid,[uid]),
-			[eid] = isnull(@p_eid,[eid]),
-			[id_usuario_modifico] = isnull(@p_id_usuario_modifico,[id_usuario_modifico]),
-			[id_usuario_creo] = isnull(@p_id_usuario_creo,[id_usuario_creo]),
-			[fechaModificacion] = GETDATE(),
-			[documento_contacto] = isnull(@p_documento_contacto,[documento_contacto]),
-			[id_documento] = isnull(@p_id_documento,[id_documento]),
-			[id_contacto] = isnull(@p_id_contacto,[id_contacto]),
-			[cmm] = isnull(@p_cmm,[cmm])
-		WHERE (id = @p_id)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_pro_rolesXcontacto]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_pro_rolesXcontacto]
 GO
 CREATE PROCEDURE [sel_pro_rolesXcontacto]
@@ -153417,9 +152521,9 @@ GO
 SET ANSI_NULLS OFF
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[reg_ter_contacto_equipo]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[reg_ter_contacto_equipo]
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[reg_ter_contactoConfiguracion]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[reg_ter_contactoConfiguracion]
 GO
-CREATE PROCEDURE [reg_ter_contacto_equipo]
+CREATE PROCEDURE [reg_ter_contactoConfiguracion]
 	@p_id INT
 AS
 BEGIN
@@ -153431,13 +152535,13 @@ BEGIN
 		[fechaModificacion] AS [fechaModificacion],
 		[fechaCreacion] AS [fechaCreacion],
 		[active] AS [active],
-		[contacto_equipo] AS [contacto_equipo],
-		[id_equipo] AS [id_equipo],
-		[id_usuario] AS [id_usuario],
-		[estado_contacto] AS [estado_contacto],
+		[contactoConfiguracion] AS [contactoConfiguracion],
+		[contactoConfiguracion_codigo] AS [contactoConfiguracion_codigo],
 		[id_contacto] AS [id_contacto],
+		[id_tabla] AS [id_tabla],
+		[idObjeto] AS [idObjeto],
 		[cmm] AS [cmm]
-	FROM [ter_contacto_equipo]
+	FROM [ter_contactoConfiguracion]
 	WHERE	(id = @p_id)
 
 END
@@ -153451,79 +152555,20 @@ SET QUOTED_IDENTIFIER OFF
 GO
 SET ANSI_NULLS ON
 GO
-IF  EXISTS (SELECT * FROM sys.views WHERE object_id = OBJECT_ID(N'[dbo].[view_ter_contacto_equipo]')) DROP VIEW [dbo].[view_ter_contacto_equipo]
+IF  EXISTS (SELECT * FROM sys.views WHERE object_id = OBJECT_ID(N'[dbo].[view_ter_contactoConfiguracion]')) DROP VIEW [dbo].[view_ter_contactoConfiguracion]
 GO
-CREATE  VIEW [view_ter_contacto_equipo] AS
-SELECT 	[ter_contacto_equipo].[id] AS [id],
-		[ter_contacto_equipo].[uid] AS [uid],
-		[ter_contacto_equipo].[eid] AS [eid],
-		[ter_contacto_equipo].[id_usuario_modifico] AS [id_usuario_modifico],
-		[ter_contacto_equipo].[id_usuario_creo] AS [id_usuario_creo],
-		[ter_contacto_equipo].[fechaModificacion] AS [fechaModificacion],
-		[ter_contacto_equipo].[fechaCreacion] AS [fechaCreacion],
-		[ter_contacto_equipo].[active] AS [active],
-		[ter_contacto_equipo].[contacto_equipo] AS [contacto_equipo],
-		[ter_contacto_equipo].[id_equipo] AS [id_equipo],
-[equ_equipo].[equipo] as [equ_equipo_equipo],
-[equ_equipo].[equipo_codigo] as [equ_equipo_equipo_codigo],
-[equ_equipo].[equipo_serial] as [equ_equipo_equipo_serial],
-[equ_equipo].[nombreContacto] as [equ_equipo_nombreContacto],
-[equ_equipo].[telefonoContacto] as [equ_equipo_telefonoContacto],
-[equ_equipo].[ubicacion] as [equ_equipo_ubicacion],
-[equ_equipo].[observaciones] as [equ_equipo_observaciones],
-[equ_equipo].[fechaPuestaMarcha_fh] as [equ_equipo_fechaPuestaMarcha_fh],
-[equ_equipo].[vencimientoGarantiaFabrica_ff] as [equ_equipo_vencimientoGarantiaFabrica_ff],
-[equ_equipo].[vencimientoGarantiaDistribuidor_ff] as [equ_equipo_vencimientoGarantiaDistribuidor_ff],
-[equ_equipo].[horasGarantia] as [equ_equipo_horasGarantia],
-[equ_equipo].[ultimaLectura_fh] as [equ_equipo_ultimaLectura_fh],
-[equ_equipo].[horometroActual] as [equ_equipo_horometroActual],
-[equ_equipo].[promedioHoras] as [equ_equipo_promedioHoras],
-[equ_equipo].[costo] as [equ_equipo_costo],
-[equ_equipo].[fechaImportacion_ff] as [equ_equipo_fechaImportacion_ff],
-[equ_equipo].[garantiaCancelada] as [equ_equipo_garantiaCancelada],
-[equ_equipo].[id_catalogo.equipo] as [equ_equipo_id_catalogo.equipo],
-[equ_equipo].[id_sistema] as [equ_equipo_id_sistema],
-[equ_equipo].[id_sucursal] as [equ_equipo_id_sucursal],
-[equ_equipo].[id_zona] as [equ_equipo_id_zona],
-[equ_equipo].[id_versionEquipo] as [equ_equipo_id_versionEquipo],
-[equ_equipo].[id_tercero_comprador] as [equ_equipo_id_tercero_comprador],
-[equ_equipo].[id_tercero] as [equ_equipo_id_tercero],
-[equ_equipo].[id_tercero_servicio] as [equ_equipo_id_tercero_servicio],
-[equ_equipo].[id_equipo] as [equ_equipo_id_equipo],
-[equ_equipo].[id_estadoEquipo] as [equ_equipo_id_estadoEquipo],
-[equ_equipo].[id_centroCosto] as [equ_equipo_id_centroCosto],
-[equ_equipo].[cmm] as [equ_equipo_cmm],
-		[ter_contacto_equipo].[id_usuario] AS [id_usuario],
-[seg_usuario].[usuario] as [seg_usuario_usuario],
-[seg_usuario].[usuario_codigo] as [seg_usuario_usuario_codigo],
-[seg_usuario].[intentosFallidos] as [seg_usuario_intentosFallidos],
-[seg_usuario].[numeroIngresos] as [seg_usuario_numeroIngresos],
-[seg_usuario].[fechaUltimoIngreso_fh] as [seg_usuario_fechaUltimoIngreso_fh],
-[seg_usuario].[fechaIntentoFallido_fh] as [seg_usuario_fechaIntentoFallido_fh],
-[seg_usuario].[clave] as [seg_usuario_clave],
-[seg_usuario].[nombre] as [seg_usuario_nombre],
-[seg_usuario].[profesion] as [seg_usuario_profesion],
-[seg_usuario].[email] as [seg_usuario_email],
-[seg_usuario].[direccion] as [seg_usuario_direccion],
-[seg_usuario].[telefono] as [seg_usuario_telefono],
-[seg_usuario].[costoHora] as [seg_usuario_costoHora],
-[seg_usuario].[porcentajeComision] as [seg_usuario_porcentajeComision],
-[seg_usuario].[accesoActivo] as [seg_usuario_accesoActivo],
-[seg_usuario].[cambiarClave] as [seg_usuario_cambiarClave],
-[seg_usuario].[fechaUltimoCambioClave_fh] as [seg_usuario_fechaUltimoCambioClave_fh],
-[seg_usuario].[aplicaRecargo] as [seg_usuario_aplicaRecargo],
-[seg_usuario].[sexo] as [seg_usuario_sexo],
-[seg_usuario].[id_perfil] as [seg_usuario_id_perfil],
-[seg_usuario].[id_cargo] as [seg_usuario_id_cargo],
-[seg_usuario].[id_grupo] as [seg_usuario_id_grupo],
-[seg_usuario].[id_zona] as [seg_usuario_id_zona],
-[seg_usuario].[identificacion] as [seg_usuario_identificacion],
-[seg_usuario].[id_usuario] as [seg_usuario_id_usuario],
-[seg_usuario].[habilitado] as [seg_usuario_habilitado],
-[seg_usuario].[idDispositivo] as [seg_usuario_idDispositivo],
-[seg_usuario].[cmm] as [seg_usuario_cmm],
-		[ter_contacto_equipo].[estado_contacto] AS [estado_contacto],
-		[ter_contacto_equipo].[id_contacto] AS [id_contacto],
+CREATE  VIEW [view_ter_contactoConfiguracion] AS
+SELECT 	[ter_contactoConfiguracion].[id] AS [id],
+		[ter_contactoConfiguracion].[uid] AS [uid],
+		[ter_contactoConfiguracion].[eid] AS [eid],
+		[ter_contactoConfiguracion].[id_usuario_modifico] AS [id_usuario_modifico],
+		[ter_contactoConfiguracion].[id_usuario_creo] AS [id_usuario_creo],
+		[ter_contactoConfiguracion].[fechaModificacion] AS [fechaModificacion],
+		[ter_contactoConfiguracion].[fechaCreacion] AS [fechaCreacion],
+		[ter_contactoConfiguracion].[active] AS [active],
+		[ter_contactoConfiguracion].[contactoConfiguracion] AS [contactoConfiguracion],
+		[ter_contactoConfiguracion].[contactoConfiguracion_codigo] AS [contactoConfiguracion_codigo],
+		[ter_contactoConfiguracion].[id_contacto] AS [id_contacto],
 [ter_contacto].[contacto] as [ter_contacto_contacto],
 [ter_contacto].[contacto_codigo] as [ter_contacto_contacto_codigo],
 [ter_contacto].[telefono] as [ter_contacto_telefono],
@@ -153531,7 +152576,6 @@ SELECT 	[ter_contacto_equipo].[id] AS [id],
 [ter_contacto].[Email] as [ter_contacto_Email],
 [ter_contacto].[Direccion] as [ter_contacto_Direccion],
 [ter_contacto].[telefonoMovil] as [ter_contacto_telefonoMovil],
-[ter_contacto].[id_tercero] as [ter_contacto_id_tercero],
 [ter_contacto].[id_usuario] as [ter_contacto_id_usuario],
 [ter_contacto].[cargo] as [ter_contacto_cargo],
 [ter_contacto].[codigoAcceso] as [ter_contacto_codigoAcceso],
@@ -153540,15 +152584,17 @@ SELECT 	[ter_contacto_equipo].[id] AS [id],
 [ter_contacto].[ter_cargoContacto_id_usuario_Modifico] as [ter_contacto_ter_cargoContacto_id_usuario_Modifico],
 [ter_contacto].[ter_cargoContacto_id_usuario_Creo] as [ter_contacto_ter_cargoContacto_id_usuario_Creo],
 [ter_contacto].[cmm] as [ter_contacto_cmm],
-		[ter_contacto_equipo].[cmm] AS [cmm],
+		[ter_contactoConfiguracion].[id_tabla] AS [id_tabla],
+		[ter_contactoConfiguracion].[idObjeto] AS [idObjeto],
+		[ter_contactoConfiguracion].[cmm] AS [cmm],
 		[empresaCodigo].[empresa] As [multiempresa]
-FROM [ter_contacto_equipo]
-	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[ter_contacto_equipo].[id_usuario_modifico]
-	INNER JOIN [seg_usuario] AS [seg_usuario_creo] ON [seg_usuario_creo].id=[ter_contacto_equipo].[id_usuario_creo]
-	INNER JOIN [equ_equipo] ON [equ_equipo].id=[ter_contacto_equipo].[id_equipo]
-	INNER JOIN [seg_usuario] ON [seg_usuario].id=[ter_contacto_equipo].[id_usuario]
-	INNER JOIN [ter_contacto] ON [ter_contacto].id=[ter_contacto_equipo].[id_contacto]
-	INNER JOIN [gen_empresa] AS empresaCodigo ON [ter_contacto_equipo].eid = [empresaCodigo].[codigo] and empresaCodigo.active=1
+FROM [ter_contactoConfiguracion]
+	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[ter_contactoConfiguracion].[id_usuario_modifico]
+	INNER JOIN [seg_usuario] AS [seg_usuario_creo] ON [seg_usuario_creo].id=[ter_contactoConfiguracion].[id_usuario_creo]
+	INNER JOIN [ter_contacto] ON [ter_contacto].id=[ter_contactoConfiguracion].[id_contacto]
+	INNER JOIN [] ON [].id=[ter_contactoConfiguracion].[id_tabla]
+	INNER JOIN [gen_empresa] AS empresaCodigo ON [ter_contactoConfiguracion].eid = [empresaCodigo].[codigo] and empresaCodigo.active=1
+WHERE [ter_contactoConfiguracion].active=1
 GO
 SET QUOTED_IDENTIFIER OFF
 GO
@@ -153559,14 +152605,14 @@ GO
 SET ANSI_NULLS OFF
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contacto_equiposXusuario_modifico]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contacto_equiposXusuario_modifico]
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contactoConfiguracionesXusuario_modifico]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contactoConfiguracionesXusuario_modifico]
 GO
-CREATE PROCEDURE [sel_ter_contacto_equiposXusuario_modifico]
+CREATE PROCEDURE [sel_ter_contactoConfiguracionesXusuario_modifico]
 	@p_id_usuario_modifico INT
 AS
 BEGIN
 	SELECT * 
-	FROM [view_ter_contacto_equipo]
+	FROM [view_ter_contactoConfiguracion]
 	WHERE ([id_usuario_modifico]= @p_id_usuario_modifico)
 END
 GO
@@ -153580,14 +152626,14 @@ GO
 SET ANSI_NULLS OFF
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contacto_equiposXusuario_creo]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contacto_equiposXusuario_creo]
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contactoConfiguracionesXusuario_creo]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contactoConfiguracionesXusuario_creo]
 GO
-CREATE PROCEDURE [sel_ter_contacto_equiposXusuario_creo]
+CREATE PROCEDURE [sel_ter_contactoConfiguracionesXusuario_creo]
 	@p_id_usuario_creo INT
 AS
 BEGIN
 	SELECT * 
-	FROM [view_ter_contacto_equipo]
+	FROM [view_ter_contactoConfiguracion]
 	WHERE ([id_usuario_creo]= @p_id_usuario_creo)
 END
 GO
@@ -153601,56 +152647,14 @@ GO
 SET ANSI_NULLS OFF
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contacto_equiposXequipo]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contacto_equiposXequipo]
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contactoConfiguracionesXcontacto]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contactoConfiguracionesXcontacto]
 GO
-CREATE PROCEDURE [sel_ter_contacto_equiposXequipo]
-	@p_id_equipo INT
-AS
-BEGIN
-	SELECT * 
-	FROM [view_ter_contacto_equipo]
-	WHERE ([id_equipo]= @p_id_equipo)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contacto_equiposXusuario]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contacto_equiposXusuario]
-GO
-CREATE PROCEDURE [sel_ter_contacto_equiposXusuario]
-	@p_id_usuario INT
-AS
-BEGIN
-	SELECT * 
-	FROM [view_ter_contacto_equipo]
-	WHERE ([id_usuario]= @p_id_usuario)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contacto_equiposXcontacto]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contacto_equiposXcontacto]
-GO
-CREATE PROCEDURE [sel_ter_contacto_equiposXcontacto]
+CREATE PROCEDURE [sel_ter_contactoConfiguracionesXcontacto]
 	@p_id_contacto INT
 AS
 BEGIN
 	SELECT * 
-	FROM [view_ter_contacto_equipo]
+	FROM [view_ter_contactoConfiguracion]
 	WHERE ([id_contacto]= @p_id_contacto)
 END
 GO
@@ -153664,16 +152668,37 @@ GO
 SET ANSI_NULLS OFF
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contacto_equipos]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contacto_equipos]
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contactoConfiguracionesXtabla]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contactoConfiguracionesXtabla]
 GO
-CREATE PROCEDURE [sel_ter_contacto_equipos]
+CREATE PROCEDURE [sel_ter_contactoConfiguracionesXtabla]
+	@p_id_tabla INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_ter_contactoConfiguracion]
+	WHERE ([id_tabla]= @p_id_tabla)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contactoConfiguraciones]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contactoConfiguraciones]
+GO
+CREATE PROCEDURE [sel_ter_contactoConfiguraciones]
 	
 	@p_filtro as varchar (8000) = '1=1',
 	@p_orden as varchar (8000) = 'id',
 	@p_campos as varchar (8000) = '*' AS
 BEGIN
 exec ('SELECT '+ @p_campos +
-' FROM [view_ter_contacto_equipo]
+' FROM [view_ter_contactoConfiguracion]
 WHERE (' + @p_filtro + ') ORDER BY ' + @p_orden)
 END
 GO
@@ -153688,14 +152713,14 @@ GO
 SET ANSI_NULLS OFF
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[lis_ter_contacto_equipos]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[lis_ter_contacto_equipos]
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[lis_ter_contactoConfiguraciones]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[lis_ter_contactoConfiguraciones]
 GO
-CREATE PROCEDURE [lis_ter_contacto_equipos]
+CREATE PROCEDURE [lis_ter_contactoConfiguraciones]
 	AS
 BEGIN
 	SELECT id AS id,
-[contacto_equipo] AS [ter_contacto_equipo]
-	FROM [ter_contacto_equipo]
+[contactoConfiguracion] AS [ter_contactoConfiguracion]
+	FROM [ter_contactoConfiguracion]
 	WHERE active = 1
 END
 GO
@@ -153709,34 +152734,34 @@ GO
 SET ANSI_NULLS OFF
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[upd_ter_contacto_equipo]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[upd_ter_contacto_equipo]
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[upd_ter_contactoConfiguracion]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[upd_ter_contactoConfiguracion]
 GO
-CREATE PROCEDURE [upd_ter_contacto_equipo]
+CREATE PROCEDURE [upd_ter_contactoConfiguracion]
 	@p_id int = null,
 		@p_uid varchar(500) = null,
 		@p_eid varchar(50) = null,
 		@p_id_usuario_modifico int = null,
 		@p_id_usuario_creo int = null,
 		@p_fechaCreacion smalldatetime = null,
-		@p_contacto_equipo varchar(300) = null,
-		@p_id_equipo int = null,
-		@p_id_usuario int = null,
-		@p_estado_contacto bit = null,
+		@p_contactoConfiguracion varchar(300) = null,
+		@p_contactoConfiguracion_codigo varchar(100) = null,
 		@p_id_contacto int = null,
+		@p_id_tabla int = null,
+		@p_idObjeto int = null,
 		@p_cmm varchar(300) = null
 AS
 BEGIN
-		UPDATE [ter_contacto_equipo]
+		UPDATE [ter_contactoConfiguracion]
 		SET	[uid] = isnull(@p_uid,[uid]),
 			[eid] = isnull(@p_eid,[eid]),
 			[id_usuario_modifico] = isnull(@p_id_usuario_modifico,[id_usuario_modifico]),
 			[id_usuario_creo] = isnull(@p_id_usuario_creo,[id_usuario_creo]),
 			[fechaModificacion] = GETDATE(),
-			[contacto_equipo] = isnull(@p_contacto_equipo,[contacto_equipo]),
-			[id_equipo] = isnull(@p_id_equipo,[id_equipo]),
-			[id_usuario] = isnull(@p_id_usuario,[id_usuario]),
-			[estado_contacto] = isnull(@p_estado_contacto,[estado_contacto]),
+			[contactoConfiguracion] = isnull(@p_contactoConfiguracion,[contactoConfiguracion]),
+			[contactoConfiguracion_codigo] = isnull(@p_contactoConfiguracion_codigo,[contactoConfiguracion_codigo]),
 			[id_contacto] = isnull(@p_id_contacto,[id_contacto]),
+			[id_tabla] = isnull(@p_id_tabla,[id_tabla]),
+			[idObjeto] = isnull(@p_idObjeto,[idObjeto]),
 			[cmm] = isnull(@p_cmm,[cmm])
 		WHERE (id = @p_id)
 END
@@ -153751,34 +152776,34 @@ GO
 SET ANSI_NULLS OFF
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[ins_ter_contacto_equipo]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[ins_ter_contacto_equipo]
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[ins_ter_contactoConfiguracion]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[ins_ter_contactoConfiguracion]
 GO
-CREATE PROCEDURE [ins_ter_contacto_equipo]
+CREATE PROCEDURE [ins_ter_contactoConfiguracion]
 	@p_uid varchar(500),
 		@p_eid varchar(50),
 		@p_id_usuario_modifico int,
 		@p_id_usuario_creo int,
-		@p_contacto_equipo varchar(300),
-		@p_id_equipo int,
-		@p_id_usuario int,
-		@p_estado_contacto bit,
+		@p_contactoConfiguracion varchar(300),
+		@p_contactoConfiguracion_codigo varchar(100),
 		@p_id_contacto int,
+		@p_id_tabla int,
+		@p_idObjeto int,
 		@p_cmm varchar(300)
 AS
 BEGIN
 	DECLARE @v_id int
-		INSERT INTO [ter_contacto_equipo]
+		INSERT INTO [ter_contactoConfiguracion]
 			([uid],
 			[eid],
 			[id_usuario_modifico],
 			[id_usuario_creo],
 			[fechaModificacion],
 			[fechaCreacion],
-			[contacto_equipo],
-			[id_equipo],
-			[id_usuario],
-			[estado_contacto],
+			[contactoConfiguracion],
+			[contactoConfiguracion_codigo],
 			[id_contacto],
+			[id_tabla],
+			[idObjeto],
 			[cmm])
 		VALUES(	@p_uid,
 			@p_eid,
@@ -153786,14 +152811,14 @@ BEGIN
 			@p_id_usuario_creo,
 			GETDATE(),
 			GETDATE(),
-			@p_contacto_equipo,
-			@p_id_equipo,
-			@p_id_usuario,
-			@p_estado_contacto,
+			@p_contactoConfiguracion,
+			@p_contactoConfiguracion_codigo,
 			@p_id_contacto,
+			@p_id_tabla,
+			@p_idObjeto,
 			@p_cmm)
 		SET @v_id = scope_identity()
-UPDATE [ter_contacto_equipo] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
+UPDATE [ter_contactoConfiguracion] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
 SELECT @v_id as id
 RETURN @v_id
 END
@@ -153808,15 +152833,15 @@ GO
 SET ANSI_NULLS OFF
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[act_ter_contacto_equipo]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[act_ter_contacto_equipo]
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[act_ter_contactoConfiguracion]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[act_ter_contactoConfiguracion]
 GO
-CREATE PROCEDURE [act_ter_contacto_equipo]
+CREATE PROCEDURE [act_ter_contactoConfiguracion]
 	@p_active BIT,
 	@p_id INT,
 @p_id_usuario_modifico int = null
 AS
 BEGIN
-	UPDATE [ter_contacto_equipo]
+	UPDATE [ter_contactoConfiguracion]
 	SET active=@p_active,
 	[id_usuario_modifico] = isnull(@p_id_usuario_modifico,[id_usuario_modifico]),
 	[fechaModificacion] = GETDATE()
@@ -153834,9 +152859,9 @@ GO
 SET ANSI_NULLS OFF
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[reg_ter_contacto_equipo_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[reg_ter_contacto_equipo_m]
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[reg_ter_contactoConfiguracion_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[reg_ter_contactoConfiguracion_m]
 GO
-CREATE PROCEDURE [reg_ter_contacto_equipo_m]
+CREATE PROCEDURE [reg_ter_contactoConfiguracion_m]
 	@p_id INT,
 	@p_eid as varchar(50) = ''
 AS
@@ -153849,13 +152874,13 @@ BEGIN
 		[fechaModificacion] AS [fechaModificacion],
 		[fechaCreacion] AS [fechaCreacion],
 		[active] AS [active],
-		[contacto_equipo] AS [contacto_equipo],
-		[id_equipo] AS [id_equipo],
-		[id_usuario] AS [id_usuario],
-		[estado_contacto] AS [estado_contacto],
+		[contactoConfiguracion] AS [contactoConfiguracion],
+		[contactoConfiguracion_codigo] AS [contactoConfiguracion_codigo],
 		[id_contacto] AS [id_contacto],
+		[id_tabla] AS [id_tabla],
+		[idObjeto] AS [idObjeto],
 		[cmm] AS [cmm]
-	FROM [ter_contacto_equipo]
+	FROM [ter_contactoConfiguracion]
 	WHERE	(id = @p_id)
 	AND	(eid LIKE @p_eid+'%')
 
@@ -153871,15 +152896,15 @@ GO
 SET ANSI_NULLS OFF
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contacto_equiposXusuario_modifico_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contacto_equiposXusuario_modifico_m]
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contactoConfiguracionesXusuario_modifico_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contactoConfiguracionesXusuario_modifico_m]
 GO
-CREATE PROCEDURE [sel_ter_contacto_equiposXusuario_modifico_m]
+CREATE PROCEDURE [sel_ter_contactoConfiguracionesXusuario_modifico_m]
 	@p_id_usuario_modifico INT,
 	@p_eid as varchar(50) = ''
 AS
 BEGIN
 	SELECT *
-	FROM [view_ter_contacto_equipo]
+	FROM [view_ter_contactoConfiguracion]
 	WHERE ([id_usuario_modifico]= @p_id_usuario_modifico)
 	AND	(eid LIKE @p_eid+'%')
 END
@@ -153894,15 +152919,15 @@ GO
 SET ANSI_NULLS OFF
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contacto_equiposXusuario_creo_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contacto_equiposXusuario_creo_m]
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contactoConfiguracionesXusuario_creo_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contactoConfiguracionesXusuario_creo_m]
 GO
-CREATE PROCEDURE [sel_ter_contacto_equiposXusuario_creo_m]
+CREATE PROCEDURE [sel_ter_contactoConfiguracionesXusuario_creo_m]
 	@p_id_usuario_creo INT,
 	@p_eid as varchar(50) = ''
 AS
 BEGIN
 	SELECT *
-	FROM [view_ter_contacto_equipo]
+	FROM [view_ter_contactoConfiguracion]
 	WHERE ([id_usuario_creo]= @p_id_usuario_creo)
 	AND	(eid LIKE @p_eid+'%')
 END
@@ -153917,61 +152942,15 @@ GO
 SET ANSI_NULLS OFF
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contacto_equiposXequipo_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contacto_equiposXequipo_m]
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contactoConfiguracionesXcontacto_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contactoConfiguracionesXcontacto_m]
 GO
-CREATE PROCEDURE [sel_ter_contacto_equiposXequipo_m]
-	@p_id_equipo INT,
-	@p_eid as varchar(50) = ''
-AS
-BEGIN
-	SELECT *
-	FROM [view_ter_contacto_equipo]
-	WHERE ([id_equipo]= @p_id_equipo)
-	AND	(eid LIKE @p_eid+'%')
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contacto_equiposXusuario_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contacto_equiposXusuario_m]
-GO
-CREATE PROCEDURE [sel_ter_contacto_equiposXusuario_m]
-	@p_id_usuario INT,
-	@p_eid as varchar(50) = ''
-AS
-BEGIN
-	SELECT *
-	FROM [view_ter_contacto_equipo]
-	WHERE ([id_usuario]= @p_id_usuario)
-	AND	(eid LIKE @p_eid+'%')
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contacto_equiposXcontacto_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contacto_equiposXcontacto_m]
-GO
-CREATE PROCEDURE [sel_ter_contacto_equiposXcontacto_m]
+CREATE PROCEDURE [sel_ter_contactoConfiguracionesXcontacto_m]
 	@p_id_contacto INT,
 	@p_eid as varchar(50) = ''
 AS
 BEGIN
 	SELECT *
-	FROM [view_ter_contacto_equipo]
+	FROM [view_ter_contactoConfiguracion]
 	WHERE ([id_contacto]= @p_id_contacto)
 	AND	(eid LIKE @p_eid+'%')
 END
@@ -153986,16 +152965,39 @@ GO
 SET ANSI_NULLS OFF
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contacto_equipos_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contacto_equipos_m]
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contactoConfiguracionesXtabla_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contactoConfiguracionesXtabla_m]
 GO
-CREATE PROCEDURE [sel_ter_contacto_equipos_m]
+CREATE PROCEDURE [sel_ter_contactoConfiguracionesXtabla_m]
+	@p_id_tabla INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_ter_contactoConfiguracion]
+	WHERE ([id_tabla]= @p_id_tabla)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contactoConfiguraciones_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contactoConfiguraciones_m]
+GO
+CREATE PROCEDURE [sel_ter_contactoConfiguraciones_m]
 	@p_eid as varchar (50)='',
 	@p_filtro as varchar (8000) = '1=1',
 	@p_orden as varchar (8000) = 'id',
 	@p_campos as varchar (8000) = '*' AS
 BEGIN
 exec ('SELECT '+ @p_campos +
-' FROM [view_ter_contacto_equipo]
+' FROM [view_ter_contactoConfiguracion]
 WHERE  (eid like '''+@p_eid+'%'+''' ) AND (' + @p_filtro + ') ORDER BY ' + @p_orden)
 END
 GO
@@ -154010,15 +153012,15 @@ GO
 SET ANSI_NULLS OFF
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[lis_ter_contacto_equipos_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[lis_ter_contacto_equipos_m]
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[lis_ter_contactoConfiguraciones_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[lis_ter_contactoConfiguraciones_m]
 GO
-CREATE PROCEDURE [lis_ter_contacto_equipos_m]
+CREATE PROCEDURE [lis_ter_contactoConfiguraciones_m]
 	@p_eid as varchar(50) = ''
 AS
 BEGIN
 	SELECT id AS id,
-[contacto_equipo] AS [ter_contacto_equipo]
-	FROM [ter_contacto_equipo]
+[contactoConfiguracion] AS [ter_contactoConfiguracion]
+	FROM [ter_contactoConfiguracion]
 	WHERE active = 1
 	AND	(eid LIKE @p_eid+'%')
 END
@@ -154034,25 +153036,25 @@ GO
 SET ANSI_NULLS OFF
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[aud_ter_contacto_equipo]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[aud_ter_contacto_equipo]
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[aud_ter_contactoConfiguracion]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[aud_ter_contactoConfiguracion]
 GO
-CREATE PROCEDURE [aud_ter_contacto_equipo]
+CREATE PROCEDURE [aud_ter_contactoConfiguracion]
 	@p_filtro as varchar (8000) = '1=1'
 AS
 BEGIN
-exec(	'SELECT [ter_contacto_equipo].id as id_tabla,
-	[ter_contacto_equipo].id_usuario_modifico as id_usuario_modifico,
-	[ter_contacto_equipo].id_usuario_creo as id_usuario_creo,
-	[ter_contacto_equipo].fechaModificacion as fechaModificacion,
-	[ter_contacto_equipo].fechaCreacion as fechaCreacion,
-	[ter_contacto_equipo].active as active,
-	[ter_contacto_equipo].[contacto_equipo] as campoPrincipal,
+exec(	'SELECT [ter_contactoConfiguracion].id as id_tabla,
+	[ter_contactoConfiguracion].id_usuario_modifico as id_usuario_modifico,
+	[ter_contactoConfiguracion].id_usuario_creo as id_usuario_creo,
+	[ter_contactoConfiguracion].fechaModificacion as fechaModificacion,
+	[ter_contactoConfiguracion].fechaCreacion as fechaCreacion,
+	[ter_contactoConfiguracion].active as active,
+	[ter_contactoConfiguracion].[contactoConfiguracion] as campoPrincipal,
 	[seg_usuario_creo].usuario as usuarioCreo,
 	[seg_usuario_modifico].usuario as usuarioModifico
 
-	FROM [ter_contacto_equipo]
-	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[ter_contacto_equipo].[id_usuario_modifico]
-	INNER JOIN [seg_usuario] AS [seg_usuario_creo] ON [seg_usuario_creo].id=[ter_contacto_equipo].[id_usuario_creo]
+	FROM [ter_contactoConfiguracion]
+	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[ter_contactoConfiguracion].[id_usuario_modifico]
+	INNER JOIN [seg_usuario] AS [seg_usuario_creo] ON [seg_usuario_creo].id=[ter_contactoConfiguracion].[id_usuario_creo]
 	where ' + @p_filtro)
 END
 GO
@@ -154061,559 +153063,7 @@ GO
 SET ANSI_NULLS ON
 GO
 ----------------------
-print 'ter_contacto_equipo'
---------------------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[reg_ter_contacto_sucursal]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[reg_ter_contacto_sucursal]
-GO
-CREATE PROCEDURE [reg_ter_contacto_sucursal]
-	@p_id INT
-AS
-BEGIN
-	SELECT 	[id] AS [id],
-		[uid] AS [uid],
-		[eid] AS [eid],
-		[id_usuario_modifico] AS [id_usuario_modifico],
-		[id_usuario_creo] AS [id_usuario_creo],
-		[fechaModificacion] AS [fechaModificacion],
-		[fechaCreacion] AS [fechaCreacion],
-		[active] AS [active],
-		[contacto_sucursal] AS [contacto_sucursal],
-		[id_contacto] AS [id_contacto],
-		[id_sucursal] AS [id_sucursal],
-		[cmm] AS [cmm]
-	FROM [ter_contacto_sucursal]
-	WHERE	(id = @p_id)
-
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-IF  EXISTS (SELECT * FROM sys.views WHERE object_id = OBJECT_ID(N'[dbo].[view_ter_contacto_sucursal]')) DROP VIEW [dbo].[view_ter_contacto_sucursal]
-GO
-CREATE  VIEW [view_ter_contacto_sucursal] AS
-SELECT 	[ter_contacto_sucursal].[id] AS [id],
-		[ter_contacto_sucursal].[uid] AS [uid],
-		[ter_contacto_sucursal].[eid] AS [eid],
-		[ter_contacto_sucursal].[id_usuario_modifico] AS [id_usuario_modifico],
-		[ter_contacto_sucursal].[id_usuario_creo] AS [id_usuario_creo],
-		[ter_contacto_sucursal].[fechaModificacion] AS [fechaModificacion],
-		[ter_contacto_sucursal].[fechaCreacion] AS [fechaCreacion],
-		[ter_contacto_sucursal].[active] AS [active],
-		[ter_contacto_sucursal].[contacto_sucursal] AS [contacto_sucursal],
-		[ter_contacto_sucursal].[id_contacto] AS [id_contacto],
-[ter_contacto].[contacto] as [ter_contacto_contacto],
-[ter_contacto].[contacto_codigo] as [ter_contacto_contacto_codigo],
-[ter_contacto].[telefono] as [ter_contacto_telefono],
-[ter_contacto].[Fax] as [ter_contacto_Fax],
-[ter_contacto].[Email] as [ter_contacto_Email],
-[ter_contacto].[Direccion] as [ter_contacto_Direccion],
-[ter_contacto].[telefonoMovil] as [ter_contacto_telefonoMovil],
-[ter_contacto].[id_tercero] as [ter_contacto_id_tercero],
-[ter_contacto].[id_usuario] as [ter_contacto_id_usuario],
-[ter_contacto].[cargo] as [ter_contacto_cargo],
-[ter_contacto].[codigoAcceso] as [ter_contacto_codigoAcceso],
-[ter_contacto].[id_cargoContacto] as [ter_contacto_id_cargoContacto],
-[ter_contacto].[accesoActivo] as [ter_contacto_accesoActivo],
-[ter_contacto].[ter_cargoContacto_id_usuario_Modifico] as [ter_contacto_ter_cargoContacto_id_usuario_Modifico],
-[ter_contacto].[ter_cargoContacto_id_usuario_Creo] as [ter_contacto_ter_cargoContacto_id_usuario_Creo],
-[ter_contacto].[cmm] as [ter_contacto_cmm],
-		[ter_contacto_sucursal].[id_sucursal] AS [id_sucursal],
-[ter_sucursal].[sucursal] as [ter_sucursal_sucursal],
-[ter_sucursal].[sucursal_codigo] as [ter_sucursal_sucursal_codigo],
-[ter_sucursal].[contacto] as [ter_sucursal_contacto],
-[ter_sucursal].[telefono] as [ter_sucursal_telefono],
-[ter_sucursal].[Fax] as [ter_sucursal_Fax],
-[ter_sucursal].[Email] as [ter_sucursal_Email],
-[ter_sucursal].[Direccion] as [ter_sucursal_Direccion],
-[ter_sucursal].[paraVenta] as [ter_sucursal_paraVenta],
-[ter_sucursal].[paraSoporte] as [ter_sucursal_paraSoporte],
-[ter_sucursal].[paraAlquiler] as [ter_sucursal_paraAlquiler],
-[ter_sucursal].[id_tercero] as [ter_sucursal_id_tercero],
-[ter_sucursal].[id_zona] as [ter_sucursal_id_zona],
-[ter_sucursal].[id_usuario_asesor] as [ter_sucursal_id_usuario_asesor],
-[ter_sucursal].[id_usuario_tecnico] as [ter_sucursal_id_usuario_tecnico],
-[ter_sucursal].[id_sucursal] as [ter_sucursal_id_sucursal],
-[ter_sucursal].[id_estadoTercero] as [ter_sucursal_id_estadoTercero],
-[ter_sucursal].[codigorecursiva] as [ter_sucursal_codigorecursiva],
-[ter_sucursal].[cargo] as [ter_sucursal_cargo],
-[ter_sucursal].[cmm] as [ter_sucursal_cmm],
-		[ter_contacto_sucursal].[cmm] AS [cmm],
-		[empresaCodigo].[empresa] As [multiempresa]
-FROM [ter_contacto_sucursal]
-	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[ter_contacto_sucursal].[id_usuario_modifico]
-	INNER JOIN [seg_usuario] AS [seg_usuario_creo] ON [seg_usuario_creo].id=[ter_contacto_sucursal].[id_usuario_creo]
-	INNER JOIN [ter_contacto] ON [ter_contacto].id=[ter_contacto_sucursal].[id_contacto]
-	INNER JOIN [ter_sucursal] ON [ter_sucursal].id=[ter_contacto_sucursal].[id_sucursal]
-	INNER JOIN [gen_empresa] AS empresaCodigo ON [ter_contacto_sucursal].eid = [empresaCodigo].[codigo] and empresaCodigo.active=1
-GO
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contacto_sucursalesXusuario_modifico]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contacto_sucursalesXusuario_modifico]
-GO
-CREATE PROCEDURE [sel_ter_contacto_sucursalesXusuario_modifico]
-	@p_id_usuario_modifico INT
-AS
-BEGIN
-	SELECT * 
-	FROM [view_ter_contacto_sucursal]
-	WHERE ([id_usuario_modifico]= @p_id_usuario_modifico)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contacto_sucursalesXusuario_creo]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contacto_sucursalesXusuario_creo]
-GO
-CREATE PROCEDURE [sel_ter_contacto_sucursalesXusuario_creo]
-	@p_id_usuario_creo INT
-AS
-BEGIN
-	SELECT * 
-	FROM [view_ter_contacto_sucursal]
-	WHERE ([id_usuario_creo]= @p_id_usuario_creo)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contacto_sucursalesXcontacto]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contacto_sucursalesXcontacto]
-GO
-CREATE PROCEDURE [sel_ter_contacto_sucursalesXcontacto]
-	@p_id_contacto INT
-AS
-BEGIN
-	SELECT * 
-	FROM [view_ter_contacto_sucursal]
-	WHERE ([id_contacto]= @p_id_contacto)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contacto_sucursalesXsucursal]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contacto_sucursalesXsucursal]
-GO
-CREATE PROCEDURE [sel_ter_contacto_sucursalesXsucursal]
-	@p_id_sucursal INT
-AS
-BEGIN
-	SELECT * 
-	FROM [view_ter_contacto_sucursal]
-	WHERE ([id_sucursal]= @p_id_sucursal)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contacto_sucursales]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contacto_sucursales]
-GO
-CREATE PROCEDURE [sel_ter_contacto_sucursales]
-	
-	@p_filtro as varchar (8000) = '1=1',
-	@p_orden as varchar (8000) = 'id',
-	@p_campos as varchar (8000) = '*' AS
-BEGIN
-exec ('SELECT '+ @p_campos +
-' FROM [view_ter_contacto_sucursal]
-WHERE (' + @p_filtro + ') ORDER BY ' + @p_orden)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[lis_ter_contacto_sucursales]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[lis_ter_contacto_sucursales]
-GO
-CREATE PROCEDURE [lis_ter_contacto_sucursales]
-	AS
-BEGIN
-	SELECT id AS id,
-[contacto_sucursal] AS [ter_contacto_sucursal]
-	FROM [ter_contacto_sucursal]
-	WHERE active = 1
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[upd_ter_contacto_sucursal]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[upd_ter_contacto_sucursal]
-GO
-CREATE PROCEDURE [upd_ter_contacto_sucursal]
-	@p_id int = null,
-		@p_uid varchar(500) = null,
-		@p_eid varchar(50) = null,
-		@p_id_usuario_modifico int = null,
-		@p_id_usuario_creo int = null,
-		@p_fechaCreacion smalldatetime = null,
-		@p_contacto_sucursal varchar(300) = null,
-		@p_id_contacto int = null,
-		@p_id_sucursal int = null,
-		@p_cmm varchar(300) = null
-AS
-BEGIN
-		UPDATE [ter_contacto_sucursal]
-		SET	[uid] = isnull(@p_uid,[uid]),
-			[eid] = isnull(@p_eid,[eid]),
-			[id_usuario_modifico] = isnull(@p_id_usuario_modifico,[id_usuario_modifico]),
-			[id_usuario_creo] = isnull(@p_id_usuario_creo,[id_usuario_creo]),
-			[fechaModificacion] = GETDATE(),
-			[contacto_sucursal] = isnull(@p_contacto_sucursal,[contacto_sucursal]),
-			[id_contacto] = isnull(@p_id_contacto,[id_contacto]),
-			[id_sucursal] = isnull(@p_id_sucursal,[id_sucursal]),
-			[cmm] = isnull(@p_cmm,[cmm])
-		WHERE (id = @p_id)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[ins_ter_contacto_sucursal]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[ins_ter_contacto_sucursal]
-GO
-CREATE PROCEDURE [ins_ter_contacto_sucursal]
-	@p_uid varchar(500),
-		@p_eid varchar(50),
-		@p_id_usuario_modifico int,
-		@p_id_usuario_creo int,
-		@p_contacto_sucursal varchar(300),
-		@p_id_contacto int,
-		@p_id_sucursal int,
-		@p_cmm varchar(300)
-AS
-BEGIN
-	DECLARE @v_id int
-		INSERT INTO [ter_contacto_sucursal]
-			([uid],
-			[eid],
-			[id_usuario_modifico],
-			[id_usuario_creo],
-			[fechaModificacion],
-			[fechaCreacion],
-			[contacto_sucursal],
-			[id_contacto],
-			[id_sucursal],
-			[cmm])
-		VALUES(	@p_uid,
-			@p_eid,
-			@p_id_usuario_modifico,
-			@p_id_usuario_creo,
-			GETDATE(),
-			GETDATE(),
-			@p_contacto_sucursal,
-			@p_id_contacto,
-			@p_id_sucursal,
-			@p_cmm)
-		SET @v_id = scope_identity()
-UPDATE [ter_contacto_sucursal] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
-SELECT @v_id as id
-RETURN @v_id
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[act_ter_contacto_sucursal]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[act_ter_contacto_sucursal]
-GO
-CREATE PROCEDURE [act_ter_contacto_sucursal]
-	@p_active BIT,
-	@p_id INT,
-@p_id_usuario_modifico int = null
-AS
-BEGIN
-	UPDATE [ter_contacto_sucursal]
-	SET active=@p_active,
-	[id_usuario_modifico] = isnull(@p_id_usuario_modifico,[id_usuario_modifico]),
-	[fechaModificacion] = GETDATE()
-	WHERE	(id = @p_id)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[reg_ter_contacto_sucursal_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[reg_ter_contacto_sucursal_m]
-GO
-CREATE PROCEDURE [reg_ter_contacto_sucursal_m]
-	@p_id INT,
-	@p_eid as varchar(50) = ''
-AS
-BEGIN
-	SELECT 	[id] AS [id],
-		[uid] AS [uid],
-		[eid] AS [eid],
-		[id_usuario_modifico] AS [id_usuario_modifico],
-		[id_usuario_creo] AS [id_usuario_creo],
-		[fechaModificacion] AS [fechaModificacion],
-		[fechaCreacion] AS [fechaCreacion],
-		[active] AS [active],
-		[contacto_sucursal] AS [contacto_sucursal],
-		[id_contacto] AS [id_contacto],
-		[id_sucursal] AS [id_sucursal],
-		[cmm] AS [cmm]
-	FROM [ter_contacto_sucursal]
-	WHERE	(id = @p_id)
-	AND	(eid LIKE @p_eid+'%')
-
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contacto_sucursalesXusuario_modifico_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contacto_sucursalesXusuario_modifico_m]
-GO
-CREATE PROCEDURE [sel_ter_contacto_sucursalesXusuario_modifico_m]
-	@p_id_usuario_modifico INT,
-	@p_eid as varchar(50) = ''
-AS
-BEGIN
-	SELECT *
-	FROM [view_ter_contacto_sucursal]
-	WHERE ([id_usuario_modifico]= @p_id_usuario_modifico)
-	AND	(eid LIKE @p_eid+'%')
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contacto_sucursalesXusuario_creo_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contacto_sucursalesXusuario_creo_m]
-GO
-CREATE PROCEDURE [sel_ter_contacto_sucursalesXusuario_creo_m]
-	@p_id_usuario_creo INT,
-	@p_eid as varchar(50) = ''
-AS
-BEGIN
-	SELECT *
-	FROM [view_ter_contacto_sucursal]
-	WHERE ([id_usuario_creo]= @p_id_usuario_creo)
-	AND	(eid LIKE @p_eid+'%')
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contacto_sucursalesXcontacto_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contacto_sucursalesXcontacto_m]
-GO
-CREATE PROCEDURE [sel_ter_contacto_sucursalesXcontacto_m]
-	@p_id_contacto INT,
-	@p_eid as varchar(50) = ''
-AS
-BEGIN
-	SELECT *
-	FROM [view_ter_contacto_sucursal]
-	WHERE ([id_contacto]= @p_id_contacto)
-	AND	(eid LIKE @p_eid+'%')
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contacto_sucursalesXsucursal_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contacto_sucursalesXsucursal_m]
-GO
-CREATE PROCEDURE [sel_ter_contacto_sucursalesXsucursal_m]
-	@p_id_sucursal INT,
-	@p_eid as varchar(50) = ''
-AS
-BEGIN
-	SELECT *
-	FROM [view_ter_contacto_sucursal]
-	WHERE ([id_sucursal]= @p_id_sucursal)
-	AND	(eid LIKE @p_eid+'%')
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contacto_sucursales_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contacto_sucursales_m]
-GO
-CREATE PROCEDURE [sel_ter_contacto_sucursales_m]
-	@p_eid as varchar (50)='',
-	@p_filtro as varchar (8000) = '1=1',
-	@p_orden as varchar (8000) = 'id',
-	@p_campos as varchar (8000) = '*' AS
-BEGIN
-exec ('SELECT '+ @p_campos +
-' FROM [view_ter_contacto_sucursal]
-WHERE  (eid like '''+@p_eid+'%'+''' ) AND (' + @p_filtro + ') ORDER BY ' + @p_orden)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[lis_ter_contacto_sucursales_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[lis_ter_contacto_sucursales_m]
-GO
-CREATE PROCEDURE [lis_ter_contacto_sucursales_m]
-	@p_eid as varchar(50) = ''
-AS
-BEGIN
-	SELECT id AS id,
-[contacto_sucursal] AS [ter_contacto_sucursal]
-	FROM [ter_contacto_sucursal]
-	WHERE active = 1
-	AND	(eid LIKE @p_eid+'%')
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[aud_ter_contacto_sucursal]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[aud_ter_contacto_sucursal]
-GO
-CREATE PROCEDURE [aud_ter_contacto_sucursal]
-	@p_filtro as varchar (8000) = '1=1'
-AS
-BEGIN
-exec(	'SELECT [ter_contacto_sucursal].id as id_tabla,
-	[ter_contacto_sucursal].id_usuario_modifico as id_usuario_modifico,
-	[ter_contacto_sucursal].id_usuario_creo as id_usuario_creo,
-	[ter_contacto_sucursal].fechaModificacion as fechaModificacion,
-	[ter_contacto_sucursal].fechaCreacion as fechaCreacion,
-	[ter_contacto_sucursal].active as active,
-	[ter_contacto_sucursal].[contacto_sucursal] as campoPrincipal,
-	[seg_usuario_creo].usuario as usuarioCreo,
-	[seg_usuario_modifico].usuario as usuarioModifico
-
-	FROM [ter_contacto_sucursal]
-	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[ter_contacto_sucursal].[id_usuario_modifico]
-	INNER JOIN [seg_usuario] AS [seg_usuario_creo] ON [seg_usuario_creo].id=[ter_contacto_sucursal].[id_usuario_creo]
-	where ' + @p_filtro)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-print 'ter_contacto_sucursal'
+print 'ter_contactoConfiguracion'
 --------------------------------
 SET QUOTED_IDENTIFIER OFF
 GO
@@ -157027,124 +155477,6 @@ BEGIN
 			[fechaModificacion] = GETDATE(),
 			[documento.proyecto_sucursal] = isnull(@p_documento_proyecto_sucursal,[documento.proyecto_sucursal]),
 			[id_documento.proyecto] = isnull(@p_id_documento_proyecto,[id_documento.proyecto]),
-			[id_sucursal] = isnull(@p_id_sucursal,[id_sucursal]),
-			[cmm] = isnull(@p_cmm,[cmm])
-		WHERE (id = @p_id)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ter_contactosXsucursal]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ter_contactosXsucursal]
-GO
-CREATE PROCEDURE [sel_ter_contactosXsucursal]
-	@p_id_ter_sucursal INT
-AS
-BEGIN
-	SELECT 	[ter_contacto_sucursal].[id] AS [I_id],
-		[ter_contacto_sucursal].[uid] AS [I_uid],
-		[ter_contacto_sucursal].[eid] AS [I_eid],
-		[ter_contacto_sucursal].[fechaModificacion] AS [I_fechaModificacion],
-		[ter_contacto_sucursal].[fechaCreacion] AS [I_fechaCreacion],
-		[ter_contacto_sucursal].[active] AS [I_active],
-		[ter_contacto_sucursal].[contacto_sucursal] AS [I_contacto_sucursal],
-		[ter_contacto_sucursal].[cmm] AS [I_cmm]
-	FROM ter_contacto_sucursal INNER JOIN ter_contacto
-	 ON [ter_contacto_sucursal].[id_contacto] = [ter_contacto].id
-	WHERE	([ter_contacto_sucursal].[id_sucursal]= @p_id_ter_sucursal)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[ins_ter_contacto_sucursal]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[ins_ter_contacto_sucursal]
-GO
-CREATE PROCEDURE [ins_ter_contacto_sucursal]
-	@p_uid varchar(500),
-		@p_eid varchar(50),
-		@p_id_usuario_modifico int,
-		@p_id_usuario_creo int,
-		@p_contacto_sucursal varchar(300),
-		@p_id_contacto int,
-		@p_id_sucursal int,
-		@p_cmm varchar(300)
-AS
-BEGIN
-	DECLARE @v_id int
-		INSERT INTO [ter_contacto_sucursal]
-			([uid],
-			[eid],
-			[id_usuario_modifico],
-			[id_usuario_creo],
-			[fechaModificacion],
-			[fechaCreacion],
-			[contacto_sucursal],
-			[id_contacto],
-			[id_sucursal],
-			[cmm])
-		VALUES(	@p_uid,
-			@p_eid,
-			@p_id_usuario_modifico,
-			@p_id_usuario_creo,
-			GETDATE(),
-			GETDATE(),
-			@p_contacto_sucursal,
-			@p_id_contacto,
-			@p_id_sucursal,
-			@p_cmm)
-		SET @v_id = scope_identity()
-UPDATE [ter_contacto_sucursal] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
-SELECT @v_id as id
-RETURN @v_id
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[upd_ter_contacto_sucursal]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[upd_ter_contacto_sucursal]
-GO
-CREATE PROCEDURE [upd_ter_contacto_sucursal]
-	@p_id int = null,
-		@p_uid varchar(500) = null,
-		@p_eid varchar(50) = null,
-		@p_id_usuario_modifico int = null,
-		@p_id_usuario_creo int = null,
-		@p_fechaCreacion smalldatetime = null,
-		@p_contacto_sucursal varchar(300) = null,
-		@p_id_contacto int = null,
-		@p_id_sucursal int = null,
-		@p_cmm varchar(300) = null
-AS
-BEGIN
-		UPDATE [ter_contacto_sucursal]
-		SET	[uid] = isnull(@p_uid,[uid]),
-			[eid] = isnull(@p_eid,[eid]),
-			[id_usuario_modifico] = isnull(@p_id_usuario_modifico,[id_usuario_modifico]),
-			[id_usuario_creo] = isnull(@p_id_usuario_creo,[id_usuario_creo]),
-			[fechaModificacion] = GETDATE(),
-			[contacto_sucursal] = isnull(@p_contacto_sucursal,[contacto_sucursal]),
-			[id_contacto] = isnull(@p_id_contacto,[id_contacto]),
 			[id_sucursal] = isnull(@p_id_sucursal,[id_sucursal]),
 			[cmm] = isnull(@p_cmm,[cmm])
 		WHERE (id = @p_id)
@@ -160838,4 +159170,4 @@ SET ANSI_NULLS ON
 GO
 ----------------------
 print 'ter_tercero_usuario'
------------------------------------9/23/2024 17:11:02
+-----------------------------------3/7/2025 10:08:09

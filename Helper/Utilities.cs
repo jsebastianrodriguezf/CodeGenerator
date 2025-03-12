@@ -183,7 +183,7 @@ namespace CodeGenerator.Helper
             return customLines;
         }
 
-        public static List<string> GetConstructor(FileModel? fileModel, string constructorMethod, List<string> defaultProperties, List<string> defaultParameters, List<string> defaultContent)
+        public static List<string> GetConstructor(FileModel? fileModel, string constructorMethod, List<string> defaultProperties, List<string> defaultParameters, List<string> defaultContent, string endkeyConstructor)
         {
             List<string> content;
             List<string> defaultContructor;
@@ -205,7 +205,7 @@ namespace CodeGenerator.Helper
             defaultContructor.AddRange(defaultContent);
             defaultContructor.Add(closeBrackets);
 
-            content = GetConstructor(fileModel);
+            content = GetConstructor(fileModel, endkeyConstructor);
 
             if (content.Count == 0)
                 content = defaultContructor;
@@ -243,12 +243,11 @@ namespace CodeGenerator.Helper
             return content;
         }
 
-        private static List<string> GetConstructor(FileModel? fileModel)
+        private static List<string> GetConstructor(FileModel? fileModel, string endKey)
         {
             List<string> template;
             List<string> customLines;
             string startKey = "    public class";
-            const string endKey = "        #region Base";
 
             if (fileModel is null) return [];
 
