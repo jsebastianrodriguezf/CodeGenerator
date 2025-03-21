@@ -983,7 +983,7 @@ namespace CodeGenerator.BLL
             GenerateFile("Controllers", $"{entityUpper}Controller.cs", content);
         }
 
-        public void GenerateIService(string prefix, string entityUpper, bool WithCodigo, bool hasView, bool hasCmm, bool hasViewFull)
+        public void GenerateIServiceOLD(string prefix, string entityUpper, bool WithCodigo, bool hasView, bool hasCmm, bool hasViewFull)
         {
             List<string> content;
             string entityUpperBase;
@@ -1106,7 +1106,52 @@ namespace CodeGenerator.BLL
             GenerateFile("IServices", $"I{entityUpper}Service.cs", content);
         }
 
-        public void GenerateService(string prefix, string entityUpper, string entityLower, bool WithCodigo, bool hasView, bool hasCmm, bool hasViewFull)
+        public void GenerateIService(string prefix, string entityUpper, bool WithCodigo, bool hasView, bool hasCmm, bool hasViewFull)
+        {
+            List<string> content;
+            string entityUpperBase;
+            string generic;
+
+            string className = GetClassName(prefix, entityUpper, hasViewFull);
+
+            entityUpperBase = entityUpper;
+
+            if (_filesModel.Any(x => x.Name == $"View{prefix}{entityUpper}sBaseObject"))
+                entityUpperBase += "s";
+
+            content = GetNamespacesIService(entityUpper);
+
+            if (WithCodigo && hasView)
+                generic = $"IFullServiceAbstract<{className}Object, View{prefix}{entityUpper}Object, View{prefix}{entityUpperBase}BaseObject>";
+            else if (!WithCodigo && hasView)
+                generic = $"IViewServiceAbstract<{className}Object, View{prefix}{entityUpper}Object, View{prefix}{entityUpperBase}BaseObject>";
+            else if (!WithCodigo && !hasView)
+                generic = $"IBasicServiceAbstract<{className}Object>";
+            else
+                generic = "ERROR";
+
+            content.AddRange([
+                 $"",
+                $"namespace SAMMAI.Core.Services.DAL.Interfaces",
+                "{",
+                $"    public interface I{entityUpper}Service : {generic}",
+                "    {",
+                $"        #region Custom IServices",
+            ]);
+
+            content.AddRange(Utilities.GetCustomCode(_iServiceModel.FirstOrDefault(x => x.Name == $"I{entityUpper}Service"), "IServices"));
+            //content.AddRange(Utilities.GetCustomCode(_iServiceModel.FirstOrDefault(x => x.Name == $"I{_transtaleService.Translate(entityUpper).Result}Service"), "IServices"));
+
+            content.AddRange([
+                $"        #endregion",
+                "    }",
+                "}"
+            ]);
+
+            GenerateFile("IServices", $"I{entityUpper}Service.cs", content);
+        }
+
+        public void GenerateServiceOLD(string prefix, string entityUpper, string entityLower, bool WithCodigo, bool hasView, bool hasCmm, bool hasViewFull)
         {
             List<string> content = [];
             string entityUpperBase;
@@ -1334,7 +1379,59 @@ namespace CodeGenerator.BLL
             GenerateFile("Services", $"{entityUpper}Service.cs", content);
         }
 
-        public string GenerateDI(string entity)
+        public void GenerateService(string prefix, string entityUpper, string entityLower, bool WithCodigo, bool hasView, bool hasCmm, bool hasViewFull)
+        {
+            List<string> content = [];
+            string entityUpperBase;
+            string generic;
+
+            string className = GetClassName(prefix, entityUpper, hasViewFull);
+
+            entityUpperBase = entityUpper;
+
+            if (_filesModel.Any(x => x.Name == $"View{prefix}{entityUpper}sBaseObject"))
+                entityUpperBase += "s";
+
+            content = GetNamespacesService(entityUpper);
+
+            if (WithCodigo && hasView)
+                generic = $"FullServiceAbstract<{className}Object, View{prefix}{entityUpper}Object, View{prefix}{entityUpperBase}BaseObject>";
+            else if (!WithCodigo && hasView)
+                generic = $"ViewServiceAbstract<{className}Object, View{prefix}{entityUpper}Object, View{prefix}{entityUpperBase}BaseObject>";
+            else if (!WithCodigo && !hasView)
+                generic = $"BasicServiceAbstract<{className}Object>";
+            else
+                generic = "ERROR";
+
+            content.AddRange([
+                $"",
+                $"namespace SAMMAI.Core.Services.DAL.Implementations",
+                "{",
+                $"    public class {entityUpper}Service : {generic}, I{entityUpper}Service",
+                "    {",
+            ]);
+
+            content.AddRange(GetConstructorService(entityUpper, entityLower));
+
+            
+            content.AddRange([
+                $"",
+                $"        #region Custom Services",
+            ]);
+
+            content.AddRange(Utilities.GetCustomCode(_serviceModel.FirstOrDefault(x => x.Name == $"{entityUpper}Service"), "Services"));
+            //content.AddRange(Utilities.GetCustomCode(_serviceModel.FirstOrDefault(x => x.Name == $"{_transtaleService.Translate(entityUpper).Result}Service"), "Services"));
+
+            content.AddRange([
+                $"        #endregion",
+                "    }",
+                "}"
+             ]);
+
+            GenerateFile("Services", $"{entityUpper}Service.cs", content);
+        }
+
+        public static string GenerateDI(string entity)
         {
             string init;
             string entityUpper;
@@ -1439,9 +1536,6 @@ namespace CodeGenerator.BLL
 
             defaultProperties = [
                 $"        private readonly ILogger<{entityUpper}Service> _logger;",
-                $"        protected readonly IMapper _mapper;",
-                $"        protected readonly DataBaseRepository _dataBaseRepository;",
-                $"        protected readonly DataBase _sammaiDataBaseOptions;",
             ];
 
             defaultParameters = [
@@ -1449,18 +1543,16 @@ namespace CodeGenerator.BLL
                 $"            IMapper mapper,",
                 $"            DataBaseRepository dataBaseRepository,",
                 $"            IOptions<ProjectSettings> projectSettingsOptions,",
+                //$"            : base(logger, mapper, dataBaseRepository, projectSettingsOptions, BaseController.{entityUpper})",
             ];
 
             defaultContent = [
                 $"            _logger = logger ?? throw new ArgumentNullException(nameof(logger));",
-                $"            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));",
-                $"            _dataBaseRepository = dataBaseRepository ?? throw new ArgumentNullException(nameof(dataBaseRepository));",
-                $"            _sammaiDataBaseOptions = projectSettingsOptions?.Value.SAMMAIMicroservices.DataBase ?? throw new ArgumentNullException(nameof(projectSettingsOptions));",
             ];
 
             content = Utilities.GetConstructor(
                 _serviceModel.FirstOrDefault(x => x.Name == $"{entityUpper}Service"),
-                constructorMethod, defaultProperties, defaultParameters, defaultContent, "        #region Base");
+                constructorMethod, defaultProperties, defaultParameters, defaultContent, "        #region Custom Services");
 
             return content;
         }
@@ -1493,6 +1585,7 @@ namespace CodeGenerator.BLL
             List<string> defaultNamespaces;
 
             defaultNamespaces = [
+                $"using SAMMAI.Core.Services.DAL.Base.Interfaces;",
                 $"using SAMMAI.Transverse.Models.Objects;",
             ];
 
@@ -1510,6 +1603,7 @@ namespace CodeGenerator.BLL
                 $"using AutoMapper;",
                 $"using Microsoft.Extensions.Options;",
                 $"using SAMMAI.Core.Repository;",
+                $"using SAMMAI.Core.Services.DAL.Base.Implementations;",
                 $"using SAMMAI.Core.Services.DAL.Interfaces;",
                 $"using SAMMAI.Core.Utility.SettingsFiles;",
                 $"using SAMMAI.Transverse.Models.Objects;",

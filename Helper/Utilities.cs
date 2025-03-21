@@ -183,7 +183,7 @@ namespace CodeGenerator.Helper
             return customLines;
         }
 
-        public static List<string> GetConstructor(FileModel? fileModel, string constructorMethod, List<string> defaultProperties, List<string> defaultParameters, List<string> defaultContent, string endkeyConstructor)
+        public static List<string> GetConstructor(FileModel? fileModel, string constructorMethod, List<string> defaultProperties, List<string> defaultParameters, List<string> defaultContent, string endkeyConstructor, bool takeDefult = false)
         {
             List<string> content;
             List<string> defaultContructor;
@@ -207,7 +207,7 @@ namespace CodeGenerator.Helper
 
             content = GetConstructor(fileModel, endkeyConstructor);
 
-            if (content.Count == 0)
+            if (takeDefult || content.Count == 0)
                 content = defaultContructor;
             else
             {
