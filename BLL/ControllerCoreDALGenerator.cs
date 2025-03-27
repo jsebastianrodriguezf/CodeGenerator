@@ -359,7 +359,7 @@ namespace CodeGenerator.BLL
             }
         }
 
-        public void GenerateController(string prefix, string entityUpper, string entityLower, bool WithCodigo, bool hasView, bool hasCmm, bool hasViewFull)
+        public void GenerateControllerOLD(string prefix, string entityUpper, string entityLower, bool WithCodigo, bool hasView, bool hasCmm, bool hasViewFull)
         {
             List<string> content;
             string entityUpperBase;
@@ -983,6 +983,59 @@ namespace CodeGenerator.BLL
             GenerateFile("Controllers", $"{entityUpper}Controller.cs", content);
         }
 
+        public void GenerateController(string prefix, string entityUpper, string entityLower, bool WithCodigo, bool hasView, bool hasCmm, bool hasViewFull)
+        {
+            List<string> content;
+            string entityUpperBase;
+            string generic;
+
+            string className = GetClassName(prefix, entityUpper, hasViewFull);
+
+            entityUpperBase = entityUpper;
+
+            if (_filesModel.Any(x => x.Name == $"View{prefix}{entityUpper}sBaseObject"))
+                entityUpperBase += "s";
+
+            content = GetNamespacesController(entityUpper);
+
+            if (WithCodigo && hasView)
+                generic = $"FullControllerAbstract<I{entityUpper}Service, {className}DTO, View{prefix}{entityUpper}DTO, View{prefix}{entityUpperBase}BaseDTO, {className}Object, View{prefix}{entityUpper}Object, View{prefix}{entityUpperBase}BaseObject>";
+            else if (!WithCodigo && hasView)
+                generic = $"ViewControllerAbstract<I{entityUpper}Service, {className}DTO, View{prefix}{entityUpper}DTO, View{prefix}{entityUpperBase}BaseDTO, {className}Object, View{prefix}{entityUpper}Object, View{prefix}{entityUpperBase}BaseObject>";
+            else if (!WithCodigo && !hasView)
+                generic = $"BasicControllerAbstract<I{entityUpper}Service, {className}DTO, {className}Object>";
+            else
+                generic = "ERROR";
+
+            content.AddRange([
+                $"",
+                $"namespace SAMMAI.Core.Controllers",
+                "{",
+                $"    [Route($\"{{BaseApi}}/{Utilities.ToKebabCase(entityUpper).ToLower()}\")]",
+                $"    [ApiController]",
+                $"    public class {entityUpper}Controller : {generic}",
+                "    {",
+            ]);
+
+            content.AddRange(GetConstructorController(entityUpper, entityLower));
+
+            content.AddRange([
+                $"",
+                $"        #region Custom Endpoints",
+            ]);
+
+            content.AddRange(Utilities.GetCustomCode(_controllerModel.FirstOrDefault(x => x.Name == $"{entityUpper}Controller"), "Endpoints"));
+            //content.AddRange(Utilities.GetCustomCode(_controllerModel.FirstOrDefault(x => x.Name == $"{_transtaleService.Translate(entityUpper).Result}Controller"), "Endpoints"));
+
+            content.AddRange([
+                $"        #endregion",
+                "    }",
+                "}"
+            ]);
+
+            GenerateFile("Controllers", $"{entityUpper}Controller.cs", content);
+        }
+
         public void GenerateIServiceOLD(string prefix, string entityUpper, bool WithCodigo, bool hasView, bool hasCmm, bool hasViewFull)
         {
             List<string> content;
@@ -1500,26 +1553,27 @@ namespace CodeGenerator.BLL
             string constructorMethod = $"        public {entityUpper}Controller(";
 
             defaultProperties = [
-                $"        private readonly ILogger<{entityUpper}Controller> _logger;",
-                $"        private readonly IMapper _mapper;",
+                //$"        private readonly ILogger<{entityUpper}Controller> _logger;",
+                //$"        private readonly IMapper _mapper;",
                 $"        private readonly I{entityUpper}Service _{entityLower}Service;",
             ];
 
             defaultParameters = [
-                $"            ILogger<{entityUpper}Controller> logger,",
+                $"            ILoggerFactory loggerFactory,",
                 $"            IMapper mapper,",
                 $"            I{entityUpper}Service {entityLower}Service,",
+                //$"            : base(loggerFactory, mapper, {entityLower}Service)",
             ];
 
             defaultContent = [
-                $"            _logger = logger ?? throw new ArgumentNullException(nameof(logger));",
-                $"            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));",
+                //$"            _logger = logger ?? throw new ArgumentNullException(nameof(logger));",
+                //$"            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));",
                 $"            _{entityLower}Service = {entityLower}Service ?? throw new ArgumentNullException(nameof({entityLower}Service));",
             ];
 
             content = Utilities.GetConstructor(
                 _controllerModel.FirstOrDefault(x => x.Name == $"{entityUpper}Controller"),
-                constructorMethod, defaultProperties, defaultParameters, defaultContent, "        #region Base");
+                constructorMethod, defaultProperties, defaultParameters, defaultContent, "        #region Custom");
 
 
             return content;
@@ -1535,19 +1589,19 @@ namespace CodeGenerator.BLL
             string constructorMethod = $"        public {entityUpper}Service(";
 
             defaultProperties = [
-                $"        private readonly ILogger<{entityUpper}Service> _logger;",
+                //$"        private readonly ILogger<{entityUpper}Service> _logger;",
             ];
 
             defaultParameters = [
-                $"            ILogger<{entityUpper}Service> logger,",
+                $"            ILoggerFactory loggerFactory,",
                 $"            IMapper mapper,",
                 $"            DataBaseRepository dataBaseRepository,",
                 $"            IOptions<ProjectSettings> projectSettingsOptions,",
-                //$"            : base(logger, mapper, dataBaseRepository, projectSettingsOptions, BaseController.{entityUpper})",
+                $"            : base(loggerFactory, mapper, dataBaseRepository, projectSettingsOptions, BaseController.{entityUpper})",
             ];
 
             defaultContent = [
-                $"            _logger = logger ?? throw new ArgumentNullException(nameof(logger));",
+                //$"            _logger = logger ?? throw new ArgumentNullException(nameof(logger));",
             ];
 
             content = Utilities.GetConstructor(
@@ -1565,13 +1619,15 @@ namespace CodeGenerator.BLL
             defaultNamespaces = [
                 $"using AutoMapper;",
                 $"using Microsoft.AspNetCore.Mvc;",
+                $"using SAMMAI.Core.Controllers.Base;",
                 $"using SAMMAI.Core.Services.DAL.Interfaces;",
                 $"using SAMMAI.Core.Utility.ActionFilters;",
-                $"using SAMMAI.Transverse.Constants;",
                 $"using SAMMAI.Transverse.Helpers;",
                 $"using SAMMAI.Transverse.Models.DTOs;",
+                $"using SAMMAI.Transverse.Models.Objects;",
                 $"using SAMMAI.Transverse.Models.Response.BaseApi;",
                 $"using static SAMMAI.Core.Utility.Constants.ApiRoutesConstants;",
+                $"using static SAMMAI.Transverse.Constants.GeneralConstants;",
             ];
 
             content = Utilities.GetNamespaces(_controllerModel.FirstOrDefault(x => x.Name == $"{entityUpper}Controller"), defaultNamespaces);

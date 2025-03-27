@@ -133,7 +133,7 @@ namespace CodeGenerator.BLL
 
         }
 
-        public void GenerateController(string prefix, string entityUpper, string entityLower, bool WithCode, bool hasView, bool hasCmm, bool isStandardTable, bool hasViewFull)
+        public void GenerateControllerOld(string prefix, string entityUpper, string entityLower, bool WithCode, bool hasView, bool hasCmm, bool isStandardTable, bool hasViewFull)
         {
             List<string> content;
             string controllerRoute;
@@ -1003,6 +1003,61 @@ namespace CodeGenerator.BLL
             GenerateFile("Controllers", $"{entityUpper}Controller.cs", content);
         }
 
+        public void GenerateController(string prefix, string entityUpper, string entityLower, bool WithCode, bool hasView, bool hasCmm, bool isStandardTable, bool hasViewFull)
+        {
+            List<string> content;
+            string controllerRoute;
+            string entityUpperBase;
+            bool withSp = true;
+            string viewGenerics;
+
+            string className = GetClassName(prefix, entityUpper, hasViewFull);
+
+            entityUpperBase = entityUpper;
+
+            if (_filesModel.Any(x => x.Name == $"View{prefix}{entityUpper}sBaseObject"))
+                entityUpperBase += "s";
+
+            controllerRoute = "$\"{BaseApi}/" + $"{Utilities.ToKebabCase(entityUpper).ToLower()}\"";
+
+            viewGenerics = hasView ?
+                $"{className}Object, View{prefix}{entityUpper}Object, View{prefix}{entityUpperBase}BaseObject" :
+                $"{prefix}{entityUpper}Object";
+
+
+            string abstractService = GetAbstractClass(WithCode, hasView, hasCmm, isStandardTable, "Controller");
+
+            content = GetNamespacesController(entityUpper);
+
+            content.AddRange([
+                $"",
+                $"namespace SAMMAI.DataBase.Controllers",
+                "{",
+                $"    [Route($\"{{BaseApi}}/{{BaseController.{entityUpper}}}\")]",
+                $"    [ApiController]",
+                $"    public class {entityUpper}Controller : {abstractService}<{entityUpper}Service, {viewGenerics}>",
+                "    {",
+            ]);
+
+            content.AddRange(GetConstructorController(entityUpper, entityLower));
+            
+            content.AddRange([
+                $"",
+                $"        #region Custom Endpoints"
+            ]);
+
+            content.AddRange(Utilities.GetCustomCode(_controllerModel.FirstOrDefault(x => x.Name == $"{entityUpper}Controller"), "Endpoints"));
+            //content.AddRange(Utilities.GetCustomCode(_controllerModel.FirstOrDefault(x => x.Name == $"{_transtaleService.Translate(entityUpper).Result}Controller"), "Endpoints"));
+
+            content.AddRange([
+                $"        #endregion",
+                "    }",
+                "}"
+            ]);
+
+            GenerateFile("Controllers", $"{entityUpper}Controller.cs", content);
+        }
+
         public void GenerateServiceOld(string prefix, string entityUpper, string entityLower, bool WithCode, bool hasView, bool hasCmm, bool hasPrincipalField, bool isStandardTable, bool hasViewFull)
         {
             List<string> content;
@@ -1349,33 +1404,33 @@ namespace CodeGenerator.BLL
             GenerateFile("Services", $"{entityUpper}Service.cs", content);
         }
 
-        private string GetAbstractClass(bool WithCode, bool hasView, bool hasCmm, bool isStandardTable)
+        private static string GetAbstractClass(bool WithCode, bool hasView, bool hasCmm, bool isStandardTable, string classType)
         {
             string abstractServiceName;
 
             if (WithCode && hasView && isStandardTable)
             {
-                abstractServiceName = "FullServiceAbstract";
+                abstractServiceName = $"Full{classType}Abstract";
             }
             else if (!WithCode && !hasView && hasCmm && isStandardTable)
             {
-                abstractServiceName = "BasicServiceAbstract";
+                abstractServiceName = $"Basic{classType}Abstract";
             }
             else if (WithCode && !hasView && hasCmm && isStandardTable)
             {
-                abstractServiceName = "CodeServiceAbstract";
+                abstractServiceName = $"Code{classType}Abstract";
             }
             else if (!WithCode && hasView && hasCmm && isStandardTable)
             {
-                abstractServiceName = "ViewServiceAbstract";
+                abstractServiceName = $"View{classType}Abstract";
             }
             else if (WithCode && !isStandardTable)
             {
-                abstractServiceName = "CodeNotStandardServiceAbstract";
+                abstractServiceName = $"CodeNotStandard{classType}Abstract";
             }
             else if (!isStandardTable)
             {
-                abstractServiceName = "NotStandardServiceAbstract";
+                abstractServiceName = $"NotStandard{classType}Abstract";
             }
             else
             {
@@ -1403,7 +1458,7 @@ namespace CodeGenerator.BLL
                 $"{prefix}{entityUpper}Object";
 
 
-            string abstractService = GetAbstractClass(WithCode, hasView, hasCmm, isStandardTable);
+            string abstractService = GetAbstractClass(WithCode, hasView, hasCmm, isStandardTable, "Service");
 
             content = GetNamespacesService(entityUpper);
 
@@ -1578,13 +1633,10 @@ namespace CodeGenerator.BLL
 
             defaultNamespaces = [
                 $"using Microsoft.AspNetCore.Mvc;",
+                $"using SAMMAI.DataBase.Controllers.Base;",
                 $"using SAMMAI.DataBase.Services.Implementations;",
-                $"using SAMMAI.DataBase.Utility.ActionFilters;",
-                $"using SAMMAI.Transverse.ActionFilters;",
-                $"using SAMMAI.Transverse.Models.Response.BaseApi;",
                 $"using static SAMMAI.DataBase.Utility.Constants.ApiRoutesConstants;",
                 $"using static SAMMAI.Transverse.Constants.ApiRoutes.DataBaseAPI;",
-                $"using static SAMMAI.Transverse.Constants.GeneralConstants;",
             ];
 
             content = Utilities.GetNamespaces(_controllerModel.FirstOrDefault(x => x.Name == $"{entityUpper}Controller"), defaultNamespaces);
@@ -1602,7 +1654,7 @@ namespace CodeGenerator.BLL
                 $"using SAMMAI.DataBase.Repository.Context;",
                 $"using SAMMAI.DataBase.Repository.Entities;",
                 $"using SAMMAI.DataBase.Repository.Manager;",
-                $"using SAMMAI.DataBase.Services.Base;",
+                $"using SAMMAI.DataBase.Services.Base.Implementations;",
                 $"using System.Data;",
             ];
 
@@ -1621,23 +1673,24 @@ namespace CodeGenerator.BLL
             string constructorMethod = $"        public {entityUpper}Controller(";
 
             defaultProperties = [
-                $"        private readonly ILogger<{entityUpper}Controller> _logger;",
+                //$"        private readonly ILogger<{entityUpper}Controller> _logger;",
                 $"        private readonly {entityUpper}Service _{entityLower}Service;",
             ];
 
             defaultParameters = [
-                $"            ILogger<{entityUpper}Controller> logger,",
+                $"            ILoggerFactory loggerFactory,",
                 $"            {entityUpper}Service {entityLower}Service,",
+                //$"            : base(loggerFactory, {entityLower}Service)",
             ];
 
             defaultContent = [
-                $"            _logger = logger ?? throw new ArgumentNullException(nameof(logger));",
+                //$"            _logger = logger ?? throw new ArgumentNullException(nameof(logger));",
                 $"            _{entityLower}Service = {entityLower}Service ?? throw new ArgumentNullException(nameof({entityLower}Service));",
             ];
 
             content = Utilities.GetConstructor(
                 _controllerModel.FirstOrDefault(x => x.Name == $"{entityUpper}Controller"),
-                constructorMethod, defaultProperties, defaultParameters, defaultContent, "        #region Base");
+                constructorMethod, defaultProperties, defaultParameters, defaultContent, "        #region Custom");
 
 
             return content;
@@ -1653,25 +1706,25 @@ namespace CodeGenerator.BLL
             string constructorMethod = $"        public {entityUpper}Service(";
 
             defaultProperties = [
-                $"        private readonly ILogger<{entityUpper}Service> _logger;",
-                $"        private readonly SAMMAIContext _context;",
-                $"        private readonly Global _global;",
-                $"        private readonly IMapper _mapper;",
+                //$"        private readonly ILogger<{entityUpper}Service> _logger;",
+                //$"        private readonly SAMMAIContext _context;",
+                //$"        private readonly Global _global;",
+                //$"        private readonly IMapper _mapper;",
             ];
 
             defaultParameters = [
-                $"            ILogger<{entityUpper}Service> logger,",
+                $"            ILoggerFactory loggerFactory,",
                 $"            SAMMAIContext context,",
                 $"            Global global,",
                 $"            IMapper mapper)",
-                $"            : base(logger, context, global, mapper)",
+                $"            : base(loggerFactory, context, global, mapper)",
             ];
 
             defaultContent = [
-                $"            _logger = logger ?? throw new ArgumentNullException(nameof(logger));",
-                $"            _context = context ?? throw new ArgumentNullException(nameof(context));",
-                $"            _global = global ?? throw new ArgumentNullException(nameof(global));",
-                $"            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));",
+                //$"            _logger = logger ?? throw new ArgumentNullException(nameof(logger));",
+                //$"            _context = context ?? throw new ArgumentNullException(nameof(context));",
+                //$"            _global = global ?? throw new ArgumentNullException(nameof(global));",
+                //$"            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));",
             ];
 
             content = Utilities.GetConstructor(

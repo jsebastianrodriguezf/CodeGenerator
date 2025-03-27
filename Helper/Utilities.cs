@@ -137,13 +137,13 @@ namespace CodeGenerator.Helper
             return customLines.Count > 0 ? customLines : [""];
         }
 
-        public static List<string> GetNamespaces(FileModel? fileModel, List<string> defaultNamespaces)
+        public static List<string> GetNamespaces(FileModel? fileModel, List<string> defaultNamespaces, bool takeDefult = false)
         {
             List<string> content;
 
             content = GetNamespaces(fileModel);
 
-            if (content.Count == 0)
+            if (takeDefult || content.Count == 0)
                 content = defaultNamespaces;
             else
             {
