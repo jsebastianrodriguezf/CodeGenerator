@@ -184,6 +184,7 @@ namespace CodeGenerator.BLL
             List<string> contentObject;
             List<string> contentEntity;
             string classObjectName;
+            string abstractClass;
 
             foreach (FileModel file in _filesModel.Where(x => x.Name != _contextName))
             {
@@ -194,23 +195,35 @@ namespace CodeGenerator.BLL
 
                 if (resp.isStandard)
                 {
+                    abstractClass = classObjectName.StartsWith("View") && !classObjectName.EndsWith("Full") ?
+                        "BaseViewObjectAbstract" : "BaseObjectAbstract";
+
                     contentObject = [
-                        "using SAMMAI.Transverse.Models.Interfaces;",
+                        "using SAMMAI.Transverse.Models.BaseObject.Implementations;",
                         "",
                         "namespace SAMMAI.Transverse.Models.Objects;",
                         "",
-                        $"public class {classObjectName}Object : IBaseObject",
+                        $"public class {classObjectName}Object : {abstractClass}",
+                        "{"
+                    ];
+                }
+                else if (resp.Item2.FirstOrDefault(x => x.Contains("    public int Id { get; set; }")) != null)
+                {
+                    contentObject = [
+                        "using SAMMAI.Transverse.Models.BaseObject.Interfaces;",
+                        "",
+                        "namespace SAMMAI.Transverse.Models.Objects;",
+                        "",
+                        $"public class {classObjectName}Object : IBaseIdentifier",
                         "{"
                     ];
                 }
                 else
                 {
                     contentObject = [
-                        "using SAMMAI.Transverse.Models.Interfaces;",
-                        "",
                         "namespace SAMMAI.Transverse.Models.Objects;",
                         "",
-                        $"public class {classObjectName}Object : IBaseIdentifier",
+                        $"public class {classObjectName}Object",
                         "{"
                     ];
                 }
@@ -242,20 +255,21 @@ namespace CodeGenerator.BLL
             int i = indexStart;
             bool isStandard = false;
 
+            isStandard = template.FirstOrDefault(x => x.Contains(" Eid ")) != null;
+
             for (; i < template.Count; i++)
             {
                 string line = template[i];
                 if (line.Contains("public virtual ") || line.StartsWith("}"))
                     break;
 
-                if (line != "")
+                if (line != "" && (Utilities.IsNotStandardProperty(line) || !isStandard))
                 {
                     if (line.Contains("public string Eid { get; set; } = null!;") || line.Contains("public string Uid { get; set; } = null!;"))
                     {
                         isStandard = true;
                         line = line.Replace("string", "string?").Replace(" = null!;", string.Empty);
-                    }
-                     
+                    }                     
 
                     if (line.Contains($" {className}1 {{ get; set; }}"))
                         line = line.Replace($" {className}1 {{ get; set; }}", $" {className} {{ get; set; }}");
@@ -301,7 +315,7 @@ namespace CodeGenerator.BLL
         #endregion
 
         #region GenerateDTOs
-        public void GenerateDTO(string className, List<string> template)
+        public void GenerateDTOOLD(string className, List<string> template)
         {
             List<string> content;
             string newClassName;
@@ -329,6 +343,167 @@ namespace CodeGenerator.BLL
                 "    }",
                 "}"
             ]);
+
+            GenerateFile("DTOs", $"{newClassName}.cs", content);
+        }
+
+        public void GenerateDTOnew(string className, List<string> template)
+        {
+            List<string> content;
+            string newClassName;
+            int startIndex;
+            int lastIndex;
+
+            startIndex = template.IndexOf("{") + 1;
+            lastIndex = template.IndexOf("}");
+
+            newClassName = $"{className[..^"Object".Length]}DTO";
+
+            content = [
+                "using SAMMAI.Transverse.Models.Objects;",
+                "using System.Text.Json.Serialization;",
+                "",
+                $"namespace SAMMAI.Transverse.Models.DTOs",
+                "{",
+                $"    public class {newClassName} : {className}",
+                "    {"
+            ];
+
+            for (int i = startIndex; i < lastIndex; i++)
+            {
+                string line = template[i];
+
+                if (!Utilities.IsNotBlackList(line))
+                {
+                    content.Add("        [JsonIgnore]");
+                    content.Add("    " + line.Replace("public", "public new"));
+                }
+                else
+                    continue;
+            }
+
+            content.AddRange([
+                "    }",
+                "}"
+            ]);
+
+            GenerateFile("DTOs", $"{newClassName}.cs", content);
+        }
+
+        public void GenerateDTO(string className, List<string> template)
+        {
+            List<string> content;
+            string newClassName;
+            int startIndex;
+            int lastIndex;
+
+            const string jsonUsing = "using System.Text.Json.Serialization;";
+            const string jsonIgnore = "        [JsonIgnore]";
+
+            startIndex = template.IndexOf("{") + 1;
+            lastIndex = template.IndexOf("}");
+
+            newClassName = $"{className[..^"Object".Length]}DTO";
+
+            content = [
+                "using SAMMAI.Transverse.Models.Objects;",
+                jsonUsing,
+                "",
+                $"namespace SAMMAI.Transverse.Models.DTOs",
+                "{",
+                $"    public class {newClassName} : {className}",
+                "    {"
+                ];
+
+            for (int i = startIndex; i < lastIndex; i++)
+            {
+                string line = template[i];
+
+                if (!Utilities.IsNotBlackList(line) && Utilities.IsNotStandardProperty(line))
+                {
+                    content.Add(jsonIgnore);
+                    content.Add("    " + line.Replace("public", "public new"));
+                }
+                else
+                    continue;
+            }
+
+            content.AddRange([
+                "    }",
+                "}"
+            ]);
+
+
+            if (!content.Contains(jsonIgnore))
+                content.RemoveAt(content.IndexOf(jsonUsing));
+
+            GenerateFile("DTOs", $"{newClassName}.cs", content);
+        }
+
+        public void GenerateDTOFake(string className, List<string> template)
+        {
+            List<string> content;
+            string newClassName;
+            int startIndex;
+            int lastIndex;
+            string init;
+            bool isStandardTable;
+            string ihiddenProperties;
+
+            const string jsonUsing = "using System.Text.Json.Serialization;";
+            const string jsonIgnore = "        [JsonIgnore]";
+
+            startIndex = template.IndexOf("{") + 1;
+            lastIndex = template.IndexOf("}");
+
+            init = className.Substring(3, 1);
+            isStandardTable = init.Equals(init.ToUpper(), StringComparison.CurrentCulture);
+
+            newClassName = $"{className[..^"Object".Length]}DTO";
+            if (isStandardTable)
+            {
+                ihiddenProperties = ", IHiddenStandardProperties";
+                content = [
+                  "using SAMMAI.Transverse.Models.DTOs.Interfaces;"
+                ];
+            }
+            else
+            {
+                ihiddenProperties = "";
+                content = [];
+            }
+
+            content.AddRange([
+                "using SAMMAI.Transverse.Models.Objects;",
+                jsonUsing,
+                "",
+                $"namespace SAMMAI.Transverse.Models.DTOs",
+                "{",
+                $"    public class {newClassName} : {className}{ihiddenProperties}",
+                "    {"
+                ]);
+
+            for (int i = startIndex; i < lastIndex; i++)
+            {
+                string line = template[i];
+
+                if (!Utilities.IsNotBlackList(line) && Utilities.IsNotStandardProperty(line))
+                {
+                    content.Add(jsonIgnore);
+                    content.Add("    " + line.Replace("public", "public new"));
+                }
+                else
+                    continue;
+            }
+
+            content.AddRange([
+                "    }",
+                "}"
+            ]);
+
+
+            if (!content.Contains(jsonIgnore))
+                content.RemoveAt(content.IndexOf(jsonUsing));
 
             GenerateFile("DTOs", $"{newClassName}.cs", content);
         }

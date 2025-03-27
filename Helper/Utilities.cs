@@ -295,6 +295,7 @@ namespace CodeGenerator.Helper
         {
             return
                 line.Contains("public ") && line.Contains(" { get; set; }") &&
+                !line.Contains(" Id { get; set; }") &&
                 !line.Contains(" Uid { get; set; }") &&
                 !line.Contains(" Eid { get; set; }") &&
                 !line.Contains(" IdUsuarioModifico { get; set; }") &&
@@ -311,6 +312,25 @@ namespace CodeGenerator.Helper
                 !line.Contains(" DateCreation { get; set; }") &&
                 !line.Contains(" public byte[]") &&
                 !line.Contains(" public string? Password { get; set; }") &&
+                !line.Contains(" Multicompany { get; set; }");
+        }
+
+        public static bool IsNotStandardProperty(string line)
+        {
+            return
+                !line.Contains(" Id { get; set; }") &&
+                !line.Contains(" Uid { get; set; }") &&
+                !line.Contains(" Eid { get; set; }") &&
+                !line.Contains(" IdUsuarioModifico { get; set; }") &&
+                !line.Contains(" IdUsuarioCreo { get; set; }") &&
+                !line.Contains(" FechaModificacion { get; set; }") &&
+                !line.Contains(" FechaCreacion { get; set; }") &&
+                !line.Contains(" Active { get; set; }") &&
+                !line.Contains(" Multiempresa { get; set; }") &&
+                !line.Contains(" IdUserModifier { get; set; }") &&
+                !line.Contains(" IdUserCreator { get; set; }") &&
+                !line.Contains(" DateModification { get; set; }") &&
+                !line.Contains(" DateCreation { get; set; }") &&
                 !line.Contains(" Multicompany { get; set; }");
         }
     }
