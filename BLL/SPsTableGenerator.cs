@@ -942,6 +942,7 @@ namespace CodeGenerator.BLL
                 $"GO",
                 $"CREATE PROCEDURE [ins_{tableNameSimple}_bulk]",
                 $"	@p_{tableNameSimple} AS typ_{tableNameSimple} READONLY,",
+                $"	@p_objetoAtributo AS typ_objetoAtributo READONLY, -- idObjeto should reference an existing (or placeholder) record in @p_{tableNameSimple}.",
                 $"	@p_uid varchar(500),",
                 $"	@p_eid varchar(50),",
                 $"	@p_id_usuario int",
@@ -952,7 +953,7 @@ namespace CodeGenerator.BLL
 
             content.AddRange(parentInsert.content);
 
-            if ( parentInsert.tableName is null)
+            if (parentInsert.tableName is null)
             {
                 if (!isParentTable)
                     content.AddRange([
@@ -1018,7 +1019,12 @@ namespace CodeGenerator.BLL
 
                 if (hasParentTable && x.Contains("[cmm]"))
                 {
-                    x = $"			''" + (x.Contains(',') ? "," : "");
+                    x = $"			{tableNameSimple}.[cmm]" + (x.Contains(',') ? "," : "");
+                }
+
+                if (!hasParentTable && !isParentTable && x.Contains("[cmm]"))
+                {
+                        x = $"			CASE WHEN id > 0 THEN id ELSE '' END" + (x.Contains(',') ? "," : "");
                 }
 
                 if (isParentTable && tableName == "doc_documento" && x.Contains("[cmm]"))
@@ -1062,6 +1068,8 @@ namespace CodeGenerator.BLL
 
             if (!isParentTable)
                 content.AddRange([
+                    $"		EXEC [_ins_objetoAtributo_bulk] @p_objetoAtributo, @v_ids, '{parentInsert.tableName ?? tableName}', @p_uid, @p_eid, @p_id_usuario;",
+                    $"",
                     $"		COMMIT TRANSACTION;",
                     $"",
                     $"	END TRY",
@@ -1224,7 +1232,7 @@ namespace CodeGenerator.BLL
                 {
                     if (x.TrimStart().StartsWith("cmm,"))
                     {
-                        x = "		ROW_NUMBER() OVER (ORDER BY id),";
+                        x = "		CASE WHEN id > 0 THEN id ELSE ROW_NUMBER() OVER (ORDER BY id) END,";
                     }
 
                     return x;
@@ -1270,7 +1278,7 @@ namespace CodeGenerator.BLL
                     $"	BEGIN TRY",
                     $"",
                     $"		INSERT INTO @v_{response.parentTable}",
-                    $"		EXEC [ins_{response.parentTable}_bulk] @v_{response.parentTable}, @p_uid, @p_eid, @p_id_usuario",
+                    $"		EXEC [ins_{response.parentTable}_bulk] @v_{response.parentTable}, @p_objetoAtributo, @p_uid, @p_eid, @p_id_usuario",
                     $"",
                     $"		DELETE FROM @v_{response.parentTable} WHERE id IS NULL",
                 ]);
@@ -1323,6 +1331,7 @@ namespace CodeGenerator.BLL
                 $"GO",
                 $"CREATE PROCEDURE [upd_{tableNameSimple}_bulk]",
                 $"	@p_{tableNameSimple} AS typ_{tableNameSimple} READONLY,",
+                $"	@p_objetoAtributo AS typ_objetoAtributo READONLY, -- idObjeto should reference an existing (or placeholder) record in @p_{tableNameSimple}.",
                 $"	@p_uid varchar(500),",
                 $"	@p_eid varchar(50),",
                 $"	@p_id_usuario int",
@@ -1360,6 +1369,9 @@ namespace CodeGenerator.BLL
 
             content.AddRange(columns);
 
+            if (!isParentTable)
+                content.Add($"		OUTPUT inserted.id INTO @v_ids");
+
             content.AddRange([
                 $"		FROM [{tableName}]",
                 $"			INNER JOIN @p_{tableNameSimple} [source]",
@@ -1372,6 +1384,8 @@ namespace CodeGenerator.BLL
 
             if (!isParentTable)
                 content.AddRange([
+                    $"		EXEC [_ins_objetoAtributo_bulk] @p_objetoAtributo, @v_ids, '{parentUpdate.tableName ?? tableName}', @p_uid, @p_eid, @p_id_usuario;",
+                    "",
                     $"		COMMIT TRANSACTION;",
                     $"",
                     $"	END TRY",
@@ -1393,10 +1407,10 @@ namespace CodeGenerator.BLL
             if (hasCmm && !isParentTable)
                 content.AddRange([
                     $"	BEGIN TRY",
-                    $"		INSERT INTO @v_ids",
-                    $"		SELECT id",
-                    $"		FROM @p_{tableNameSimple}",
-                    "",
+                    //$"		INSERT INTO @v_ids",
+                    //$"		SELECT id",
+                    //$"		FROM @p_{tableNameSimple}",
+                    //"",
                     $"		EXEC upd_{tableNameSimple}_cmm @v_ids, @p_id_usuario, @p_eid",
                     $"	END TRY",
                     $"	BEGIN CATCH",
@@ -1502,7 +1516,7 @@ namespace CodeGenerator.BLL
                     $"	BEGIN TRANSACTION;",
                     "",
                     $"	BEGIN TRY",
-                    $"		EXEC [upd_{response.parentTable}_bulk] @v_{response.parentTable}, @p_uid, @p_eid, @p_id_usuario",
+                    $"		EXEC [upd_{response.parentTable}_bulk] @v_{response.parentTable}, @p_objetoAtributo, @p_uid, @p_eid, @p_id_usuario",
                 ]);
 
             }
@@ -1517,6 +1531,9 @@ namespace CodeGenerator.BLL
         private List<string> UpdateActiveSP(List<string> template, string tableName)
         {
             int index;
+            string tableNameFormat;
+            List<string> activeContent;
+            string attributeTable;
 
             const string QUOTED_IDENTIFIER = "SET QUOTED_IDENTIFIER";
             const string ANSI_NULLS = "SET ANSI_NULLS";
@@ -1532,6 +1549,61 @@ namespace CodeGenerator.BLL
 
             index = template.FindLastIndex(x => x.Contains(ANSI_NULLS));
             template[index] = template[index].Replace("ON", "OFF");
+
+            tableNameFormat = tableName.Replace('.', '_');
+
+            if (template.Any(x => x.Contains($"[dbo].[act_{tableNameFormat}]")))
+            {
+                activeContent = [
+                    $"SET QUOTED_IDENTIFIER ON",
+                    $"GO",
+                    $"SET ANSI_NULLS ON",
+                    $"GO",
+                    $"",
+                    $"IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[act_{tableNameFormat}]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[act_{tableNameFormat}]",
+                    $"GO",
+                    $"CREATE PROCEDURE [act_{tableNameFormat}]",
+                    $"	@p_ids AS typ_ids READONLY,",
+                    $"	@p_active BIT,",
+                    $"	@p_uid VARCHAR(500),",
+                    $"	@p_eid VARCHAR(50),",
+                    $"	@p_id_usuario INT = NULL",
+                    $"AS",
+                    $"BEGIN",
+                    $"	UPDATE [{tableName}]",
+                    $"	SET [active] = @p_active,",
+                    $"		[id_usuario_modifico] = ISNULL(@p_id_usuario, [id_usuario_modifico]),",
+                    $"		[fechaModificacion] = GETDATE()",
+                    $"	FROM [{tableName}] tabla",
+                    $"		INNER JOIN @p_ids ids",
+                    $"	ON tabla.id = ids.id",
+                    $"	WHERE eid = @p_eid",
+                ];
+
+                if (!(tableName == "doc_documento" || tableName == "cat_catalogo"))
+                {
+                    attributeTable = HasParentTable(tableName) ? tableName.Split('.').First() : tableName;
+                    activeContent.AddRange([
+                        $"",
+                        $"	IF @p_active = 0",
+                        $"	BEGIN",
+                        $"		EXEC [_act_objetoAtributo_bulk] @p_ids, '{attributeTable}', @p_uid, @p_eid, @p_id_usuario;",
+                        $"	END",
+                    ]);
+                }
+
+                activeContent.AddRange([
+                    $"END",
+                    $"GO",
+                    $"SET QUOTED_IDENTIFIER OFF ",
+                    $"GO",
+                    $"SET ANSI_NULLS OFF",
+                    $"GO",
+                ]);
+
+                return activeContent;
+            }
+
 
             return template;
         }
