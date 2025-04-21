@@ -102709,6 +102709,458 @@ GO
 SET ANSI_NULLS OFF
 GO
 
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[reg_gen_logTrazabilidad]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[reg_gen_logTrazabilidad]
+GO
+CREATE PROCEDURE [reg_gen_logTrazabilidad]
+	@p_id INT
+AS
+BEGIN
+	SELECT 	[id] AS [id],
+		[uid] AS [uid],
+		[eid] AS [eid],
+		[id_usuario_modifico] AS [id_usuario_modifico],
+		[id_usuario_creo] AS [id_usuario_creo],
+		[fechaModificacion] AS [fechaModificacion],
+		[fechaCreacion] AS [fechaCreacion],
+		[active] AS [active],
+		[logTrazabilidad] AS [logTrazabilidad],
+		[logTrazabilidad_codigo] AS [logTrazabilidad_codigo],
+		[aplicacion] AS [aplicacion],
+		[version] AS [version],
+		[nivel] AS [nivel],
+		[fechaLog] AS [fechaLog],
+		[cmm] AS [cmm]
+	FROM [gen_logTrazabilidad]
+	WHERE	(id = @p_id)
+
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+IF  EXISTS (SELECT * FROM sys.views WHERE object_id = OBJECT_ID(N'[dbo].[view_gen_logTrazabilidad]')) DROP VIEW [dbo].[view_gen_logTrazabilidad]
+GO
+CREATE  VIEW [view_gen_logTrazabilidad] AS
+SELECT 	[gen_logTrazabilidad].[id] AS [id],
+		[gen_logTrazabilidad].[uid] AS [uid],
+		[gen_logTrazabilidad].[eid] AS [eid],
+		[gen_logTrazabilidad].[id_usuario_modifico] AS [id_usuario_modifico],
+		[gen_logTrazabilidad].[id_usuario_creo] AS [id_usuario_creo],
+		[gen_logTrazabilidad].[fechaModificacion] AS [fechaModificacion],
+		[gen_logTrazabilidad].[fechaCreacion] AS [fechaCreacion],
+		[gen_logTrazabilidad].[active] AS [active],
+		[gen_logTrazabilidad].[logTrazabilidad] AS [logTrazabilidad],
+		[gen_logTrazabilidad].[logTrazabilidad_codigo] AS [logTrazabilidad_codigo],
+		[gen_logTrazabilidad].[aplicacion] AS [aplicacion],
+		[gen_logTrazabilidad].[version] AS [version],
+		[gen_logTrazabilidad].[nivel] AS [nivel],
+		[gen_logTrazabilidad].[fechaLog] AS [fechaLog],
+		[gen_logTrazabilidad].[cmm] AS [cmm],
+		[empresaCodigo].[empresa] As [multiempresa]
+FROM [gen_logTrazabilidad]
+	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[gen_logTrazabilidad].[id_usuario_modifico]
+	INNER JOIN [seg_usuario] AS [seg_usuario_creo] ON [seg_usuario_creo].id=[gen_logTrazabilidad].[id_usuario_creo]
+	INNER JOIN [gen_empresa] AS empresaCodigo ON [gen_logTrazabilidad].eid = [empresaCodigo].[codigo] and empresaCodigo.active=1
+WHERE [gen_logTrazabilidad].active=1
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gen_logTrazabilidadesXusuario_modifico]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gen_logTrazabilidadesXusuario_modifico]
+GO
+CREATE PROCEDURE [sel_gen_logTrazabilidadesXusuario_modifico]
+	@p_id_usuario_modifico INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_gen_logTrazabilidad]
+	WHERE ([id_usuario_modifico]= @p_id_usuario_modifico)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gen_logTrazabilidadesXusuario_creo]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gen_logTrazabilidadesXusuario_creo]
+GO
+CREATE PROCEDURE [sel_gen_logTrazabilidadesXusuario_creo]
+	@p_id_usuario_creo INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_gen_logTrazabilidad]
+	WHERE ([id_usuario_creo]= @p_id_usuario_creo)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gen_logTrazabilidades]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gen_logTrazabilidades]
+GO
+CREATE PROCEDURE [sel_gen_logTrazabilidades]
+	
+	@p_filtro as varchar (8000) = '1=1',
+	@p_orden as varchar (8000) = 'id',
+	@p_campos as varchar (8000) = '*' AS
+BEGIN
+exec ('SELECT '+ @p_campos +
+' FROM [view_gen_logTrazabilidad]
+WHERE (' + @p_filtro + ') ORDER BY ' + @p_orden)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[lis_gen_logTrazabilidades]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[lis_gen_logTrazabilidades]
+GO
+CREATE PROCEDURE [lis_gen_logTrazabilidades]
+	AS
+BEGIN
+	SELECT id AS id,
+[logTrazabilidad] AS [gen_logTrazabilidad]
+	FROM [gen_logTrazabilidad]
+	WHERE active = 1
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[upd_gen_logTrazabilidad]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[upd_gen_logTrazabilidad]
+GO
+CREATE PROCEDURE [upd_gen_logTrazabilidad]
+	@p_id int = null,
+		@p_uid varchar(500) = null,
+		@p_eid varchar(50) = null,
+		@p_id_usuario_modifico int = null,
+		@p_id_usuario_creo int = null,
+		@p_fechaCreacion smalldatetime = null,
+		@p_logTrazabilidad varchar(300) = null,
+		@p_logTrazabilidad_codigo varchar(100) = null,
+		@p_aplicacion varchar(100) = null,
+		@p_version varchar(10) = null,
+		@p_nivel varchar(100) = null,
+		@p_fechaLog datetime = null,
+		@p_cmm varchar(300) = null
+AS
+BEGIN
+		UPDATE [gen_logTrazabilidad]
+		SET	[uid] = isnull(@p_uid,[uid]),
+			[eid] = isnull(@p_eid,[eid]),
+			[id_usuario_modifico] = isnull(@p_id_usuario_modifico,[id_usuario_modifico]),
+			[id_usuario_creo] = isnull(@p_id_usuario_creo,[id_usuario_creo]),
+			[fechaModificacion] = GETDATE(),
+			[logTrazabilidad] = isnull(@p_logTrazabilidad,[logTrazabilidad]),
+			[logTrazabilidad_codigo] = isnull(@p_logTrazabilidad_codigo,[logTrazabilidad_codigo]),
+			[aplicacion] = isnull(@p_aplicacion,[aplicacion]),
+			[version] = isnull(@p_version,[version]),
+			[nivel] = isnull(@p_nivel,[nivel]),
+			[fechaLog] = isnull(@p_fechaLog,[fechaLog]),
+			[cmm] = isnull(@p_cmm,[cmm])
+		WHERE (id = @p_id)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[ins_gen_logTrazabilidad]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[ins_gen_logTrazabilidad]
+GO
+CREATE PROCEDURE [ins_gen_logTrazabilidad]
+	@p_uid varchar(500),
+		@p_eid varchar(50),
+		@p_id_usuario_modifico int,
+		@p_id_usuario_creo int,
+		@p_logTrazabilidad varchar(300),
+		@p_logTrazabilidad_codigo varchar(100),
+		@p_aplicacion varchar(100),
+		@p_version varchar(10),
+		@p_nivel varchar(100),
+		@p_fechaLog datetime,
+		@p_cmm varchar(300)
+AS
+BEGIN
+	DECLARE @v_id int
+		INSERT INTO [gen_logTrazabilidad]
+			([uid],
+			[eid],
+			[id_usuario_modifico],
+			[id_usuario_creo],
+			[fechaModificacion],
+			[fechaCreacion],
+			[logTrazabilidad],
+			[logTrazabilidad_codigo],
+			[aplicacion],
+			[version],
+			[nivel],
+			[fechaLog],
+			[cmm])
+		VALUES(	@p_uid,
+			@p_eid,
+			@p_id_usuario_modifico,
+			@p_id_usuario_creo,
+			GETDATE(),
+			GETDATE(),
+			@p_logTrazabilidad,
+			@p_logTrazabilidad_codigo,
+			@p_aplicacion,
+			@p_version,
+			@p_nivel,
+			@p_fechaLog,
+			@p_cmm)
+		SET @v_id = scope_identity()
+UPDATE [gen_logTrazabilidad] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
+SELECT @v_id as id
+RETURN @v_id
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[act_gen_logTrazabilidad]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[act_gen_logTrazabilidad]
+GO
+CREATE PROCEDURE [act_gen_logTrazabilidad]
+	@p_active BIT,
+	@p_id INT,
+@p_id_usuario_modifico int = null
+AS
+BEGIN
+	UPDATE [gen_logTrazabilidad]
+	SET active=@p_active,
+	[id_usuario_modifico] = isnull(@p_id_usuario_modifico,[id_usuario_modifico]),
+	[fechaModificacion] = GETDATE()
+	WHERE	(id = @p_id)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[reg_gen_logTrazabilidad_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[reg_gen_logTrazabilidad_m]
+GO
+CREATE PROCEDURE [reg_gen_logTrazabilidad_m]
+	@p_id INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT 	[id] AS [id],
+		[uid] AS [uid],
+		[eid] AS [eid],
+		[id_usuario_modifico] AS [id_usuario_modifico],
+		[id_usuario_creo] AS [id_usuario_creo],
+		[fechaModificacion] AS [fechaModificacion],
+		[fechaCreacion] AS [fechaCreacion],
+		[active] AS [active],
+		[logTrazabilidad] AS [logTrazabilidad],
+		[logTrazabilidad_codigo] AS [logTrazabilidad_codigo],
+		[aplicacion] AS [aplicacion],
+		[version] AS [version],
+		[nivel] AS [nivel],
+		[fechaLog] AS [fechaLog],
+		[cmm] AS [cmm]
+	FROM [gen_logTrazabilidad]
+	WHERE	(id = @p_id)
+	AND	(eid LIKE @p_eid+'%')
+
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gen_logTrazabilidadesXusuario_modifico_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gen_logTrazabilidadesXusuario_modifico_m]
+GO
+CREATE PROCEDURE [sel_gen_logTrazabilidadesXusuario_modifico_m]
+	@p_id_usuario_modifico INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_gen_logTrazabilidad]
+	WHERE ([id_usuario_modifico]= @p_id_usuario_modifico)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gen_logTrazabilidadesXusuario_creo_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gen_logTrazabilidadesXusuario_creo_m]
+GO
+CREATE PROCEDURE [sel_gen_logTrazabilidadesXusuario_creo_m]
+	@p_id_usuario_creo INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_gen_logTrazabilidad]
+	WHERE ([id_usuario_creo]= @p_id_usuario_creo)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gen_logTrazabilidades_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gen_logTrazabilidades_m]
+GO
+CREATE PROCEDURE [sel_gen_logTrazabilidades_m]
+	@p_eid as varchar (50)='',
+	@p_filtro as varchar (8000) = '1=1',
+	@p_orden as varchar (8000) = 'id',
+	@p_campos as varchar (8000) = '*' AS
+BEGIN
+exec ('SELECT '+ @p_campos +
+' FROM [view_gen_logTrazabilidad]
+WHERE  (eid like '''+@p_eid+'%'+''' ) AND (' + @p_filtro + ') ORDER BY ' + @p_orden)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[lis_gen_logTrazabilidades_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[lis_gen_logTrazabilidades_m]
+GO
+CREATE PROCEDURE [lis_gen_logTrazabilidades_m]
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT id AS id,
+[logTrazabilidad] AS [gen_logTrazabilidad]
+	FROM [gen_logTrazabilidad]
+	WHERE active = 1
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[aud_gen_logTrazabilidad]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[aud_gen_logTrazabilidad]
+GO
+CREATE PROCEDURE [aud_gen_logTrazabilidad]
+	@p_filtro as varchar (8000) = '1=1'
+AS
+BEGIN
+exec(	'SELECT [gen_logTrazabilidad].id as id_tabla,
+	[gen_logTrazabilidad].id_usuario_modifico as id_usuario_modifico,
+	[gen_logTrazabilidad].id_usuario_creo as id_usuario_creo,
+	[gen_logTrazabilidad].fechaModificacion as fechaModificacion,
+	[gen_logTrazabilidad].fechaCreacion as fechaCreacion,
+	[gen_logTrazabilidad].active as active,
+	[gen_logTrazabilidad].[logTrazabilidad] as campoPrincipal,
+	[seg_usuario_creo].usuario as usuarioCreo,
+	[seg_usuario_modifico].usuario as usuarioModifico
+
+	FROM [gen_logTrazabilidad]
+	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[gen_logTrazabilidad].[id_usuario_modifico]
+	INNER JOIN [seg_usuario] AS [seg_usuario_creo] ON [seg_usuario_creo].id=[gen_logTrazabilidad].[id_usuario_creo]
+	where ' + @p_filtro)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+print 'gen_logTrazabilidad'
+--------------------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[reg_gen_moneda]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[reg_gen_moneda]
 GO
 CREATE PROCEDURE [reg_gen_moneda]
@@ -159170,4 +159622,4 @@ SET ANSI_NULLS ON
 GO
 ----------------------
 print 'ter_tercero_usuario'
------------------------------------3/7/2025 10:08:09
+-----------------------------------21/04/2025 10:27:42
