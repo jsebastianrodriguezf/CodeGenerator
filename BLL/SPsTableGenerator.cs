@@ -1384,7 +1384,7 @@ namespace CodeGenerator.BLL
 
             if (!isParentTable)
                 content.AddRange([
-                    $"		EXEC [_ins_objetoAtributo_bulk] @p_objetoAtributo, @v_ids, '{parentUpdate.tableName ?? tableName}', @p_uid, @p_eid, @p_id_usuario;",
+                    $"		EXEC [_upd_objetoAtributo_bulk] @p_objetoAtributo, @v_ids, '{parentUpdate.tableName ?? tableName}', @p_uid, @p_eid, @p_id_usuario;",
                     "",
                     $"		COMMIT TRANSACTION;",
                     $"",
