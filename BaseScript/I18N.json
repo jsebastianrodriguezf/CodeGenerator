@@ -2551,6 +2551,10 @@
     {
       "Spanish": "Jornada",
       "English": "Workday"
+    },
+    {
+      "Spanish": "Log",
+      "English": "Log"
     }
   ]
 }
