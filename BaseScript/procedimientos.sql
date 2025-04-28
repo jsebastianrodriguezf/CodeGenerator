@@ -102877,7 +102877,7 @@ CREATE PROCEDURE [upd_gen_logTrazabilidad]
 		@p_logTrazabilidad varchar(300) = null,
 		@p_logTrazabilidad_codigo varchar(100) = null,
 		@p_aplicacion varchar(100) = null,
-		@p_version varchar(10) = null,
+		@p_version varchar(100) = null,
 		@p_nivel varchar(100) = null,
 		@p_fechaLog datetime = null,
 		@p_cmm varchar(300) = null
@@ -102919,7 +102919,7 @@ CREATE PROCEDURE [ins_gen_logTrazabilidad]
 		@p_logTrazabilidad varchar(300),
 		@p_logTrazabilidad_codigo varchar(100),
 		@p_aplicacion varchar(100),
-		@p_version varchar(10),
+		@p_version varchar(100),
 		@p_nivel varchar(100),
 		@p_fechaLog datetime,
 		@p_cmm varchar(300)
@@ -159622,4 +159622,4 @@ SET ANSI_NULLS ON
 GO
 ----------------------
 print 'ter_tercero_usuario'
------------------------------------23/04/2025 11:39:29
+-----------------------------------24/04/2025 18:00:02
