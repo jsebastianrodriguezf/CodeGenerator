@@ -2555,6 +2555,14 @@
     {
       "Spanish": "Log",
       "English": "Log"
+    },
+    {
+      "Spanish": "Exitoso",
+      "English": "Satisfied"
+    },
+    {
+      "Spanish": "Validador",
+      "English": "Validator"
     }
   ]
 }
