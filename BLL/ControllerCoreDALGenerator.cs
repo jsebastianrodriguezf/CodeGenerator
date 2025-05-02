@@ -276,10 +276,11 @@ namespace CodeGenerator.BLL
         public List<string> GenerateForAllEntities()
         {
             List<string> responses = [];
-            string response;
+            (string, string generic) response;
 
             List<FileModel> files = _filesModel.Where(x => x.Name.Substring(3, 1) == x.Name.Substring(3, 1).ToUpper() || x.Name == "TablesObject" || x.Name == "ColumnsObject").ToList();
             List<string> contentDI = [];
+            List<string> contentRepositoruDI = [];
             List<string> constants = [];
 
             foreach (FileModel file in files)
@@ -288,23 +289,26 @@ namespace CodeGenerator.BLL
                     continue;
 
                 response = GenerateByEntity(file.Name[..^"Object".Length], file);
-                if (!string.IsNullOrEmpty(response))
-                    responses.Add(response);
+                if (!string.IsNullOrEmpty(response.Item1))
+                    responses.Add(response.Item1);
 
                 contentDI.Add(GenerateDI(file.Name));
+                contentRepositoruDI.Add(GenerateRepositoryDI(response.generic.Replace("ServiceAbstract", "Repository")));
             }
 
             GenerateFile("Dependencies", "Dependency.cs", contentDI);
+            GenerateFile("Dependencies", "DependencyRepository.cs", contentRepositoruDI);
 
             return responses;
         }
 
-        public string GenerateByEntity(string entity, FileModel file)
+        public (string, string generic) GenerateByEntity(string entity, FileModel file)
         {
             string prefix;
             string entityUpper;
             string entityLower;
             string init;
+            string generic;
             bool withCodigo;
             bool hasView;
             bool hasViewFull;
@@ -351,12 +355,38 @@ namespace CodeGenerator.BLL
                 GenerateIService(prefix, entityUpper, withCodigo, hasView, hasCmm, hasViewFull);
                 GenerateService(prefix, entityUpper, entityLower, withCodigo, hasView, hasCmm, hasViewFull);
 
-                return string.Empty;
+
+                generic = GenerateGeneric(prefix, entityUpper, entityLower, withCodigo, hasView, hasCmm, hasViewFull);
+                return (string.Empty, generic);
             }
             catch
             {
                 throw;
             }
+        }
+
+        private string GenerateGeneric(string prefix, string entityUpper, string entityLower, bool WithCodigo, bool hasView, bool hasCmm, bool hasViewFull)
+        {
+            string entityUpperBase;
+            string generic;
+
+            string className = GetClassName(prefix, entityUpper, hasViewFull);
+
+            entityUpperBase = entityUpper;
+
+            if (_filesModel.Any(x => x.Name == $"View{prefix}{entityUpper}sBaseObject"))
+                entityUpperBase += "s";
+
+            if (WithCodigo && hasView)
+                generic = $"FullServiceAbstract<{className}Object, View{prefix}{entityUpper}Object, View{prefix}{entityUpperBase}BaseObject>";
+            else if (!WithCodigo && hasView)
+                generic = $"ViewServiceAbstract<{className}Object, View{prefix}{entityUpper}Object, View{prefix}{entityUpperBase}BaseObject>";
+            else if (!WithCodigo && !hasView)
+                generic = $"BasicServiceAbstract<{className}Object>";
+            else
+                generic = "ERROR";
+
+            return generic;
         }
 
         public void GenerateControllerOLD(string prefix, string entityUpper, string entityLower, bool WithCodigo, bool hasView, bool hasCmm, bool hasViewFull)
@@ -1226,7 +1256,7 @@ namespace CodeGenerator.BLL
                 "    {",
             ]);
 
-            content.AddRange(GetConstructorService(entityUpper, entityLower));
+            content.AddRange(GetConstructorService(entityUpper, entityLower, "DataBaseRepository"));
 
             content.AddRange([
                 $"",
@@ -1464,7 +1494,9 @@ namespace CodeGenerator.BLL
                 "    {",
             ]);
 
-            content.AddRange(GetConstructorService(entityUpper, entityLower));
+            string repositoryType = $"I{generic.Replace("ServiceAbstract", "Repository")}";
+
+            content.AddRange(GetConstructorService(entityUpper, entityLower, repositoryType));
 
             
             content.AddRange([
@@ -1501,7 +1533,12 @@ namespace CodeGenerator.BLL
                 init = entity[..1];
                 entityUpper = string.Concat(init.ToUpper(), entity.AsSpan(1));
             }
-            return $"services.AddScoped<Services.DAL.Interfaces.I{entityUpper}Service, Services.DAL.Implementations.{entityUpper}Service> ();";
+            return $"services.AddScoped<Services.DAL.Interfaces.I{entityUpper}Service, Services.DAL.Implementations.{entityUpper}Service>();";
+        }
+
+        public static string GenerateRepositoryDI(string generic)
+        {
+            return $"services.AddScoped<I{generic}, {generic}>();";
         }
 
         #region Utilities
@@ -1579,7 +1616,7 @@ namespace CodeGenerator.BLL
             return content;
         }
 
-        private List<string> GetConstructorService(string entityUpper, string entityLower)
+        private List<string> GetConstructorService(string entityUpper, string entityLower, string repositoryType)
         {
             List<string> content;
             List<string> defaultProperties;
@@ -1595,9 +1632,8 @@ namespace CodeGenerator.BLL
             defaultParameters = [
                 $"            ILoggerFactory loggerFactory,",
                 $"            IMapper mapper,",
-                $"            DataBaseRepository dataBaseRepository,",
-                $"            IOptions<ProjectSettings> projectSettingsOptions,",
-                $"            : base(loggerFactory, mapper, dataBaseRepository, projectSettingsOptions, BaseController.{entityUpper})",
+                $"            {repositoryType} baseRepository,",
+                $"            : base(loggerFactory, mapper, baseRepository)",
             ];
 
             defaultContent = [
@@ -1606,7 +1642,7 @@ namespace CodeGenerator.BLL
 
             content = Utilities.GetConstructor(
                 _serviceModel.FirstOrDefault(x => x.Name == $"{entityUpper}Service"),
-                constructorMethod, defaultProperties, defaultParameters, defaultContent, "        #region Custom Services");
+                constructorMethod, defaultProperties, defaultParameters, defaultContent, "        #region Custom Services", true);
 
             return content;
         }
@@ -1658,7 +1694,7 @@ namespace CodeGenerator.BLL
             defaultNamespaces = [
                 $"using AutoMapper;",
                 $"using Microsoft.Extensions.Options;",
-                $"using SAMMAI.Core.Repository;",
+                $"using SAMMAI.Core.Repository.DataBase.Base.Interfaces;",
                 $"using SAMMAI.Core.Services.DAL.Base.Implementations;",
                 $"using SAMMAI.Core.Services.DAL.Interfaces;",
                 $"using SAMMAI.Core.Utility.SettingsFiles;",

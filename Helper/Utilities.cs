@@ -187,6 +187,7 @@ namespace CodeGenerator.Helper
         {
             List<string> content;
             List<string> defaultContructor;
+            int lastCommaIndex;
             string openBrackets = "        {";
             string closeBrackets = "        }";
             int lastBracket;
@@ -200,7 +201,10 @@ namespace CodeGenerator.Helper
 
             lastBracket = (defaultContructor[^1].Contains(':')) ? 2 : 1;
 
-            defaultContructor[^lastBracket] = defaultContructor[^lastBracket].Replace(',', ')');
+            lastCommaIndex = defaultContructor[^lastBracket].LastIndexOf(',');
+            if (lastCommaIndex != -1)
+                defaultContructor[^lastBracket] = defaultContructor[^lastBracket].Remove(lastCommaIndex, 1).Insert(lastCommaIndex, ")");
+
             defaultContructor.Add(openBrackets);
             defaultContructor.AddRange(defaultContent);
             defaultContructor.Add(closeBrackets);
