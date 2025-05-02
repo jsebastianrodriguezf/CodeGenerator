@@ -23,6 +23,7 @@ internal class Program
     private static string Execute(InputEnum option, string context, string rootPathBaseWorkDirectory, string rootPathSAMMAIDirectory)
     {
         string response;
+        (string, string) response2;
         string path;
         string entity;
 
@@ -151,7 +152,8 @@ internal class Program
                     iServicePath: Path.Combine(rootPathSAMMAIDirectory, "SAMMAI.Core", "SAMMAI.Core", "Services", "DAL", "Interfaces"));
 
 
-                response = controllerCoreDALGenerator.GenerateByEntity(entity, fileModel);
+                response2 = controllerCoreDALGenerator.GenerateByEntity(entity, fileModel);
+                response = response2.Item1;
 
                 break;
 
