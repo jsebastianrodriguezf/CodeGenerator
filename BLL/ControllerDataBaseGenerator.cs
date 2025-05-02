@@ -1680,7 +1680,7 @@ namespace CodeGenerator.BLL
             defaultParameters = [
                 $"            ILoggerFactory loggerFactory,",
                 $"            {entityUpper}Service {entityLower}Service,",
-                //$"            : base(loggerFactory, {entityLower}Service)",
+                $"            : base(loggerFactory, {entityLower}Service)",
             ];
 
             defaultContent = [
