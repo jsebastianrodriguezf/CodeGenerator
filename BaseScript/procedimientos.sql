@@ -111411,6 +111411,992 @@ GO
 SET ANSI_NULLS OFF
 GO
 
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[reg_gui_flujoEvento]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[reg_gui_flujoEvento]
+GO
+CREATE PROCEDURE [reg_gui_flujoEvento]
+	@p_id INT
+AS
+BEGIN
+	SELECT 	[id] AS [id],
+		[uid] AS [uid],
+		[eid] AS [eid],
+		[id_usuario_modifico] AS [id_usuario_modifico],
+		[id_usuario_creo] AS [id_usuario_creo],
+		[fechaModificacion] AS [fechaModificacion],
+		[fechaCreacion] AS [fechaCreacion],
+		[active] AS [active],
+		[flujoEvento] AS [flujoEvento],
+		[flujoEvento_codigo] AS [flujoEvento_codigo],
+		[tipoEvento] AS [tipoEvento],
+		[idObjeto] AS [idObjeto],
+		[id_flujoEventoCondicion_exitoso] AS [id_flujoEventoCondicion_exitoso],
+		[id_flujoEventoCondicion_fallido] AS [id_flujoEventoCondicion_fallido],
+		[ordenEjecucion] AS [ordenEjecucion],
+		[cmm] AS [cmm]
+	FROM [gui_flujoEvento]
+	WHERE	(id = @p_id)
+
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+IF  EXISTS (SELECT * FROM sys.views WHERE object_id = OBJECT_ID(N'[dbo].[view_gui_flujoEvento]')) DROP VIEW [dbo].[view_gui_flujoEvento]
+GO
+CREATE  VIEW [view_gui_flujoEvento] AS
+SELECT 	[gui_flujoEvento].[id] AS [id],
+		[gui_flujoEvento].[uid] AS [uid],
+		[gui_flujoEvento].[eid] AS [eid],
+		[gui_flujoEvento].[id_usuario_modifico] AS [id_usuario_modifico],
+		[gui_flujoEvento].[id_usuario_creo] AS [id_usuario_creo],
+		[gui_flujoEvento].[fechaModificacion] AS [fechaModificacion],
+		[gui_flujoEvento].[fechaCreacion] AS [fechaCreacion],
+		[gui_flujoEvento].[active] AS [active],
+		[gui_flujoEvento].[flujoEvento] AS [flujoEvento],
+		[gui_flujoEvento].[flujoEvento_codigo] AS [flujoEvento_codigo],
+		[gui_flujoEvento].[tipoEvento] AS [tipoEvento],
+		[gui_flujoEvento].[idObjeto] AS [idObjeto],
+		[gui_flujoEvento].[id_flujoEventoCondicion_exitoso] AS [id_flujoEventoCondicion_exitoso],
+[gui_flujoEventoCondicion_exitoso].[flujoEventoCondicion] as [gui_flujoEventoCondicion_exitoso_flujoEventoCondicion],
+[gui_flujoEventoCondicion_exitoso].[flujoEventoCondicion_codigo] as [gui_flujoEventoCondicion_exitoso_flujoEventoCondicion_codigo],
+[gui_flujoEventoCondicion_exitoso].[validador] as [gui_flujoEventoCondicion_exitoso_validador],
+[gui_flujoEventoCondicion_exitoso].[cmm] as [gui_flujoEventoCondicion_exitoso_cmm],
+		[gui_flujoEvento].[id_flujoEventoCondicion_fallido] AS [id_flujoEventoCondicion_fallido],
+[gui_flujoEventoCondicion_fallido].[flujoEventoCondicion] as [gui_flujoEventoCondicion_fallido_flujoEventoCondicion],
+[gui_flujoEventoCondicion_fallido].[flujoEventoCondicion_codigo] as [gui_flujoEventoCondicion_fallido_flujoEventoCondicion_codigo],
+[gui_flujoEventoCondicion_fallido].[validador] as [gui_flujoEventoCondicion_fallido_validador],
+[gui_flujoEventoCondicion_fallido].[cmm] as [gui_flujoEventoCondicion_fallido_cmm],
+		[gui_flujoEvento].[ordenEjecucion] AS [ordenEjecucion],
+		[gui_flujoEvento].[cmm] AS [cmm],
+		[empresaCodigo].[empresa] As [multiempresa]
+FROM [gui_flujoEvento]
+	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[gui_flujoEvento].[id_usuario_modifico]
+	INNER JOIN [seg_usuario] AS [seg_usuario_creo] ON [seg_usuario_creo].id=[gui_flujoEvento].[id_usuario_creo]
+	INNER JOIN [gui_flujoEventoCondicion] AS [gui_flujoEventoCondicion_exitoso] ON [gui_flujoEventoCondicion_exitoso].id=[gui_flujoEvento].[id_flujoEventoCondicion_exitoso]
+	INNER JOIN [gui_flujoEventoCondicion] AS [gui_flujoEventoCondicion_fallido] ON [gui_flujoEventoCondicion_fallido].id=[gui_flujoEvento].[id_flujoEventoCondicion_fallido]
+	INNER JOIN [gen_empresa] AS empresaCodigo ON [gui_flujoEvento].eid = [empresaCodigo].[codigo] and empresaCodigo.active=1
+WHERE [gui_flujoEvento].active=1
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gui_flujoEventosXusuario_modifico]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gui_flujoEventosXusuario_modifico]
+GO
+CREATE PROCEDURE [sel_gui_flujoEventosXusuario_modifico]
+	@p_id_usuario_modifico INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_gui_flujoEvento]
+	WHERE ([id_usuario_modifico]= @p_id_usuario_modifico)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gui_flujoEventosXusuario_creo]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gui_flujoEventosXusuario_creo]
+GO
+CREATE PROCEDURE [sel_gui_flujoEventosXusuario_creo]
+	@p_id_usuario_creo INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_gui_flujoEvento]
+	WHERE ([id_usuario_creo]= @p_id_usuario_creo)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gui_flujoEventosXflujoEventoCondicion_exitoso]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gui_flujoEventosXflujoEventoCondicion_exitoso]
+GO
+CREATE PROCEDURE [sel_gui_flujoEventosXflujoEventoCondicion_exitoso]
+	@p_id_flujoEventoCondicion_exitoso INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_gui_flujoEvento]
+	WHERE ([id_flujoEventoCondicion_exitoso]= @p_id_flujoEventoCondicion_exitoso)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gui_flujoEventosXflujoEventoCondicion_fallido]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gui_flujoEventosXflujoEventoCondicion_fallido]
+GO
+CREATE PROCEDURE [sel_gui_flujoEventosXflujoEventoCondicion_fallido]
+	@p_id_flujoEventoCondicion_fallido INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_gui_flujoEvento]
+	WHERE ([id_flujoEventoCondicion_fallido]= @p_id_flujoEventoCondicion_fallido)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gui_flujoEventos]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gui_flujoEventos]
+GO
+CREATE PROCEDURE [sel_gui_flujoEventos]
+	
+	@p_filtro as varchar (8000) = '1=1',
+	@p_orden as varchar (8000) = 'id',
+	@p_campos as varchar (8000) = '*' AS
+BEGIN
+exec ('SELECT '+ @p_campos +
+' FROM [view_gui_flujoEvento]
+WHERE (' + @p_filtro + ') ORDER BY ' + @p_orden)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[lis_gui_flujoEventos]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[lis_gui_flujoEventos]
+GO
+CREATE PROCEDURE [lis_gui_flujoEventos]
+	AS
+BEGIN
+	SELECT id AS id,
+[flujoEvento] AS [gui_flujoEvento]
+	FROM [gui_flujoEvento]
+	WHERE active = 1
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[upd_gui_flujoEvento]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[upd_gui_flujoEvento]
+GO
+CREATE PROCEDURE [upd_gui_flujoEvento]
+	@p_id int = null,
+		@p_uid varchar(500) = null,
+		@p_eid varchar(50) = null,
+		@p_id_usuario_modifico int = null,
+		@p_id_usuario_creo int = null,
+		@p_fechaCreacion smalldatetime = null,
+		@p_flujoEvento varchar(300) = null,
+		@p_flujoEvento_codigo varchar(100) = null,
+		@p_tipoEvento int = null,
+		@p_idObjeto int = null,
+		@p_id_flujoEventoCondicion_exitoso int = null,
+		@p_id_flujoEventoCondicion_fallido int = null,
+		@p_ordenEjecucion int = null,
+		@p_cmm varchar(300) = null
+AS
+BEGIN
+		UPDATE [gui_flujoEvento]
+		SET	[uid] = isnull(@p_uid,[uid]),
+			[eid] = isnull(@p_eid,[eid]),
+			[id_usuario_modifico] = isnull(@p_id_usuario_modifico,[id_usuario_modifico]),
+			[id_usuario_creo] = isnull(@p_id_usuario_creo,[id_usuario_creo]),
+			[fechaModificacion] = GETDATE(),
+			[flujoEvento] = isnull(@p_flujoEvento,[flujoEvento]),
+			[flujoEvento_codigo] = isnull(@p_flujoEvento_codigo,[flujoEvento_codigo]),
+			[tipoEvento] = isnull(@p_tipoEvento,[tipoEvento]),
+			[idObjeto] = isnull(@p_idObjeto,[idObjeto]),
+			[id_flujoEventoCondicion_exitoso] = isnull(@p_id_flujoEventoCondicion_exitoso,[id_flujoEventoCondicion_exitoso]),
+			[id_flujoEventoCondicion_fallido] = isnull(@p_id_flujoEventoCondicion_fallido,[id_flujoEventoCondicion_fallido]),
+			[ordenEjecucion] = isnull(@p_ordenEjecucion,[ordenEjecucion]),
+			[cmm] = isnull(@p_cmm,[cmm])
+		WHERE (id = @p_id)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[ins_gui_flujoEvento]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[ins_gui_flujoEvento]
+GO
+CREATE PROCEDURE [ins_gui_flujoEvento]
+	@p_uid varchar(500),
+		@p_eid varchar(50),
+		@p_id_usuario_modifico int,
+		@p_id_usuario_creo int,
+		@p_flujoEvento varchar(300),
+		@p_flujoEvento_codigo varchar(100),
+		@p_tipoEvento int,
+		@p_idObjeto int,
+		@p_id_flujoEventoCondicion_exitoso int,
+		@p_id_flujoEventoCondicion_fallido int,
+		@p_ordenEjecucion int,
+		@p_cmm varchar(300)
+AS
+BEGIN
+	DECLARE @v_id int
+		INSERT INTO [gui_flujoEvento]
+			([uid],
+			[eid],
+			[id_usuario_modifico],
+			[id_usuario_creo],
+			[fechaModificacion],
+			[fechaCreacion],
+			[flujoEvento],
+			[flujoEvento_codigo],
+			[tipoEvento],
+			[idObjeto],
+			[id_flujoEventoCondicion_exitoso],
+			[id_flujoEventoCondicion_fallido],
+			[ordenEjecucion],
+			[cmm])
+		VALUES(	@p_uid,
+			@p_eid,
+			@p_id_usuario_modifico,
+			@p_id_usuario_creo,
+			GETDATE(),
+			GETDATE(),
+			@p_flujoEvento,
+			@p_flujoEvento_codigo,
+			@p_tipoEvento,
+			@p_idObjeto,
+			@p_id_flujoEventoCondicion_exitoso,
+			@p_id_flujoEventoCondicion_fallido,
+			@p_ordenEjecucion,
+			@p_cmm)
+		SET @v_id = scope_identity()
+UPDATE [gui_flujoEvento] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
+SELECT @v_id as id
+RETURN @v_id
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[act_gui_flujoEvento]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[act_gui_flujoEvento]
+GO
+CREATE PROCEDURE [act_gui_flujoEvento]
+	@p_active BIT,
+	@p_id INT,
+@p_id_usuario_modifico int = null
+AS
+BEGIN
+	UPDATE [gui_flujoEvento]
+	SET active=@p_active,
+	[id_usuario_modifico] = isnull(@p_id_usuario_modifico,[id_usuario_modifico]),
+	[fechaModificacion] = GETDATE()
+	WHERE	(id = @p_id)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[reg_gui_flujoEvento_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[reg_gui_flujoEvento_m]
+GO
+CREATE PROCEDURE [reg_gui_flujoEvento_m]
+	@p_id INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT 	[id] AS [id],
+		[uid] AS [uid],
+		[eid] AS [eid],
+		[id_usuario_modifico] AS [id_usuario_modifico],
+		[id_usuario_creo] AS [id_usuario_creo],
+		[fechaModificacion] AS [fechaModificacion],
+		[fechaCreacion] AS [fechaCreacion],
+		[active] AS [active],
+		[flujoEvento] AS [flujoEvento],
+		[flujoEvento_codigo] AS [flujoEvento_codigo],
+		[tipoEvento] AS [tipoEvento],
+		[idObjeto] AS [idObjeto],
+		[id_flujoEventoCondicion_exitoso] AS [id_flujoEventoCondicion_exitoso],
+		[id_flujoEventoCondicion_fallido] AS [id_flujoEventoCondicion_fallido],
+		[ordenEjecucion] AS [ordenEjecucion],
+		[cmm] AS [cmm]
+	FROM [gui_flujoEvento]
+	WHERE	(id = @p_id)
+	AND	(eid LIKE @p_eid+'%')
+
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gui_flujoEventosXusuario_modifico_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gui_flujoEventosXusuario_modifico_m]
+GO
+CREATE PROCEDURE [sel_gui_flujoEventosXusuario_modifico_m]
+	@p_id_usuario_modifico INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_gui_flujoEvento]
+	WHERE ([id_usuario_modifico]= @p_id_usuario_modifico)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gui_flujoEventosXusuario_creo_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gui_flujoEventosXusuario_creo_m]
+GO
+CREATE PROCEDURE [sel_gui_flujoEventosXusuario_creo_m]
+	@p_id_usuario_creo INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_gui_flujoEvento]
+	WHERE ([id_usuario_creo]= @p_id_usuario_creo)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gui_flujoEventosXflujoEventoCondicion_exitoso_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gui_flujoEventosXflujoEventoCondicion_exitoso_m]
+GO
+CREATE PROCEDURE [sel_gui_flujoEventosXflujoEventoCondicion_exitoso_m]
+	@p_id_flujoEventoCondicion_exitoso INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_gui_flujoEvento]
+	WHERE ([id_flujoEventoCondicion_exitoso]= @p_id_flujoEventoCondicion_exitoso)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gui_flujoEventosXflujoEventoCondicion_fallido_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gui_flujoEventosXflujoEventoCondicion_fallido_m]
+GO
+CREATE PROCEDURE [sel_gui_flujoEventosXflujoEventoCondicion_fallido_m]
+	@p_id_flujoEventoCondicion_fallido INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_gui_flujoEvento]
+	WHERE ([id_flujoEventoCondicion_fallido]= @p_id_flujoEventoCondicion_fallido)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gui_flujoEventos_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gui_flujoEventos_m]
+GO
+CREATE PROCEDURE [sel_gui_flujoEventos_m]
+	@p_eid as varchar (50)='',
+	@p_filtro as varchar (8000) = '1=1',
+	@p_orden as varchar (8000) = 'id',
+	@p_campos as varchar (8000) = '*' AS
+BEGIN
+exec ('SELECT '+ @p_campos +
+' FROM [view_gui_flujoEvento]
+WHERE  (eid like '''+@p_eid+'%'+''' ) AND (' + @p_filtro + ') ORDER BY ' + @p_orden)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[lis_gui_flujoEventos_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[lis_gui_flujoEventos_m]
+GO
+CREATE PROCEDURE [lis_gui_flujoEventos_m]
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT id AS id,
+[flujoEvento] AS [gui_flujoEvento]
+	FROM [gui_flujoEvento]
+	WHERE active = 1
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[aud_gui_flujoEvento]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[aud_gui_flujoEvento]
+GO
+CREATE PROCEDURE [aud_gui_flujoEvento]
+	@p_filtro as varchar (8000) = '1=1'
+AS
+BEGIN
+exec(	'SELECT [gui_flujoEvento].id as id_tabla,
+	[gui_flujoEvento].id_usuario_modifico as id_usuario_modifico,
+	[gui_flujoEvento].id_usuario_creo as id_usuario_creo,
+	[gui_flujoEvento].fechaModificacion as fechaModificacion,
+	[gui_flujoEvento].fechaCreacion as fechaCreacion,
+	[gui_flujoEvento].active as active,
+	[gui_flujoEvento].[flujoEvento] as campoPrincipal,
+	[seg_usuario_creo].usuario as usuarioCreo,
+	[seg_usuario_modifico].usuario as usuarioModifico
+
+	FROM [gui_flujoEvento]
+	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[gui_flujoEvento].[id_usuario_modifico]
+	INNER JOIN [seg_usuario] AS [seg_usuario_creo] ON [seg_usuario_creo].id=[gui_flujoEvento].[id_usuario_creo]
+	where ' + @p_filtro)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+print 'gui_flujoEvento'
+--------------------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[reg_gui_flujoEventoCondicion]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[reg_gui_flujoEventoCondicion]
+GO
+CREATE PROCEDURE [reg_gui_flujoEventoCondicion]
+	@p_id INT
+AS
+BEGIN
+	SELECT 	[id] AS [id],
+		[uid] AS [uid],
+		[eid] AS [eid],
+		[id_usuario_modifico] AS [id_usuario_modifico],
+		[id_usuario_creo] AS [id_usuario_creo],
+		[fechaModificacion] AS [fechaModificacion],
+		[fechaCreacion] AS [fechaCreacion],
+		[active] AS [active],
+		[flujoEventoCondicion] AS [flujoEventoCondicion],
+		[flujoEventoCondicion_codigo] AS [flujoEventoCondicion_codigo],
+		[validador] AS [validador],
+		[cmm] AS [cmm]
+	FROM [gui_flujoEventoCondicion]
+	WHERE	(id = @p_id)
+
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+IF  EXISTS (SELECT * FROM sys.views WHERE object_id = OBJECT_ID(N'[dbo].[view_gui_flujoEventoCondicion]')) DROP VIEW [dbo].[view_gui_flujoEventoCondicion]
+GO
+CREATE  VIEW [view_gui_flujoEventoCondicion] AS
+SELECT 	[gui_flujoEventoCondicion].[id] AS [id],
+		[gui_flujoEventoCondicion].[uid] AS [uid],
+		[gui_flujoEventoCondicion].[eid] AS [eid],
+		[gui_flujoEventoCondicion].[id_usuario_modifico] AS [id_usuario_modifico],
+		[gui_flujoEventoCondicion].[id_usuario_creo] AS [id_usuario_creo],
+		[gui_flujoEventoCondicion].[fechaModificacion] AS [fechaModificacion],
+		[gui_flujoEventoCondicion].[fechaCreacion] AS [fechaCreacion],
+		[gui_flujoEventoCondicion].[active] AS [active],
+		[gui_flujoEventoCondicion].[flujoEventoCondicion] AS [flujoEventoCondicion],
+		[gui_flujoEventoCondicion].[flujoEventoCondicion_codigo] AS [flujoEventoCondicion_codigo],
+		[gui_flujoEventoCondicion].[validador] AS [validador],
+		[gui_flujoEventoCondicion].[cmm] AS [cmm],
+		[empresaCodigo].[empresa] As [multiempresa]
+FROM [gui_flujoEventoCondicion]
+	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[gui_flujoEventoCondicion].[id_usuario_modifico]
+	INNER JOIN [seg_usuario] AS [seg_usuario_creo] ON [seg_usuario_creo].id=[gui_flujoEventoCondicion].[id_usuario_creo]
+	INNER JOIN [gen_empresa] AS empresaCodigo ON [gui_flujoEventoCondicion].eid = [empresaCodigo].[codigo] and empresaCodigo.active=1
+WHERE [gui_flujoEventoCondicion].active=1
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gui_flujoEventoCondicionesXusuario_modifico]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gui_flujoEventoCondicionesXusuario_modifico]
+GO
+CREATE PROCEDURE [sel_gui_flujoEventoCondicionesXusuario_modifico]
+	@p_id_usuario_modifico INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_gui_flujoEventoCondicion]
+	WHERE ([id_usuario_modifico]= @p_id_usuario_modifico)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gui_flujoEventoCondicionesXusuario_creo]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gui_flujoEventoCondicionesXusuario_creo]
+GO
+CREATE PROCEDURE [sel_gui_flujoEventoCondicionesXusuario_creo]
+	@p_id_usuario_creo INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_gui_flujoEventoCondicion]
+	WHERE ([id_usuario_creo]= @p_id_usuario_creo)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gui_flujoEventoCondiciones]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gui_flujoEventoCondiciones]
+GO
+CREATE PROCEDURE [sel_gui_flujoEventoCondiciones]
+	
+	@p_filtro as varchar (8000) = '1=1',
+	@p_orden as varchar (8000) = 'id',
+	@p_campos as varchar (8000) = '*' AS
+BEGIN
+exec ('SELECT '+ @p_campos +
+' FROM [view_gui_flujoEventoCondicion]
+WHERE (' + @p_filtro + ') ORDER BY ' + @p_orden)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[lis_gui_flujoEventoCondiciones]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[lis_gui_flujoEventoCondiciones]
+GO
+CREATE PROCEDURE [lis_gui_flujoEventoCondiciones]
+	AS
+BEGIN
+	SELECT id AS id,
+[flujoEventoCondicion] AS [gui_flujoEventoCondicion]
+	FROM [gui_flujoEventoCondicion]
+	WHERE active = 1
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[upd_gui_flujoEventoCondicion]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[upd_gui_flujoEventoCondicion]
+GO
+CREATE PROCEDURE [upd_gui_flujoEventoCondicion]
+	@p_id int = null,
+		@p_uid varchar(500) = null,
+		@p_eid varchar(50) = null,
+		@p_id_usuario_modifico int = null,
+		@p_id_usuario_creo int = null,
+		@p_fechaCreacion smalldatetime = null,
+		@p_flujoEventoCondicion varchar(300) = null,
+		@p_flujoEventoCondicion_codigo varchar(100) = null,
+		@p_validador varchar(200) = null,
+		@p_cmm varchar(300) = null
+AS
+BEGIN
+		UPDATE [gui_flujoEventoCondicion]
+		SET	[uid] = isnull(@p_uid,[uid]),
+			[eid] = isnull(@p_eid,[eid]),
+			[id_usuario_modifico] = isnull(@p_id_usuario_modifico,[id_usuario_modifico]),
+			[id_usuario_creo] = isnull(@p_id_usuario_creo,[id_usuario_creo]),
+			[fechaModificacion] = GETDATE(),
+			[flujoEventoCondicion] = isnull(@p_flujoEventoCondicion,[flujoEventoCondicion]),
+			[flujoEventoCondicion_codigo] = isnull(@p_flujoEventoCondicion_codigo,[flujoEventoCondicion_codigo]),
+			[validador] = isnull(@p_validador,[validador]),
+			[cmm] = isnull(@p_cmm,[cmm])
+		WHERE (id = @p_id)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[ins_gui_flujoEventoCondicion]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[ins_gui_flujoEventoCondicion]
+GO
+CREATE PROCEDURE [ins_gui_flujoEventoCondicion]
+	@p_uid varchar(500),
+		@p_eid varchar(50),
+		@p_id_usuario_modifico int,
+		@p_id_usuario_creo int,
+		@p_flujoEventoCondicion varchar(300),
+		@p_flujoEventoCondicion_codigo varchar(100),
+		@p_validador varchar(200),
+		@p_cmm varchar(300)
+AS
+BEGIN
+	DECLARE @v_id int
+		INSERT INTO [gui_flujoEventoCondicion]
+			([uid],
+			[eid],
+			[id_usuario_modifico],
+			[id_usuario_creo],
+			[fechaModificacion],
+			[fechaCreacion],
+			[flujoEventoCondicion],
+			[flujoEventoCondicion_codigo],
+			[validador],
+			[cmm])
+		VALUES(	@p_uid,
+			@p_eid,
+			@p_id_usuario_modifico,
+			@p_id_usuario_creo,
+			GETDATE(),
+			GETDATE(),
+			@p_flujoEventoCondicion,
+			@p_flujoEventoCondicion_codigo,
+			@p_validador,
+			@p_cmm)
+		SET @v_id = scope_identity()
+UPDATE [gui_flujoEventoCondicion] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
+SELECT @v_id as id
+RETURN @v_id
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[act_gui_flujoEventoCondicion]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[act_gui_flujoEventoCondicion]
+GO
+CREATE PROCEDURE [act_gui_flujoEventoCondicion]
+	@p_active BIT,
+	@p_id INT,
+@p_id_usuario_modifico int = null
+AS
+BEGIN
+	UPDATE [gui_flujoEventoCondicion]
+	SET active=@p_active,
+	[id_usuario_modifico] = isnull(@p_id_usuario_modifico,[id_usuario_modifico]),
+	[fechaModificacion] = GETDATE()
+	WHERE	(id = @p_id)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[reg_gui_flujoEventoCondicion_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[reg_gui_flujoEventoCondicion_m]
+GO
+CREATE PROCEDURE [reg_gui_flujoEventoCondicion_m]
+	@p_id INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT 	[id] AS [id],
+		[uid] AS [uid],
+		[eid] AS [eid],
+		[id_usuario_modifico] AS [id_usuario_modifico],
+		[id_usuario_creo] AS [id_usuario_creo],
+		[fechaModificacion] AS [fechaModificacion],
+		[fechaCreacion] AS [fechaCreacion],
+		[active] AS [active],
+		[flujoEventoCondicion] AS [flujoEventoCondicion],
+		[flujoEventoCondicion_codigo] AS [flujoEventoCondicion_codigo],
+		[validador] AS [validador],
+		[cmm] AS [cmm]
+	FROM [gui_flujoEventoCondicion]
+	WHERE	(id = @p_id)
+	AND	(eid LIKE @p_eid+'%')
+
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gui_flujoEventoCondicionesXusuario_modifico_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gui_flujoEventoCondicionesXusuario_modifico_m]
+GO
+CREATE PROCEDURE [sel_gui_flujoEventoCondicionesXusuario_modifico_m]
+	@p_id_usuario_modifico INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_gui_flujoEventoCondicion]
+	WHERE ([id_usuario_modifico]= @p_id_usuario_modifico)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gui_flujoEventoCondicionesXusuario_creo_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gui_flujoEventoCondicionesXusuario_creo_m]
+GO
+CREATE PROCEDURE [sel_gui_flujoEventoCondicionesXusuario_creo_m]
+	@p_id_usuario_creo INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_gui_flujoEventoCondicion]
+	WHERE ([id_usuario_creo]= @p_id_usuario_creo)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gui_flujoEventoCondiciones_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gui_flujoEventoCondiciones_m]
+GO
+CREATE PROCEDURE [sel_gui_flujoEventoCondiciones_m]
+	@p_eid as varchar (50)='',
+	@p_filtro as varchar (8000) = '1=1',
+	@p_orden as varchar (8000) = 'id',
+	@p_campos as varchar (8000) = '*' AS
+BEGIN
+exec ('SELECT '+ @p_campos +
+' FROM [view_gui_flujoEventoCondicion]
+WHERE  (eid like '''+@p_eid+'%'+''' ) AND (' + @p_filtro + ') ORDER BY ' + @p_orden)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[lis_gui_flujoEventoCondiciones_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[lis_gui_flujoEventoCondiciones_m]
+GO
+CREATE PROCEDURE [lis_gui_flujoEventoCondiciones_m]
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT id AS id,
+[flujoEventoCondicion] AS [gui_flujoEventoCondicion]
+	FROM [gui_flujoEventoCondicion]
+	WHERE active = 1
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[aud_gui_flujoEventoCondicion]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[aud_gui_flujoEventoCondicion]
+GO
+CREATE PROCEDURE [aud_gui_flujoEventoCondicion]
+	@p_filtro as varchar (8000) = '1=1'
+AS
+BEGIN
+exec(	'SELECT [gui_flujoEventoCondicion].id as id_tabla,
+	[gui_flujoEventoCondicion].id_usuario_modifico as id_usuario_modifico,
+	[gui_flujoEventoCondicion].id_usuario_creo as id_usuario_creo,
+	[gui_flujoEventoCondicion].fechaModificacion as fechaModificacion,
+	[gui_flujoEventoCondicion].fechaCreacion as fechaCreacion,
+	[gui_flujoEventoCondicion].active as active,
+	[gui_flujoEventoCondicion].[flujoEventoCondicion] as campoPrincipal,
+	[seg_usuario_creo].usuario as usuarioCreo,
+	[seg_usuario_modifico].usuario as usuarioModifico
+
+	FROM [gui_flujoEventoCondicion]
+	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[gui_flujoEventoCondicion].[id_usuario_modifico]
+	INNER JOIN [seg_usuario] AS [seg_usuario_creo] ON [seg_usuario_creo].id=[gui_flujoEventoCondicion].[id_usuario_creo]
+	where ' + @p_filtro)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+print 'gui_flujoEventoCondicion'
+--------------------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[reg_gui_funcionalidad]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[reg_gui_funcionalidad]
 GO
 CREATE PROCEDURE [reg_gui_funcionalidad]
@@ -112194,6 +113180,618 @@ SET ANSI_NULLS ON
 GO
 ----------------------
 print 'gui_funcionalidad'
+--------------------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[reg_gui_funcionalidadFlujoEvento]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[reg_gui_funcionalidadFlujoEvento]
+GO
+CREATE PROCEDURE [reg_gui_funcionalidadFlujoEvento]
+	@p_id INT
+AS
+BEGIN
+	SELECT 	[id] AS [id],
+		[uid] AS [uid],
+		[eid] AS [eid],
+		[id_usuario_modifico] AS [id_usuario_modifico],
+		[id_usuario_creo] AS [id_usuario_creo],
+		[fechaModificacion] AS [fechaModificacion],
+		[fechaCreacion] AS [fechaCreacion],
+		[active] AS [active],
+		[funcionalidadFlujoEvento] AS [funcionalidadFlujoEvento],
+		[funcionalidadFlujoEvento_codigo] AS [funcionalidadFlujoEvento_codigo],
+		[id_funcionalidad] AS [id_funcionalidad],
+		[tipoAccion] AS [tipoAccion],
+		[validador] AS [validador],
+		[id_flujoEventoCondicion_exitoso] AS [id_flujoEventoCondicion_exitoso],
+		[id_flujoEventoCondicion_fallido] AS [id_flujoEventoCondicion_fallido],
+		[cmm] AS [cmm]
+	FROM [gui_funcionalidadFlujoEvento]
+	WHERE	(id = @p_id)
+
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+IF  EXISTS (SELECT * FROM sys.views WHERE object_id = OBJECT_ID(N'[dbo].[view_gui_funcionalidadFlujoEvento]')) DROP VIEW [dbo].[view_gui_funcionalidadFlujoEvento]
+GO
+CREATE  VIEW [view_gui_funcionalidadFlujoEvento] AS
+SELECT 	[gui_funcionalidadFlujoEvento].[id] AS [id],
+		[gui_funcionalidadFlujoEvento].[uid] AS [uid],
+		[gui_funcionalidadFlujoEvento].[eid] AS [eid],
+		[gui_funcionalidadFlujoEvento].[id_usuario_modifico] AS [id_usuario_modifico],
+		[gui_funcionalidadFlujoEvento].[id_usuario_creo] AS [id_usuario_creo],
+		[gui_funcionalidadFlujoEvento].[fechaModificacion] AS [fechaModificacion],
+		[gui_funcionalidadFlujoEvento].[fechaCreacion] AS [fechaCreacion],
+		[gui_funcionalidadFlujoEvento].[active] AS [active],
+		[gui_funcionalidadFlujoEvento].[funcionalidadFlujoEvento] AS [funcionalidadFlujoEvento],
+		[gui_funcionalidadFlujoEvento].[funcionalidadFlujoEvento_codigo] AS [funcionalidadFlujoEvento_codigo],
+		[gui_funcionalidadFlujoEvento].[id_funcionalidad] AS [id_funcionalidad],
+[gui_funcionalidad].[funcionalidad] as [gui_funcionalidad_funcionalidad],
+[gui_funcionalidad].[funcionalidad_codigo] as [gui_funcionalidad_funcionalidad_codigo],
+[gui_funcionalidad].[orden] as [gui_funcionalidad_orden],
+[gui_funcionalidad].[id_funcionalidad] as [gui_funcionalidad_id_funcionalidad],
+[gui_funcionalidad].[id_tipoFuncionalidad] as [gui_funcionalidad_id_tipoFuncionalidad],
+[gui_funcionalidad].[id_aplicacion] as [gui_funcionalidad_id_aplicacion],
+[gui_funcionalidad].[id_formulario] as [gui_funcionalidad_id_formulario],
+[gui_funcionalidad].[cmm] as [gui_funcionalidad_cmm],
+[gui_funcionalidad].[icono] as [gui_funcionalidad_icono],
+		[gui_funcionalidadFlujoEvento].[tipoAccion] AS [tipoAccion],
+		[gui_funcionalidadFlujoEvento].[validador] AS [validador],
+		[gui_funcionalidadFlujoEvento].[id_flujoEventoCondicion_exitoso] AS [id_flujoEventoCondicion_exitoso],
+[gui_flujoEventoCondicion_exitoso].[flujoEventoCondicion] as [gui_flujoEventoCondicion_exitoso_flujoEventoCondicion],
+[gui_flujoEventoCondicion_exitoso].[flujoEventoCondicion_codigo] as [gui_flujoEventoCondicion_exitoso_flujoEventoCondicion_codigo],
+[gui_flujoEventoCondicion_exitoso].[validador] as [gui_flujoEventoCondicion_exitoso_validador],
+[gui_flujoEventoCondicion_exitoso].[cmm] as [gui_flujoEventoCondicion_exitoso_cmm],
+		[gui_funcionalidadFlujoEvento].[id_flujoEventoCondicion_fallido] AS [id_flujoEventoCondicion_fallido],
+[gui_flujoEventoCondicion_fallido].[flujoEventoCondicion] as [gui_flujoEventoCondicion_fallido_flujoEventoCondicion],
+[gui_flujoEventoCondicion_fallido].[flujoEventoCondicion_codigo] as [gui_flujoEventoCondicion_fallido_flujoEventoCondicion_codigo],
+[gui_flujoEventoCondicion_fallido].[validador] as [gui_flujoEventoCondicion_fallido_validador],
+[gui_flujoEventoCondicion_fallido].[cmm] as [gui_flujoEventoCondicion_fallido_cmm],
+		[gui_funcionalidadFlujoEvento].[cmm] AS [cmm],
+		[empresaCodigo].[empresa] As [multiempresa]
+FROM [gui_funcionalidadFlujoEvento]
+	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[gui_funcionalidadFlujoEvento].[id_usuario_modifico]
+	INNER JOIN [seg_usuario] AS [seg_usuario_creo] ON [seg_usuario_creo].id=[gui_funcionalidadFlujoEvento].[id_usuario_creo]
+	INNER JOIN [gui_funcionalidad] ON [gui_funcionalidad].id=[gui_funcionalidadFlujoEvento].[id_funcionalidad]
+	INNER JOIN [gui_flujoEventoCondicion] AS [gui_flujoEventoCondicion_exitoso] ON [gui_flujoEventoCondicion_exitoso].id=[gui_funcionalidadFlujoEvento].[id_flujoEventoCondicion_exitoso]
+	INNER JOIN [gui_flujoEventoCondicion] AS [gui_flujoEventoCondicion_fallido] ON [gui_flujoEventoCondicion_fallido].id=[gui_funcionalidadFlujoEvento].[id_flujoEventoCondicion_fallido]
+	INNER JOIN [gen_empresa] AS empresaCodigo ON [gui_funcionalidadFlujoEvento].eid = [empresaCodigo].[codigo] and empresaCodigo.active=1
+WHERE [gui_funcionalidadFlujoEvento].active=1
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gui_funcionalidadFlujoEventosXusuario_modifico]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gui_funcionalidadFlujoEventosXusuario_modifico]
+GO
+CREATE PROCEDURE [sel_gui_funcionalidadFlujoEventosXusuario_modifico]
+	@p_id_usuario_modifico INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_gui_funcionalidadFlujoEvento]
+	WHERE ([id_usuario_modifico]= @p_id_usuario_modifico)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gui_funcionalidadFlujoEventosXusuario_creo]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gui_funcionalidadFlujoEventosXusuario_creo]
+GO
+CREATE PROCEDURE [sel_gui_funcionalidadFlujoEventosXusuario_creo]
+	@p_id_usuario_creo INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_gui_funcionalidadFlujoEvento]
+	WHERE ([id_usuario_creo]= @p_id_usuario_creo)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gui_funcionalidadFlujoEventosXfuncionalidad]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gui_funcionalidadFlujoEventosXfuncionalidad]
+GO
+CREATE PROCEDURE [sel_gui_funcionalidadFlujoEventosXfuncionalidad]
+	@p_id_funcionalidad INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_gui_funcionalidadFlujoEvento]
+	WHERE ([id_funcionalidad]= @p_id_funcionalidad)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gui_funcionalidadFlujoEventosXflujoEventoCondicion_exitoso]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gui_funcionalidadFlujoEventosXflujoEventoCondicion_exitoso]
+GO
+CREATE PROCEDURE [sel_gui_funcionalidadFlujoEventosXflujoEventoCondicion_exitoso]
+	@p_id_flujoEventoCondicion_exitoso INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_gui_funcionalidadFlujoEvento]
+	WHERE ([id_flujoEventoCondicion_exitoso]= @p_id_flujoEventoCondicion_exitoso)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gui_funcionalidadFlujoEventosXflujoEventoCondicion_fallido]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gui_funcionalidadFlujoEventosXflujoEventoCondicion_fallido]
+GO
+CREATE PROCEDURE [sel_gui_funcionalidadFlujoEventosXflujoEventoCondicion_fallido]
+	@p_id_flujoEventoCondicion_fallido INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_gui_funcionalidadFlujoEvento]
+	WHERE ([id_flujoEventoCondicion_fallido]= @p_id_flujoEventoCondicion_fallido)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gui_funcionalidadFlujoEventos]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gui_funcionalidadFlujoEventos]
+GO
+CREATE PROCEDURE [sel_gui_funcionalidadFlujoEventos]
+	
+	@p_filtro as varchar (8000) = '1=1',
+	@p_orden as varchar (8000) = 'id',
+	@p_campos as varchar (8000) = '*' AS
+BEGIN
+exec ('SELECT '+ @p_campos +
+' FROM [view_gui_funcionalidadFlujoEvento]
+WHERE (' + @p_filtro + ') ORDER BY ' + @p_orden)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[lis_gui_funcionalidadFlujoEventos]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[lis_gui_funcionalidadFlujoEventos]
+GO
+CREATE PROCEDURE [lis_gui_funcionalidadFlujoEventos]
+	AS
+BEGIN
+	SELECT id AS id,
+[funcionalidadFlujoEvento] AS [gui_funcionalidadFlujoEvento]
+	FROM [gui_funcionalidadFlujoEvento]
+	WHERE active = 1
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[upd_gui_funcionalidadFlujoEvento]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[upd_gui_funcionalidadFlujoEvento]
+GO
+CREATE PROCEDURE [upd_gui_funcionalidadFlujoEvento]
+	@p_id int = null,
+		@p_uid varchar(500) = null,
+		@p_eid varchar(50) = null,
+		@p_id_usuario_modifico int = null,
+		@p_id_usuario_creo int = null,
+		@p_fechaCreacion smalldatetime = null,
+		@p_funcionalidadFlujoEvento varchar(300) = null,
+		@p_funcionalidadFlujoEvento_codigo varchar(100) = null,
+		@p_id_funcionalidad int = null,
+		@p_tipoAccion int = null,
+		@p_validador varchar(200) = null,
+		@p_id_flujoEventoCondicion_exitoso int = null,
+		@p_id_flujoEventoCondicion_fallido int = null,
+		@p_cmm varchar(300) = null
+AS
+BEGIN
+		UPDATE [gui_funcionalidadFlujoEvento]
+		SET	[uid] = isnull(@p_uid,[uid]),
+			[eid] = isnull(@p_eid,[eid]),
+			[id_usuario_modifico] = isnull(@p_id_usuario_modifico,[id_usuario_modifico]),
+			[id_usuario_creo] = isnull(@p_id_usuario_creo,[id_usuario_creo]),
+			[fechaModificacion] = GETDATE(),
+			[funcionalidadFlujoEvento] = isnull(@p_funcionalidadFlujoEvento,[funcionalidadFlujoEvento]),
+			[funcionalidadFlujoEvento_codigo] = isnull(@p_funcionalidadFlujoEvento_codigo,[funcionalidadFlujoEvento_codigo]),
+			[id_funcionalidad] = isnull(@p_id_funcionalidad,[id_funcionalidad]),
+			[tipoAccion] = isnull(@p_tipoAccion,[tipoAccion]),
+			[validador] = isnull(@p_validador,[validador]),
+			[id_flujoEventoCondicion_exitoso] = isnull(@p_id_flujoEventoCondicion_exitoso,[id_flujoEventoCondicion_exitoso]),
+			[id_flujoEventoCondicion_fallido] = isnull(@p_id_flujoEventoCondicion_fallido,[id_flujoEventoCondicion_fallido]),
+			[cmm] = isnull(@p_cmm,[cmm])
+		WHERE (id = @p_id)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[ins_gui_funcionalidadFlujoEvento]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[ins_gui_funcionalidadFlujoEvento]
+GO
+CREATE PROCEDURE [ins_gui_funcionalidadFlujoEvento]
+	@p_uid varchar(500),
+		@p_eid varchar(50),
+		@p_id_usuario_modifico int,
+		@p_id_usuario_creo int,
+		@p_funcionalidadFlujoEvento varchar(300),
+		@p_funcionalidadFlujoEvento_codigo varchar(100),
+		@p_id_funcionalidad int,
+		@p_tipoAccion int,
+		@p_validador varchar(200),
+		@p_id_flujoEventoCondicion_exitoso int,
+		@p_id_flujoEventoCondicion_fallido int,
+		@p_cmm varchar(300)
+AS
+BEGIN
+	DECLARE @v_id int
+		INSERT INTO [gui_funcionalidadFlujoEvento]
+			([uid],
+			[eid],
+			[id_usuario_modifico],
+			[id_usuario_creo],
+			[fechaModificacion],
+			[fechaCreacion],
+			[funcionalidadFlujoEvento],
+			[funcionalidadFlujoEvento_codigo],
+			[id_funcionalidad],
+			[tipoAccion],
+			[validador],
+			[id_flujoEventoCondicion_exitoso],
+			[id_flujoEventoCondicion_fallido],
+			[cmm])
+		VALUES(	@p_uid,
+			@p_eid,
+			@p_id_usuario_modifico,
+			@p_id_usuario_creo,
+			GETDATE(),
+			GETDATE(),
+			@p_funcionalidadFlujoEvento,
+			@p_funcionalidadFlujoEvento_codigo,
+			@p_id_funcionalidad,
+			@p_tipoAccion,
+			@p_validador,
+			@p_id_flujoEventoCondicion_exitoso,
+			@p_id_flujoEventoCondicion_fallido,
+			@p_cmm)
+		SET @v_id = scope_identity()
+UPDATE [gui_funcionalidadFlujoEvento] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
+SELECT @v_id as id
+RETURN @v_id
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[act_gui_funcionalidadFlujoEvento]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[act_gui_funcionalidadFlujoEvento]
+GO
+CREATE PROCEDURE [act_gui_funcionalidadFlujoEvento]
+	@p_active BIT,
+	@p_id INT,
+@p_id_usuario_modifico int = null
+AS
+BEGIN
+	UPDATE [gui_funcionalidadFlujoEvento]
+	SET active=@p_active,
+	[id_usuario_modifico] = isnull(@p_id_usuario_modifico,[id_usuario_modifico]),
+	[fechaModificacion] = GETDATE()
+	WHERE	(id = @p_id)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[reg_gui_funcionalidadFlujoEvento_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[reg_gui_funcionalidadFlujoEvento_m]
+GO
+CREATE PROCEDURE [reg_gui_funcionalidadFlujoEvento_m]
+	@p_id INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT 	[id] AS [id],
+		[uid] AS [uid],
+		[eid] AS [eid],
+		[id_usuario_modifico] AS [id_usuario_modifico],
+		[id_usuario_creo] AS [id_usuario_creo],
+		[fechaModificacion] AS [fechaModificacion],
+		[fechaCreacion] AS [fechaCreacion],
+		[active] AS [active],
+		[funcionalidadFlujoEvento] AS [funcionalidadFlujoEvento],
+		[funcionalidadFlujoEvento_codigo] AS [funcionalidadFlujoEvento_codigo],
+		[id_funcionalidad] AS [id_funcionalidad],
+		[tipoAccion] AS [tipoAccion],
+		[validador] AS [validador],
+		[id_flujoEventoCondicion_exitoso] AS [id_flujoEventoCondicion_exitoso],
+		[id_flujoEventoCondicion_fallido] AS [id_flujoEventoCondicion_fallido],
+		[cmm] AS [cmm]
+	FROM [gui_funcionalidadFlujoEvento]
+	WHERE	(id = @p_id)
+	AND	(eid LIKE @p_eid+'%')
+
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gui_funcionalidadFlujoEventosXusuario_modifico_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gui_funcionalidadFlujoEventosXusuario_modifico_m]
+GO
+CREATE PROCEDURE [sel_gui_funcionalidadFlujoEventosXusuario_modifico_m]
+	@p_id_usuario_modifico INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_gui_funcionalidadFlujoEvento]
+	WHERE ([id_usuario_modifico]= @p_id_usuario_modifico)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gui_funcionalidadFlujoEventosXusuario_creo_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gui_funcionalidadFlujoEventosXusuario_creo_m]
+GO
+CREATE PROCEDURE [sel_gui_funcionalidadFlujoEventosXusuario_creo_m]
+	@p_id_usuario_creo INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_gui_funcionalidadFlujoEvento]
+	WHERE ([id_usuario_creo]= @p_id_usuario_creo)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gui_funcionalidadFlujoEventosXfuncionalidad_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gui_funcionalidadFlujoEventosXfuncionalidad_m]
+GO
+CREATE PROCEDURE [sel_gui_funcionalidadFlujoEventosXfuncionalidad_m]
+	@p_id_funcionalidad INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_gui_funcionalidadFlujoEvento]
+	WHERE ([id_funcionalidad]= @p_id_funcionalidad)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gui_funcionalidadFlujoEventosXflujoEventoCondicion_exitoso_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gui_funcionalidadFlujoEventosXflujoEventoCondicion_exitoso_m]
+GO
+CREATE PROCEDURE [sel_gui_funcionalidadFlujoEventosXflujoEventoCondicion_exitoso_m]
+	@p_id_flujoEventoCondicion_exitoso INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_gui_funcionalidadFlujoEvento]
+	WHERE ([id_flujoEventoCondicion_exitoso]= @p_id_flujoEventoCondicion_exitoso)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gui_funcionalidadFlujoEventosXflujoEventoCondicion_fallido_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gui_funcionalidadFlujoEventosXflujoEventoCondicion_fallido_m]
+GO
+CREATE PROCEDURE [sel_gui_funcionalidadFlujoEventosXflujoEventoCondicion_fallido_m]
+	@p_id_flujoEventoCondicion_fallido INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_gui_funcionalidadFlujoEvento]
+	WHERE ([id_flujoEventoCondicion_fallido]= @p_id_flujoEventoCondicion_fallido)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gui_funcionalidadFlujoEventos_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gui_funcionalidadFlujoEventos_m]
+GO
+CREATE PROCEDURE [sel_gui_funcionalidadFlujoEventos_m]
+	@p_eid as varchar (50)='',
+	@p_filtro as varchar (8000) = '1=1',
+	@p_orden as varchar (8000) = 'id',
+	@p_campos as varchar (8000) = '*' AS
+BEGIN
+exec ('SELECT '+ @p_campos +
+' FROM [view_gui_funcionalidadFlujoEvento]
+WHERE  (eid like '''+@p_eid+'%'+''' ) AND (' + @p_filtro + ') ORDER BY ' + @p_orden)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[lis_gui_funcionalidadFlujoEventos_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[lis_gui_funcionalidadFlujoEventos_m]
+GO
+CREATE PROCEDURE [lis_gui_funcionalidadFlujoEventos_m]
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT id AS id,
+[funcionalidadFlujoEvento] AS [gui_funcionalidadFlujoEvento]
+	FROM [gui_funcionalidadFlujoEvento]
+	WHERE active = 1
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[aud_gui_funcionalidadFlujoEvento]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[aud_gui_funcionalidadFlujoEvento]
+GO
+CREATE PROCEDURE [aud_gui_funcionalidadFlujoEvento]
+	@p_filtro as varchar (8000) = '1=1'
+AS
+BEGIN
+exec(	'SELECT [gui_funcionalidadFlujoEvento].id as id_tabla,
+	[gui_funcionalidadFlujoEvento].id_usuario_modifico as id_usuario_modifico,
+	[gui_funcionalidadFlujoEvento].id_usuario_creo as id_usuario_creo,
+	[gui_funcionalidadFlujoEvento].fechaModificacion as fechaModificacion,
+	[gui_funcionalidadFlujoEvento].fechaCreacion as fechaCreacion,
+	[gui_funcionalidadFlujoEvento].active as active,
+	[gui_funcionalidadFlujoEvento].[funcionalidadFlujoEvento] as campoPrincipal,
+	[seg_usuario_creo].usuario as usuarioCreo,
+	[seg_usuario_modifico].usuario as usuarioModifico
+
+	FROM [gui_funcionalidadFlujoEvento]
+	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[gui_funcionalidadFlujoEvento].[id_usuario_modifico]
+	INNER JOIN [seg_usuario] AS [seg_usuario_creo] ON [seg_usuario_creo].id=[gui_funcionalidadFlujoEvento].[id_usuario_creo]
+	where ' + @p_filtro)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+print 'gui_funcionalidadFlujoEvento'
 --------------------------------
 SET QUOTED_IDENTIFIER OFF
 GO
@@ -153037,6 +154635,8 @@ SELECT 	[ter_contactoConfiguracion].[id] AS [id],
 [ter_contacto].[ter_cargoContacto_id_usuario_Creo] as [ter_contacto_ter_cargoContacto_id_usuario_Creo],
 [ter_contacto].[cmm] as [ter_contacto_cmm],
 		[ter_contactoConfiguracion].[id_tabla] AS [id_tabla],
+		[_tablas].[tabla] AS [_tablas_tabla],
+		[_tablas].[id_tabla_padre] AS [_tablas_id_tabla_padre],
 		[ter_contactoConfiguracion].[idObjeto] AS [idObjeto],
 		[ter_contactoConfiguracion].[cmm] AS [cmm],
 		[empresaCodigo].[empresa] As [multiempresa]
@@ -153044,7 +154644,7 @@ FROM [ter_contactoConfiguracion]
 	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[ter_contactoConfiguracion].[id_usuario_modifico]
 	INNER JOIN [seg_usuario] AS [seg_usuario_creo] ON [seg_usuario_creo].id=[ter_contactoConfiguracion].[id_usuario_creo]
 	INNER JOIN [ter_contacto] ON [ter_contacto].id=[ter_contactoConfiguracion].[id_contacto]
-	INNER JOIN [] ON [].id=[ter_contactoConfiguracion].[id_tabla]
+	INNER JOIN [_tablas] ON [_tablas].id=[ter_contactoConfiguracion].[id_tabla]
 	INNER JOIN [gen_empresa] AS empresaCodigo ON [ter_contactoConfiguracion].eid = [empresaCodigo].[codigo] and empresaCodigo.active=1
 WHERE [ter_contactoConfiguracion].active=1
 GO
@@ -159622,4 +161222,4 @@ SET ANSI_NULLS ON
 GO
 ----------------------
 print 'ter_tercero_usuario'
------------------------------------24/04/2025 18:00:02
+-----------------------------------5/2/2025 09:08:08
