@@ -69675,11 +69675,11 @@ BEGIN
 		[cantidad] AS [cantidad],
 		[id_documento] AS [id_documento],
 		[id_catalogo] AS [id_catalogo],
-		[id_tipoDocumento] AS [id_tipoDocumento],
 		[olvidar] AS [olvidar],
 		[id_reporteTecnico] AS [id_reporteTecnico],
 		[id_tipoPendiente] AS [id_tipoPendiente],
-		[cmm] AS [cmm]
+		[cmm] AS [cmm],
+		[id_subtipoDocumento] AS [id_subtipoDocumento]
 	FROM [doc_pendienteDocumento]
 	WHERE	(id = @p_id)
 
@@ -69755,17 +69755,6 @@ SELECT 	[doc_pendienteDocumento].[id] AS [id],
 [cat_catalogo].[descripcion] as [cat_catalogo_descripcion],
 [cat_catalogo].[bloquearCostear] as [cat_catalogo_bloquearCostear],
 [cat_catalogo].[cmm] as [cat_catalogo_cmm],
-		[doc_pendienteDocumento].[id_tipoDocumento] AS [id_tipoDocumento],
-[doc_tipoDocumento].[tipoDocumento] as [doc_tipoDocumento_tipoDocumento],
-[doc_tipoDocumento].[tipoDocumento_codigo] as [doc_tipoDocumento_tipoDocumento_codigo],
-[doc_tipoDocumento].[esSalida] as [doc_tipoDocumento_esSalida],
-[doc_tipoDocumento].[mostrarBodega] as [doc_tipoDocumento_mostrarBodega],
-[doc_tipoDocumento].[mostrarCentroCosto] as [doc_tipoDocumento_mostrarCentroCosto],
-[doc_tipoDocumento].[mostrarIncoterm] as [doc_tipoDocumento_mostrarIncoterm],
-[doc_tipoDocumento].[puedeSerMayor] as [doc_tipoDocumento_puedeSerMayor],
-[doc_tipoDocumento].[puedeSerMenor] as [doc_tipoDocumento_puedeSerMenor],
-[doc_tipoDocumento].[esUrgente] as [doc_tipoDocumento_esUrgente],
-[doc_tipoDocumento].[cmm] as [doc_tipoDocumento_cmm],
 		[doc_pendienteDocumento].[olvidar] AS [olvidar],
 		[doc_pendienteDocumento].[id_reporteTecnico] AS [id_reporteTecnico],
 [ort_reporteTecnico].[reporteTecnico] as [ort_reporteTecnico_reporteTecnico],
@@ -69785,15 +69774,35 @@ SELECT 	[doc_pendienteDocumento].[id] AS [id],
 [doc_tipoPendiente].[tipoPendiente_codigo] as [doc_tipoPendiente_tipoPendiente_codigo],
 [doc_tipoPendiente].[cmm] as [doc_tipoPendiente_cmm],
 		[doc_pendienteDocumento].[cmm] AS [cmm],
+		[doc_pendienteDocumento].[id_subtipoDocumento] AS [id_subtipoDocumento],
+[doc_subtipoDocumento].[subtipoDocumento] as [doc_subtipoDocumento_subtipoDocumento],
+[doc_subtipoDocumento].[subtipoDocumento_codigo] as [doc_subtipoDocumento_subtipoDocumento_codigo],
+[doc_subtipoDocumento].[prefijo] as [doc_subtipoDocumento_prefijo],
+[doc_subtipoDocumento].[consecutivo] as [doc_subtipoDocumento_consecutivo],
+[doc_subtipoDocumento].[id_tipoDocumento] as [doc_subtipoDocumento_id_tipoDocumento],
+[doc_subtipoDocumento].[programarPlaneadas] as [doc_subtipoDocumento_programarPlaneadas],
+[doc_subtipoDocumento].[cargarSolicitante] as [doc_subtipoDocumento_cargarSolicitante],
+[doc_subtipoDocumento].[verCentroCosto] as [doc_subtipoDocumento_verCentroCosto],
+[doc_subtipoDocumento].[verIncoterm] as [doc_subtipoDocumento_verIncoterm],
+[doc_subtipoDocumento].[valUrgente] as [doc_subtipoDocumento_valUrgente],
+[doc_subtipoDocumento].[bloquearDespacho] as [doc_subtipoDocumento_bloquearDespacho],
+[doc_subtipoDocumento].[cerrarSol] as [doc_subtipoDocumento_cerrarSol],
+[doc_subtipoDocumento].[ejecutaDevolucion] as [doc_subtipoDocumento_ejecutaDevolucion],
+[doc_subtipoDocumento].[tipoCobro] as [doc_subtipoDocumento_tipoCobro],
+[doc_subtipoDocumento].[mostrarPendienteDocumento] as [doc_subtipoDocumento_mostrarPendienteDocumento],
+[doc_subtipoDocumento].[cantidadAuxiliar] as [doc_subtipoDocumento_cantidadAuxiliar],
+[doc_subtipoDocumento].[mostrarValoresEjecutados] as [doc_subtipoDocumento_mostrarValoresEjecutados],
+[doc_subtipoDocumento].[archivosAdjuntosApp] as [doc_subtipoDocumento_archivosAdjuntosApp],
+[doc_subtipoDocumento].[cmm] as [doc_subtipoDocumento_cmm],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [doc_pendienteDocumento]
 	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[doc_pendienteDocumento].[id_usuario_modifico]
 	INNER JOIN [seg_usuario] AS [seg_usuario_creo] ON [seg_usuario_creo].id=[doc_pendienteDocumento].[id_usuario_creo]
 	INNER JOIN [doc_documento] ON [doc_documento].id=[doc_pendienteDocumento].[id_documento]
 	INNER JOIN [cat_catalogo] ON [cat_catalogo].id=[doc_pendienteDocumento].[id_catalogo]
-	INNER JOIN [doc_tipoDocumento] ON [doc_tipoDocumento].id=[doc_pendienteDocumento].[id_tipoDocumento]
 	INNER JOIN [ort_reporteTecnico] ON [ort_reporteTecnico].id=[doc_pendienteDocumento].[id_reporteTecnico]
 	INNER JOIN [doc_tipoPendiente] ON [doc_tipoPendiente].id=[doc_pendienteDocumento].[id_tipoPendiente]
+	INNER JOIN [doc_subtipoDocumento] ON [doc_subtipoDocumento].id=[doc_pendienteDocumento].[id_subtipoDocumento]
 	INNER JOIN [gen_empresa] AS empresaCodigo ON [doc_pendienteDocumento].eid = [empresaCodigo].[codigo] and empresaCodigo.active=1
 WHERE [doc_pendienteDocumento].active=1
 GO
@@ -69890,27 +69899,6 @@ GO
 SET ANSI_NULLS OFF
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_doc_pendienteDocumentosXtipoDocumento]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_doc_pendienteDocumentosXtipoDocumento]
-GO
-CREATE PROCEDURE [sel_doc_pendienteDocumentosXtipoDocumento]
-	@p_id_tipoDocumento INT
-AS
-BEGIN
-	SELECT * 
-	FROM [view_doc_pendienteDocumento]
-	WHERE ([id_tipoDocumento]= @p_id_tipoDocumento)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_doc_pendienteDocumentosXreporteTecnico]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_doc_pendienteDocumentosXreporteTecnico]
 GO
 CREATE PROCEDURE [sel_doc_pendienteDocumentosXreporteTecnico]
@@ -69941,6 +69929,27 @@ BEGIN
 	SELECT * 
 	FROM [view_doc_pendienteDocumento]
 	WHERE ([id_tipoPendiente]= @p_id_tipoPendiente)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_doc_pendienteDocumentosXsubtipoDocumento]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_doc_pendienteDocumentosXsubtipoDocumento]
+GO
+CREATE PROCEDURE [sel_doc_pendienteDocumentosXsubtipoDocumento]
+	@p_id_subtipoDocumento INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_doc_pendienteDocumento]
+	WHERE ([id_subtipoDocumento]= @p_id_subtipoDocumento)
 END
 GO
 SET QUOTED_IDENTIFIER OFF 
@@ -70012,11 +70021,11 @@ CREATE PROCEDURE [upd_doc_pendienteDocumento]
 		@p_cantidad float = null,
 		@p_id_documento int = null,
 		@p_id_catalogo int = null,
-		@p_id_tipoDocumento int = null,
 		@p_olvidar bit = null,
 		@p_id_reporteTecnico int = null,
 		@p_id_tipoPendiente int = null,
-		@p_cmm varchar(300) = null
+		@p_cmm varchar(300) = null,
+		@p_id_subtipoDocumento int = null
 AS
 BEGIN
 		UPDATE [doc_pendienteDocumento]
@@ -70030,11 +70039,11 @@ BEGIN
 			[cantidad] = isnull(@p_cantidad,[cantidad]),
 			[id_documento] = isnull(@p_id_documento,[id_documento]),
 			[id_catalogo] = isnull(@p_id_catalogo,[id_catalogo]),
-			[id_tipoDocumento] = isnull(@p_id_tipoDocumento,[id_tipoDocumento]),
 			[olvidar] = isnull(@p_olvidar,[olvidar]),
 			[id_reporteTecnico] = isnull(@p_id_reporteTecnico,[id_reporteTecnico]),
 			[id_tipoPendiente] = isnull(@p_id_tipoPendiente,[id_tipoPendiente]),
-			[cmm] = isnull(@p_cmm,[cmm])
+			[cmm] = isnull(@p_cmm,[cmm]),
+			[id_subtipoDocumento] = isnull(@p_id_subtipoDocumento,[id_subtipoDocumento])
 		WHERE (id = @p_id)
 END
 GO
@@ -70060,11 +70069,11 @@ CREATE PROCEDURE [ins_doc_pendienteDocumento]
 		@p_cantidad float,
 		@p_id_documento int,
 		@p_id_catalogo int,
-		@p_id_tipoDocumento int,
 		@p_olvidar bit,
 		@p_id_reporteTecnico int,
 		@p_id_tipoPendiente int,
-		@p_cmm varchar(300)
+		@p_cmm varchar(300),
+		@p_id_subtipoDocumento int
 AS
 BEGIN
 	DECLARE @v_id int
@@ -70080,11 +70089,11 @@ BEGIN
 			[cantidad],
 			[id_documento],
 			[id_catalogo],
-			[id_tipoDocumento],
 			[olvidar],
 			[id_reporteTecnico],
 			[id_tipoPendiente],
-			[cmm])
+			[cmm],
+			[id_subtipoDocumento])
 		VALUES(	@p_uid,
 			@p_eid,
 			@p_id_usuario_modifico,
@@ -70096,11 +70105,11 @@ BEGIN
 			@p_cantidad,
 			@p_id_documento,
 			@p_id_catalogo,
-			@p_id_tipoDocumento,
 			@p_olvidar,
 			@p_id_reporteTecnico,
 			@p_id_tipoPendiente,
-			@p_cmm)
+			@p_cmm,
+			@p_id_subtipoDocumento)
 		SET @v_id = scope_identity()
 UPDATE [doc_pendienteDocumento] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
 SELECT @v_id as id
@@ -70163,11 +70172,11 @@ BEGIN
 		[cantidad] AS [cantidad],
 		[id_documento] AS [id_documento],
 		[id_catalogo] AS [id_catalogo],
-		[id_tipoDocumento] AS [id_tipoDocumento],
 		[olvidar] AS [olvidar],
 		[id_reporteTecnico] AS [id_reporteTecnico],
 		[id_tipoPendiente] AS [id_tipoPendiente],
-		[cmm] AS [cmm]
+		[cmm] AS [cmm],
+		[id_subtipoDocumento] AS [id_subtipoDocumento]
 	FROM [doc_pendienteDocumento]
 	WHERE	(id = @p_id)
 	AND	(eid LIKE @p_eid+'%')
@@ -70276,29 +70285,6 @@ GO
 SET ANSI_NULLS OFF
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_doc_pendienteDocumentosXtipoDocumento_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_doc_pendienteDocumentosXtipoDocumento_m]
-GO
-CREATE PROCEDURE [sel_doc_pendienteDocumentosXtipoDocumento_m]
-	@p_id_tipoDocumento INT,
-	@p_eid as varchar(50) = ''
-AS
-BEGIN
-	SELECT *
-	FROM [view_doc_pendienteDocumento]
-	WHERE ([id_tipoDocumento]= @p_id_tipoDocumento)
-	AND	(eid LIKE @p_eid+'%')
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_doc_pendienteDocumentosXreporteTecnico_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_doc_pendienteDocumentosXreporteTecnico_m]
 GO
 CREATE PROCEDURE [sel_doc_pendienteDocumentosXreporteTecnico_m]
@@ -70332,6 +70318,29 @@ BEGIN
 	SELECT *
 	FROM [view_doc_pendienteDocumento]
 	WHERE ([id_tipoPendiente]= @p_id_tipoPendiente)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_doc_pendienteDocumentosXsubtipoDocumento_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_doc_pendienteDocumentosXsubtipoDocumento_m]
+GO
+CREATE PROCEDURE [sel_doc_pendienteDocumentosXsubtipoDocumento_m]
+	@p_id_subtipoDocumento INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_doc_pendienteDocumento]
+	WHERE ([id_subtipoDocumento]= @p_id_subtipoDocumento)
 	AND	(eid LIKE @p_eid+'%')
 END
 GO
@@ -70477,11 +70486,11 @@ SELECT 	[doc_pendienteDocumento_doc_itemDocumento].[id] AS [id],
 [doc_pendienteDocumento].[cantidad] as [doc_pendienteDocumento_cantidad],
 [doc_pendienteDocumento].[id_documento] as [doc_pendienteDocumento_id_documento],
 [doc_pendienteDocumento].[id_catalogo] as [doc_pendienteDocumento_id_catalogo],
-[doc_pendienteDocumento].[id_tipoDocumento] as [doc_pendienteDocumento_id_tipoDocumento],
 [doc_pendienteDocumento].[olvidar] as [doc_pendienteDocumento_olvidar],
 [doc_pendienteDocumento].[id_reporteTecnico] as [doc_pendienteDocumento_id_reporteTecnico],
 [doc_pendienteDocumento].[id_tipoPendiente] as [doc_pendienteDocumento_id_tipoPendiente],
 [doc_pendienteDocumento].[cmm] as [doc_pendienteDocumento_cmm],
+[doc_pendienteDocumento].[id_subtipoDocumento] as [doc_pendienteDocumento_id_subtipoDocumento],
 		[doc_pendienteDocumento_doc_itemDocumento].[id_itemDocumento] AS [id_itemDocumento],
 [doc_itemDocumento].[itemDocumento] as [doc_itemDocumento_itemDocumento],
 [doc_itemDocumento].[itemDocumento_codigo] as [doc_itemDocumento_itemDocumento_codigo],
@@ -161222,4 +161231,4 @@ SET ANSI_NULLS ON
 GO
 ----------------------
 print 'ter_tercero_usuario'
------------------------------------5/2/2025 09:08:08
+-----------------------------------5/15/2025 09:20:17
