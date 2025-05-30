@@ -95438,7 +95438,8 @@ BEGIN
 		[id_seccionFormulario] AS [id_seccionFormulario],
 		[cmm] AS [cmm],
 		[mostrarEnGrilla] AS [mostrarEnGrilla],
-		[condicion] AS [condicion]
+		[condicion] AS [condicion],
+		[valorDefecto] AS [valorDefecto]
 	FROM [gen_detalleFormulario]
 	WHERE	(id = @p_id)
 
@@ -95497,6 +95498,7 @@ SELECT 	[gen_detalleFormulario].[id] AS [id],
 [gen_formulario].[cmm] as [gen_formulario_cmm],
 [gen_formulario].[id_formulario] as [gen_formulario_id_formulario],
 [gen_formulario].[condicion] as [gen_formulario_condicion],
+[gen_formulario].[valorDefecto] as [gen_formulario_valorDefecto],
 		[gen_detalleFormulario].[id_seccionFormulario] AS [id_seccionFormulario],
 [gen_seccionFormulario].[seccionFormulario] as [gen_seccionFormulario_seccionFormulario],
 [gen_seccionFormulario].[seccionFormulario_codigo] as [gen_seccionFormulario_seccionFormulario_codigo],
@@ -95505,6 +95507,7 @@ SELECT 	[gen_detalleFormulario].[id] AS [id],
 		[gen_detalleFormulario].[cmm] AS [cmm],
 		[gen_detalleFormulario].[mostrarEnGrilla] AS [mostrarEnGrilla],
 		[gen_detalleFormulario].[condicion] AS [condicion],
+		[gen_detalleFormulario].[valorDefecto] AS [valorDefecto],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [gen_detalleFormulario]
 	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[gen_detalleFormulario].[id_usuario_modifico]
@@ -95740,7 +95743,8 @@ CREATE PROCEDURE [upd_gen_detalleFormulario]
 		@p_id_seccionFormulario int = null,
 		@p_cmm varchar(300) = null,
 		@p_mostrarEnGrilla bit = null,
-		@p_condicion varchar(300) = null
+		@p_condicion varchar(300) = null,
+		@p_valorDefecto varchar(300) = null
 AS
 BEGIN
 		UPDATE [gen_detalleFormulario]
@@ -95762,7 +95766,8 @@ BEGIN
 			[id_seccionFormulario] = isnull(@p_id_seccionFormulario,[id_seccionFormulario]),
 			[cmm] = isnull(@p_cmm,[cmm]),
 			[mostrarEnGrilla] = isnull(@p_mostrarEnGrilla,[mostrarEnGrilla]),
-			[condicion] = isnull(@p_condicion,[condicion])
+			[condicion] = isnull(@p_condicion,[condicion]),
+			[valorDefecto] = isnull(@p_valorDefecto,[valorDefecto])
 		WHERE (id = @p_id)
 END
 GO
@@ -95796,7 +95801,8 @@ CREATE PROCEDURE [ins_gen_detalleFormulario]
 		@p_id_seccionFormulario int,
 		@p_cmm varchar(300),
 		@p_mostrarEnGrilla bit,
-		@p_condicion varchar(300)
+		@p_condicion varchar(300),
+		@p_valorDefecto varchar(300)
 AS
 BEGIN
 	DECLARE @v_id int
@@ -95820,7 +95826,8 @@ BEGIN
 			[id_seccionFormulario],
 			[cmm],
 			[mostrarEnGrilla],
-			[condicion])
+			[condicion],
+			[valorDefecto])
 		VALUES(	@p_uid,
 			@p_eid,
 			@p_id_usuario_modifico,
@@ -95840,7 +95847,8 @@ BEGIN
 			@p_id_seccionFormulario,
 			@p_cmm,
 			@p_mostrarEnGrilla,
-			@p_condicion)
+			@p_condicion,
+			@p_valorDefecto)
 		SET @v_id = scope_identity()
 UPDATE [gen_detalleFormulario] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
 SELECT @v_id as id
@@ -95911,7 +95919,8 @@ BEGIN
 		[id_seccionFormulario] AS [id_seccionFormulario],
 		[cmm] AS [cmm],
 		[mostrarEnGrilla] AS [mostrarEnGrilla],
-		[condicion] AS [condicion]
+		[condicion] AS [condicion],
+		[valorDefecto] AS [valorDefecto]
 	FROM [gen_detalleFormulario]
 	WHERE	(id = @p_id)
 	AND	(eid LIKE @p_eid+'%')
@@ -99942,7 +99951,8 @@ BEGIN
 		[id_tabla_destino] AS [id_tabla_destino],
 		[cmm] AS [cmm],
 		[id_formulario] AS [id_formulario],
-		[condicion] AS [condicion]
+		[condicion] AS [condicion],
+		[valorDefecto] AS [valorDefecto]
 	FROM [gen_formulario]
 	WHERE	(id = @p_id)
 
@@ -99992,7 +100002,9 @@ SELECT 	[gen_formulario].[id] AS [id],
 [gen_formulario_padre].[cmm] as [gen_formulario_padre_cmm],
 [gen_formulario_padre].[id_formulario] as [gen_formulario_padre_id_formulario],
 [gen_formulario_padre].[condicion] as [gen_formulario_padre_condicion],
+[gen_formulario_padre].[valorDefecto] as [gen_formulario_padre_valorDefecto],
 		[gen_formulario].[condicion] AS [condicion],
+		[gen_formulario].[valorDefecto] AS [valorDefecto],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [gen_formulario]
 	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[gen_formulario].[id_usuario_modifico]
@@ -100179,7 +100191,8 @@ CREATE PROCEDURE [upd_gen_formulario]
 		@p_id_tabla_destino int = null,
 		@p_cmm varchar(300) = null,
 		@p_id_formulario int = null,
-		@p_condicion varchar(300) = null
+		@p_condicion varchar(300) = null,
+		@p_valorDefecto varchar(300) = null
 AS
 BEGIN
 		UPDATE [gen_formulario]
@@ -100196,7 +100209,8 @@ BEGIN
 			[id_tabla_destino] = isnull(@p_id_tabla_destino,[id_tabla_destino]),
 			[cmm] = isnull(@p_cmm,[cmm]),
 			[id_formulario] = isnull(@p_id_formulario,[id_formulario]),
-			[condicion] = isnull(@p_condicion,[condicion])
+			[condicion] = isnull(@p_condicion,[condicion]),
+			[valorDefecto] = isnull(@p_valorDefecto,[valorDefecto])
 		WHERE (id = @p_id)
 END
 GO
@@ -100225,7 +100239,8 @@ CREATE PROCEDURE [ins_gen_formulario]
 		@p_id_tabla_destino int,
 		@p_cmm varchar(300),
 		@p_id_formulario int,
-		@p_condicion varchar(300)
+		@p_condicion varchar(300),
+		@p_valorDefecto varchar(300)
 AS
 BEGIN
 	DECLARE @v_id int
@@ -100244,7 +100259,8 @@ BEGIN
 			[id_tabla_destino],
 			[cmm],
 			[id_formulario],
-			[condicion])
+			[condicion],
+			[valorDefecto])
 		VALUES(	@p_uid,
 			@p_eid,
 			@p_id_usuario_modifico,
@@ -100259,7 +100275,8 @@ BEGIN
 			@p_id_tabla_destino,
 			@p_cmm,
 			@p_id_formulario,
-			@p_condicion)
+			@p_condicion,
+			@p_valorDefecto)
 		SET @v_id = scope_identity()
 UPDATE [gen_formulario] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
 SELECT @v_id as id
@@ -100325,7 +100342,8 @@ BEGIN
 		[id_tabla_destino] AS [id_tabla_destino],
 		[cmm] AS [cmm],
 		[id_formulario] AS [id_formulario],
-		[condicion] AS [condicion]
+		[condicion] AS [condicion],
+		[valorDefecto] AS [valorDefecto]
 	FROM [gen_formulario]
 	WHERE	(id = @p_id)
 	AND	(eid LIKE @p_eid+'%')
@@ -100711,6 +100729,7 @@ SELECT 	[gen_formulario_catalogo.equipo].[id] AS [id],
 [gen_formulario].[cmm] as [gen_formulario_cmm],
 [gen_formulario].[id_formulario] as [gen_formulario_id_formulario],
 [gen_formulario].[condicion] as [gen_formulario_condicion],
+[gen_formulario].[valorDefecto] as [gen_formulario_valorDefecto],
 		[gen_formulario_catalogo.equipo].[id_catalogo.equipo] AS [id_catalogo.equipo],
 [cat_catalogo.equipo].[catalogo.equipo] as [cat_catalogo.equipo_catalogo.equipo],
 [cat_catalogo.equipo].[garantiaMeses] as [cat_catalogo.equipo_garantiaMeses],
@@ -110438,6 +110457,7 @@ SELECT 	[gui_campoTexto].[id] AS [id],
 [gui_funcionalidad].[id_formulario] as [gui_funcionalidad_id_formulario],
 [gui_funcionalidad].[cmm] as [gui_funcionalidad_cmm],
 [gui_funcionalidad].[icono] as [gui_funcionalidad_icono],
+[gui_funcionalidad].[valorDefecto] as [gui_funcionalidad_valorDefecto],
 		[gui_campoTexto].[cmm] AS [cmm],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [gui_campoTexto]
@@ -112419,7 +112439,8 @@ BEGIN
 		[id_aplicacion] AS [id_aplicacion],
 		[id_formulario] AS [id_formulario],
 		[cmm] AS [cmm],
-		[icono] AS [icono]
+		[icono] AS [icono],
+		[valorDefecto] AS [valorDefecto]
 	FROM [gui_funcionalidad]
 	WHERE	(id = @p_id)
 
@@ -112458,6 +112479,7 @@ SELECT 	[gui_funcionalidad].[id] AS [id],
 [gui_funcionalidad_padre].[id_formulario] as [gui_funcionalidad_padre_id_formulario],
 [gui_funcionalidad_padre].[cmm] as [gui_funcionalidad_padre_cmm],
 [gui_funcionalidad_padre].[icono] as [gui_funcionalidad_padre_icono],
+[gui_funcionalidad_padre].[valorDefecto] as [gui_funcionalidad_padre_valorDefecto],
 		[gui_funcionalidad].[id_tipoFuncionalidad] AS [id_tipoFuncionalidad],
 [gui_tipoFuncionalidad].[tipoFuncionalidad] as [gui_tipoFuncionalidad_tipoFuncionalidad],
 [gui_tipoFuncionalidad].[tipoFuncionalidad_codigo] as [gui_tipoFuncionalidad_tipoFuncionalidad_codigo],
@@ -112475,8 +112497,10 @@ SELECT 	[gui_funcionalidad].[id] AS [id],
 [gen_formulario].[cmm] as [gen_formulario_cmm],
 [gen_formulario].[id_formulario] as [gen_formulario_id_formulario],
 [gen_formulario].[condicion] as [gen_formulario_condicion],
+[gen_formulario].[valorDefecto] as [gen_formulario_valorDefecto],
 		[gui_funcionalidad].[cmm] AS [cmm],
 		[gui_funcionalidad].[icono] AS [icono],
+		[gui_funcionalidad].[valorDefecto] AS [valorDefecto],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [gui_funcionalidad]
 	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[gui_funcionalidad].[id_usuario_modifico]
@@ -112685,7 +112709,8 @@ CREATE PROCEDURE [upd_gui_funcionalidad]
 		@p_id_aplicacion int = null,
 		@p_id_formulario int = null,
 		@p_cmm varchar(300) = null,
-		@p_icono varchar(100) = null
+		@p_icono varchar(100) = null,
+		@p_valorDefecto varchar(300) = null
 AS
 BEGIN
 		UPDATE [gui_funcionalidad]
@@ -112702,7 +112727,8 @@ BEGIN
 			[id_aplicacion] = isnull(@p_id_aplicacion,[id_aplicacion]),
 			[id_formulario] = isnull(@p_id_formulario,[id_formulario]),
 			[cmm] = isnull(@p_cmm,[cmm]),
-			[icono] = isnull(@p_icono,[icono])
+			[icono] = isnull(@p_icono,[icono]),
+			[valorDefecto] = isnull(@p_valorDefecto,[valorDefecto])
 		WHERE (id = @p_id)
 END
 GO
@@ -112731,7 +112757,8 @@ CREATE PROCEDURE [ins_gui_funcionalidad]
 		@p_id_aplicacion int,
 		@p_id_formulario int,
 		@p_cmm varchar(300),
-		@p_icono varchar(100)
+		@p_icono varchar(100),
+		@p_valorDefecto varchar(300)
 AS
 BEGIN
 	DECLARE @v_id int
@@ -112750,7 +112777,8 @@ BEGIN
 			[id_aplicacion],
 			[id_formulario],
 			[cmm],
-			[icono])
+			[icono],
+			[valorDefecto])
 		VALUES(	@p_uid,
 			@p_eid,
 			@p_id_usuario_modifico,
@@ -112765,7 +112793,8 @@ BEGIN
 			@p_id_aplicacion,
 			@p_id_formulario,
 			@p_cmm,
-			@p_icono)
+			@p_icono,
+			@p_valorDefecto)
 		SET @v_id = scope_identity()
 UPDATE [gui_funcionalidad] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
 SELECT @v_id as id
@@ -112831,7 +112860,8 @@ BEGIN
 		[id_aplicacion] AS [id_aplicacion],
 		[id_formulario] AS [id_formulario],
 		[cmm] AS [cmm],
-		[icono] AS [icono]
+		[icono] AS [icono],
+		[valorDefecto] AS [valorDefecto]
 	FROM [gui_funcionalidad]
 	WHERE	(id = @p_id)
 	AND	(eid LIKE @p_eid+'%')
@@ -113245,6 +113275,7 @@ SELECT 	[gui_funcionalidadFlujoEvento].[id] AS [id],
 [gui_funcionalidad].[id_formulario] as [gui_funcionalidad_id_formulario],
 [gui_funcionalidad].[cmm] as [gui_funcionalidad_cmm],
 [gui_funcionalidad].[icono] as [gui_funcionalidad_icono],
+[gui_funcionalidad].[valorDefecto] as [gui_funcionalidad_valorDefecto],
 		[gui_funcionalidadFlujoEvento].[tipoAccion] AS [tipoAccion],
 		[gui_funcionalidadFlujoEvento].[validador] AS [validador],
 		[gui_funcionalidadFlujoEvento].[id_flujoEventoCondicion_exitoso] AS [id_flujoEventoCondicion_exitoso],
@@ -138168,6 +138199,7 @@ SELECT 	[rep_reporte].[id] AS [id],
 [gui_funcionalidad].[id_formulario] as [gui_funcionalidad_id_formulario],
 [gui_funcionalidad].[cmm] as [gui_funcionalidad_cmm],
 [gui_funcionalidad].[icono] as [gui_funcionalidad_icono],
+[gui_funcionalidad].[valorDefecto] as [gui_funcionalidad_valorDefecto],
 		[rep_reporte].[esFormato] AS [esFormato],
 		[rep_reporte].[tieneGraficos] AS [tieneGraficos],
 		[rep_reporte].[cabecera] AS [cabecera],
@@ -142719,6 +142751,7 @@ SELECT 	[seg_perfil_formulario].[id] AS [id],
 [gen_formulario].[cmm] as [gen_formulario_cmm],
 [gen_formulario].[id_formulario] as [gen_formulario_id_formulario],
 [gen_formulario].[condicion] as [gen_formulario_condicion],
+[gen_formulario].[valorDefecto] as [gen_formulario_valorDefecto],
 		[seg_perfil_formulario].[cmm] AS [cmm],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [seg_perfil_formulario]
@@ -143252,6 +143285,7 @@ SELECT 	[seg_perfil_funcionalidad].[id] AS [id],
 [gui_funcionalidad].[id_formulario] as [gui_funcionalidad_id_formulario],
 [gui_funcionalidad].[cmm] as [gui_funcionalidad_cmm],
 [gui_funcionalidad].[icono] as [gui_funcionalidad_icono],
+[gui_funcionalidad].[valorDefecto] as [gui_funcionalidad_valorDefecto],
 		[seg_perfil_funcionalidad].[cmm] AS [cmm],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [seg_perfil_funcionalidad]
@@ -144902,6 +144936,7 @@ SELECT 	[seg_preferencia].[id] AS [id],
 [gui_funcionalidad].[id_formulario] as [gui_funcionalidad_id_formulario],
 [gui_funcionalidad].[cmm] as [gui_funcionalidad_cmm],
 [gui_funcionalidad].[icono] as [gui_funcionalidad_icono],
+[gui_funcionalidad].[valorDefecto] as [gui_funcionalidad_valorDefecto],
 		[seg_preferencia].[cmm] AS [cmm],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [seg_preferencia]
