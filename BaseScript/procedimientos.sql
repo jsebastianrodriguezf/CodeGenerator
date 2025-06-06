@@ -135434,12 +135434,12 @@ BEGIN
 		[campoReporte_codigo] AS [campoReporte_codigo],
 		[id_reporte] AS [id_reporte],
 		[id_tipoCampoReporte] AS [id_tipoCampoReporte],
-		[tabla] AS [tabla],
 		[valorDefecto] AS [valorDefecto],
 		[esParametro] AS [esParametro],
 		[esSerie] AS [esSerie],
 		[parametroTotal] AS [parametroTotal],
-		[cmm] AS [cmm]
+		[cmm] AS [cmm],
+		[id_tabla] AS [id_tabla]
 	FROM [rep_campoReporte]
 	WHERE	(id = @p_id)
 
@@ -135481,18 +135481,21 @@ SELECT 	[rep_campoReporte].[id] AS [id],
 [rep_tipoCampoReporte].[tipoCampoReporte] as [rep_tipoCampoReporte_tipoCampoReporte],
 [rep_tipoCampoReporte].[tipoCampoReporte_codigo] as [rep_tipoCampoReporte_tipoCampoReporte_codigo],
 [rep_tipoCampoReporte].[cmm] as [rep_tipoCampoReporte_cmm],
-		[rep_campoReporte].[tabla] AS [tabla],
 		[rep_campoReporte].[valorDefecto] AS [valorDefecto],
 		[rep_campoReporte].[esParametro] AS [esParametro],
 		[rep_campoReporte].[esSerie] AS [esSerie],
 		[rep_campoReporte].[parametroTotal] AS [parametroTotal],
 		[rep_campoReporte].[cmm] AS [cmm],
+		[rep_campoReporte].[id_tabla] AS [id_tabla],
+		[_tablas].[tabla] AS [_tablas_tabla],
+		[_tablas].[id_tabla_padre] AS [_tablas_id_tabla_padre],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [rep_campoReporte]
 	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[rep_campoReporte].[id_usuario_modifico]
 	INNER JOIN [seg_usuario] AS [seg_usuario_creo] ON [seg_usuario_creo].id=[rep_campoReporte].[id_usuario_creo]
 	INNER JOIN [rep_reporte] ON [rep_reporte].id=[rep_campoReporte].[id_reporte]
 	INNER JOIN [rep_tipoCampoReporte] ON [rep_tipoCampoReporte].id=[rep_campoReporte].[id_tipoCampoReporte]
+	INNER JOIN [_tablas] ON [_tablas].id=[rep_campoReporte].[id_tabla]
 	INNER JOIN [gen_empresa] AS empresaCodigo ON [rep_campoReporte].eid = [empresaCodigo].[codigo] and empresaCodigo.active=1
 WHERE [rep_campoReporte].active=1
 GO
@@ -135589,6 +135592,27 @@ GO
 SET ANSI_NULLS OFF
 GO
 
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_rep_campoReportesXtabla]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_rep_campoReportesXtabla]
+GO
+CREATE PROCEDURE [sel_rep_campoReportesXtabla]
+	@p_id_tabla INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_rep_campoReporte]
+	WHERE ([id_tabla]= @p_id_tabla)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_rep_campoReportes]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_rep_campoReportes]
 GO
 CREATE PROCEDURE [sel_rep_campoReportes]
@@ -135647,12 +135671,12 @@ CREATE PROCEDURE [upd_rep_campoReporte]
 		@p_campoReporte_codigo varchar(100) = null,
 		@p_id_reporte int = null,
 		@p_id_tipoCampoReporte int = null,
-		@p_tabla varchar(50) = null,
 		@p_valorDefecto varchar(100) = null,
 		@p_esParametro bit = null,
 		@p_esSerie bit = null,
 		@p_parametroTotal bit = null,
-		@p_cmm varchar(300) = null
+		@p_cmm varchar(300) = null,
+		@p_id_tabla int = null
 AS
 BEGIN
 		UPDATE [rep_campoReporte]
@@ -135665,12 +135689,12 @@ BEGIN
 			[campoReporte_codigo] = isnull(@p_campoReporte_codigo,[campoReporte_codigo]),
 			[id_reporte] = isnull(@p_id_reporte,[id_reporte]),
 			[id_tipoCampoReporte] = isnull(@p_id_tipoCampoReporte,[id_tipoCampoReporte]),
-			[tabla] = isnull(@p_tabla,[tabla]),
 			[valorDefecto] = isnull(@p_valorDefecto,[valorDefecto]),
 			[esParametro] = isnull(@p_esParametro,[esParametro]),
 			[esSerie] = isnull(@p_esSerie,[esSerie]),
 			[parametroTotal] = isnull(@p_parametroTotal,[parametroTotal]),
-			[cmm] = isnull(@p_cmm,[cmm])
+			[cmm] = isnull(@p_cmm,[cmm]),
+			[id_tabla] = isnull(@p_id_tabla,[id_tabla])
 		WHERE (id = @p_id)
 END
 GO
@@ -135695,12 +135719,12 @@ CREATE PROCEDURE [ins_rep_campoReporte]
 		@p_campoReporte_codigo varchar(100),
 		@p_id_reporte int,
 		@p_id_tipoCampoReporte int,
-		@p_tabla varchar(50),
 		@p_valorDefecto varchar(100),
 		@p_esParametro bit,
 		@p_esSerie bit,
 		@p_parametroTotal bit,
-		@p_cmm varchar(300)
+		@p_cmm varchar(300),
+		@p_id_tabla int
 AS
 BEGIN
 	DECLARE @v_id int
@@ -135715,12 +135739,12 @@ BEGIN
 			[campoReporte_codigo],
 			[id_reporte],
 			[id_tipoCampoReporte],
-			[tabla],
 			[valorDefecto],
 			[esParametro],
 			[esSerie],
 			[parametroTotal],
-			[cmm])
+			[cmm],
+			[id_tabla])
 		VALUES(	@p_uid,
 			@p_eid,
 			@p_id_usuario_modifico,
@@ -135731,12 +135755,12 @@ BEGIN
 			@p_campoReporte_codigo,
 			@p_id_reporte,
 			@p_id_tipoCampoReporte,
-			@p_tabla,
 			@p_valorDefecto,
 			@p_esParametro,
 			@p_esSerie,
 			@p_parametroTotal,
-			@p_cmm)
+			@p_cmm,
+			@p_id_tabla)
 		SET @v_id = scope_identity()
 UPDATE [rep_campoReporte] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
 SELECT @v_id as id
@@ -135798,12 +135822,12 @@ BEGIN
 		[campoReporte_codigo] AS [campoReporte_codigo],
 		[id_reporte] AS [id_reporte],
 		[id_tipoCampoReporte] AS [id_tipoCampoReporte],
-		[tabla] AS [tabla],
 		[valorDefecto] AS [valorDefecto],
 		[esParametro] AS [esParametro],
 		[esSerie] AS [esSerie],
 		[parametroTotal] AS [parametroTotal],
-		[cmm] AS [cmm]
+		[cmm] AS [cmm],
+		[id_tabla] AS [id_tabla]
 	FROM [rep_campoReporte]
 	WHERE	(id = @p_id)
 	AND	(eid LIKE @p_eid+'%')
@@ -135899,6 +135923,29 @@ BEGIN
 	SELECT *
 	FROM [view_rep_campoReporte]
 	WHERE ([id_tipoCampoReporte]= @p_id_tipoCampoReporte)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_rep_campoReportesXtabla_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_rep_campoReportesXtabla_m]
+GO
+CREATE PROCEDURE [sel_rep_campoReportesXtabla_m]
+	@p_id_tabla INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_rep_campoReporte]
+	WHERE ([id_tabla]= @p_id_tabla)
 	AND	(eid LIKE @p_eid+'%')
 END
 GO
@@ -161257,4 +161304,4 @@ SET ANSI_NULLS ON
 GO
 ----------------------
 print 'ter_tercero_usuario'
------------------------------------5/2/2025 09:08:08
+-----------------------------------6/6/2025 10:00:45
