@@ -64267,7 +64267,8 @@ BEGIN
 		[replicarAtributos] AS [replicarAtributos],
 		[replicarItemsActividades] AS [replicarItemsActividades],
 		[replicarComentario] AS [replicarComentario],
-		[cmm] AS [cmm]
+		[cmm] AS [cmm],
+		[id_flujoFormulario] AS [id_flujoFormulario]
 	FROM [doc_flujoDocumento]
 	WHERE	(id = @p_id)
 
@@ -64369,6 +64370,13 @@ SELECT 	[doc_flujoDocumento].[id] AS [id],
 		[doc_flujoDocumento].[replicarItemsActividades] AS [replicarItemsActividades],
 		[doc_flujoDocumento].[replicarComentario] AS [replicarComentario],
 		[doc_flujoDocumento].[cmm] AS [cmm],
+		[doc_flujoDocumento].[id_flujoFormulario] AS [id_flujoFormulario],
+[gen_flujoFormulario].[flujoFormulario] as [gen_flujoFormulario_flujoFormulario],
+[gen_flujoFormulario].[flujoFormulario_codigo] as [gen_flujoFormulario_flujoFormulario_codigo],
+[gen_flujoFormulario].[id_formulario_origen] as [gen_flujoFormulario_id_formulario_origen],
+[gen_flujoFormulario].[id_formulario_destino] as [gen_flujoFormulario_id_formulario_destino],
+[gen_flujoFormulario].[cmm] as [gen_flujoFormulario_cmm],
+[gen_flujoFormulario].[esAutomatico] as [gen_flujoFormulario_esAutomatico],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [doc_flujoDocumento]
 	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[doc_flujoDocumento].[id_usuario_modifico]
@@ -64377,6 +64385,7 @@ FROM [doc_flujoDocumento]
 	INNER JOIN [doc_subtipoDocumento] AS [doc_subtipoDocumento_destino] ON [doc_subtipoDocumento_destino].id=[doc_flujoDocumento].[id_subtipoDocumento_destino]
 	INNER JOIN [doc_estadoTipoDocumento] AS [doc_estadoTipoDocumento_origen] ON [doc_estadoTipoDocumento_origen].id=[doc_flujoDocumento].[id_estadoTipoDocumento_origen]
 	INNER JOIN [doc_estadoTipoDocumento] AS [doc_estadoTipoDocumento_resultado] ON [doc_estadoTipoDocumento_resultado].id=[doc_flujoDocumento].[id_estadoTipoDocumento_resultado]
+	INNER JOIN [gen_flujoFormulario] ON [gen_flujoFormulario].id=[doc_flujoDocumento].[id_flujoFormulario]
 	INNER JOIN [gen_empresa] AS empresaCodigo ON [doc_flujoDocumento].eid = [empresaCodigo].[codigo] and empresaCodigo.active=1
 WHERE [doc_flujoDocumento].active=1
 GO
@@ -64515,6 +64524,27 @@ GO
 SET ANSI_NULLS OFF
 GO
 
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_doc_flujoDocumentosXflujoFormulario]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_doc_flujoDocumentosXflujoFormulario]
+GO
+CREATE PROCEDURE [sel_doc_flujoDocumentosXflujoFormulario]
+	@p_id_flujoFormulario INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_doc_flujoDocumento]
+	WHERE ([id_flujoFormulario]= @p_id_flujoFormulario)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_doc_flujoDocumentos]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_doc_flujoDocumentos]
 GO
 CREATE PROCEDURE [sel_doc_flujoDocumentos]
@@ -64580,7 +64610,8 @@ CREATE PROCEDURE [upd_doc_flujoDocumento]
 		@p_replicarAtributos bit = null,
 		@p_replicarItemsActividades int = null,
 		@p_replicarComentario int = null,
-		@p_cmm varchar(300) = null
+		@p_cmm varchar(300) = null,
+		@p_id_flujoFormulario int = null
 AS
 BEGIN
 		UPDATE [doc_flujoDocumento]
@@ -64600,7 +64631,8 @@ BEGIN
 			[replicarAtributos] = isnull(@p_replicarAtributos,[replicarAtributos]),
 			[replicarItemsActividades] = isnull(@p_replicarItemsActividades,[replicarItemsActividades]),
 			[replicarComentario] = isnull(@p_replicarComentario,[replicarComentario]),
-			[cmm] = isnull(@p_cmm,[cmm])
+			[cmm] = isnull(@p_cmm,[cmm]),
+			[id_flujoFormulario] = isnull(@p_id_flujoFormulario,[id_flujoFormulario])
 		WHERE (id = @p_id)
 END
 GO
@@ -64632,7 +64664,8 @@ CREATE PROCEDURE [ins_doc_flujoDocumento]
 		@p_replicarAtributos bit,
 		@p_replicarItemsActividades int,
 		@p_replicarComentario int,
-		@p_cmm varchar(300)
+		@p_cmm varchar(300),
+		@p_id_flujoFormulario int
 AS
 BEGIN
 	DECLARE @v_id int
@@ -64654,7 +64687,8 @@ BEGIN
 			[replicarAtributos],
 			[replicarItemsActividades],
 			[replicarComentario],
-			[cmm])
+			[cmm],
+			[id_flujoFormulario])
 		VALUES(	@p_uid,
 			@p_eid,
 			@p_id_usuario_modifico,
@@ -64672,7 +64706,8 @@ BEGIN
 			@p_replicarAtributos,
 			@p_replicarItemsActividades,
 			@p_replicarComentario,
-			@p_cmm)
+			@p_cmm,
+			@p_id_flujoFormulario)
 		SET @v_id = scope_identity()
 UPDATE [doc_flujoDocumento] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
 SELECT @v_id as id
@@ -64741,7 +64776,8 @@ BEGIN
 		[replicarAtributos] AS [replicarAtributos],
 		[replicarItemsActividades] AS [replicarItemsActividades],
 		[replicarComentario] AS [replicarComentario],
-		[cmm] AS [cmm]
+		[cmm] AS [cmm],
+		[id_flujoFormulario] AS [id_flujoFormulario]
 	FROM [doc_flujoDocumento]
 	WHERE	(id = @p_id)
 	AND	(eid LIKE @p_eid+'%')
@@ -64883,6 +64919,29 @@ BEGIN
 	SELECT *
 	FROM [view_doc_flujoDocumento]
 	WHERE ([id_estadoTipoDocumento_resultado]= @p_id_estadoTipoDocumento_resultado)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_doc_flujoDocumentosXflujoFormulario_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_doc_flujoDocumentosXflujoFormulario_m]
+GO
+CREATE PROCEDURE [sel_doc_flujoDocumentosXflujoFormulario_m]
+	@p_id_flujoFormulario INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_doc_flujoDocumento]
+	WHERE ([id_flujoFormulario]= @p_id_flujoFormulario)
 	AND	(eid LIKE @p_eid+'%')
 END
 GO
@@ -99914,6 +99973,1179 @@ SET ANSI_NULLS ON
 GO
 ----------------------
 print 'gen_firmaContacto'
+--------------------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[reg_gen_flujoDetalleFormulario]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[reg_gen_flujoDetalleFormulario]
+GO
+CREATE PROCEDURE [reg_gen_flujoDetalleFormulario]
+	@p_id INT
+AS
+BEGIN
+	SELECT 	[id] AS [id],
+		[uid] AS [uid],
+		[eid] AS [eid],
+		[id_usuario_modifico] AS [id_usuario_modifico],
+		[id_usuario_creo] AS [id_usuario_creo],
+		[fechaModificacion] AS [fechaModificacion],
+		[fechaCreacion] AS [fechaCreacion],
+		[active] AS [active],
+		[flujoDetalleFormulario] AS [flujoDetalleFormulario],
+		[flujoDetalleFormulario_codigo] AS [flujoDetalleFormulario_codigo],
+		[id_detalleFormulario_origen] AS [id_detalleFormulario_origen],
+		[id_detalleFormulario_destino] AS [id_detalleFormulario_destino],
+		[valorDefecto] AS [valorDefecto],
+		[id_flujoFormulario] AS [id_flujoFormulario],
+		[cmm] AS [cmm]
+	FROM [gen_flujoDetalleFormulario]
+	WHERE	(id = @p_id)
+
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+IF  EXISTS (SELECT * FROM sys.views WHERE object_id = OBJECT_ID(N'[dbo].[view_gen_flujoDetalleFormulario]')) DROP VIEW [dbo].[view_gen_flujoDetalleFormulario]
+GO
+CREATE  VIEW [view_gen_flujoDetalleFormulario] AS
+SELECT 	[gen_flujoDetalleFormulario].[id] AS [id],
+		[gen_flujoDetalleFormulario].[uid] AS [uid],
+		[gen_flujoDetalleFormulario].[eid] AS [eid],
+		[gen_flujoDetalleFormulario].[id_usuario_modifico] AS [id_usuario_modifico],
+		[gen_flujoDetalleFormulario].[id_usuario_creo] AS [id_usuario_creo],
+		[gen_flujoDetalleFormulario].[fechaModificacion] AS [fechaModificacion],
+		[gen_flujoDetalleFormulario].[fechaCreacion] AS [fechaCreacion],
+		[gen_flujoDetalleFormulario].[active] AS [active],
+		[gen_flujoDetalleFormulario].[flujoDetalleFormulario] AS [flujoDetalleFormulario],
+		[gen_flujoDetalleFormulario].[flujoDetalleFormulario_codigo] AS [flujoDetalleFormulario_codigo],
+		[gen_flujoDetalleFormulario].[id_detalleFormulario_origen] AS [id_detalleFormulario_origen],
+[gen_detalleFormulario_origen].[detalleFormulario] as [gen_detalleFormulario_origen_detalleFormulario],
+[gen_detalleFormulario_origen].[detalleFormulario_codigo] as [gen_detalleFormulario_origen_detalleFormulario_codigo],
+[gen_detalleFormulario_origen].[defecto] as [gen_detalleFormulario_origen_defecto],
+[gen_detalleFormulario_origen].[esObligatorio] as [gen_detalleFormulario_origen_esObligatorio],
+[gen_detalleFormulario_origen].[orden] as [gen_detalleFormulario_origen_orden],
+[gen_detalleFormulario_origen].[id_tipoDato] as [gen_detalleFormulario_origen_id_tipoDato],
+[gen_detalleFormulario_origen].[expresionRegular] as [gen_detalleFormulario_origen_expresionRegular],
+[gen_detalleFormulario_origen].[id_columna] as [gen_detalleFormulario_origen_id_columna],
+[gen_detalleFormulario_origen].[id_atributo] as [gen_detalleFormulario_origen_id_atributo],
+[gen_detalleFormulario_origen].[id_formulario] as [gen_detalleFormulario_origen_id_formulario],
+[gen_detalleFormulario_origen].[id_seccionFormulario] as [gen_detalleFormulario_origen_id_seccionFormulario],
+[gen_detalleFormulario_origen].[cmm] as [gen_detalleFormulario_origen_cmm],
+[gen_detalleFormulario_origen].[mostrarEnGrilla] as [gen_detalleFormulario_origen_mostrarEnGrilla],
+[gen_detalleFormulario_origen].[condicion] as [gen_detalleFormulario_origen_condicion],
+		[gen_flujoDetalleFormulario].[id_detalleFormulario_destino] AS [id_detalleFormulario_destino],
+[gen_detalleFormulario_destino].[detalleFormulario] as [gen_detalleFormulario_destino_detalleFormulario],
+[gen_detalleFormulario_destino].[detalleFormulario_codigo] as [gen_detalleFormulario_destino_detalleFormulario_codigo],
+[gen_detalleFormulario_destino].[defecto] as [gen_detalleFormulario_destino_defecto],
+[gen_detalleFormulario_destino].[esObligatorio] as [gen_detalleFormulario_destino_esObligatorio],
+[gen_detalleFormulario_destino].[orden] as [gen_detalleFormulario_destino_orden],
+[gen_detalleFormulario_destino].[id_tipoDato] as [gen_detalleFormulario_destino_id_tipoDato],
+[gen_detalleFormulario_destino].[expresionRegular] as [gen_detalleFormulario_destino_expresionRegular],
+[gen_detalleFormulario_destino].[id_columna] as [gen_detalleFormulario_destino_id_columna],
+[gen_detalleFormulario_destino].[id_atributo] as [gen_detalleFormulario_destino_id_atributo],
+[gen_detalleFormulario_destino].[id_formulario] as [gen_detalleFormulario_destino_id_formulario],
+[gen_detalleFormulario_destino].[id_seccionFormulario] as [gen_detalleFormulario_destino_id_seccionFormulario],
+[gen_detalleFormulario_destino].[cmm] as [gen_detalleFormulario_destino_cmm],
+[gen_detalleFormulario_destino].[mostrarEnGrilla] as [gen_detalleFormulario_destino_mostrarEnGrilla],
+[gen_detalleFormulario_destino].[condicion] as [gen_detalleFormulario_destino_condicion],
+		[gen_flujoDetalleFormulario].[valorDefecto] AS [valorDefecto],
+		[gen_flujoDetalleFormulario].[id_flujoFormulario] AS [id_flujoFormulario],
+[gen_flujoFormulario].[flujoFormulario] as [gen_flujoFormulario_flujoFormulario],
+[gen_flujoFormulario].[flujoFormulario_codigo] as [gen_flujoFormulario_flujoFormulario_codigo],
+[gen_flujoFormulario].[id_formulario_origen] as [gen_flujoFormulario_id_formulario_origen],
+[gen_flujoFormulario].[id_formulario_destino] as [gen_flujoFormulario_id_formulario_destino],
+[gen_flujoFormulario].[cmm] as [gen_flujoFormulario_cmm],
+[gen_flujoFormulario].[esAutomatico] as [gen_flujoFormulario_esAutomatico],
+		[gen_flujoDetalleFormulario].[cmm] AS [cmm],
+		[empresaCodigo].[empresa] As [multiempresa]
+FROM [gen_flujoDetalleFormulario]
+	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[gen_flujoDetalleFormulario].[id_usuario_modifico]
+	INNER JOIN [seg_usuario] AS [seg_usuario_creo] ON [seg_usuario_creo].id=[gen_flujoDetalleFormulario].[id_usuario_creo]
+	INNER JOIN [gen_detalleFormulario] AS [gen_detalleFormulario_origen] ON [gen_detalleFormulario_origen].id=[gen_flujoDetalleFormulario].[id_detalleFormulario_origen]
+	INNER JOIN [gen_detalleFormulario] AS [gen_detalleFormulario_destino] ON [gen_detalleFormulario_destino].id=[gen_flujoDetalleFormulario].[id_detalleFormulario_destino]
+	INNER JOIN [gen_flujoFormulario] ON [gen_flujoFormulario].id=[gen_flujoDetalleFormulario].[id_flujoFormulario]
+	INNER JOIN [gen_empresa] AS empresaCodigo ON [gen_flujoDetalleFormulario].eid = [empresaCodigo].[codigo] and empresaCodigo.active=1
+WHERE [gen_flujoDetalleFormulario].active=1
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gen_flujoDetalleFormulariosXusuario_modifico]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gen_flujoDetalleFormulariosXusuario_modifico]
+GO
+CREATE PROCEDURE [sel_gen_flujoDetalleFormulariosXusuario_modifico]
+	@p_id_usuario_modifico INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_gen_flujoDetalleFormulario]
+	WHERE ([id_usuario_modifico]= @p_id_usuario_modifico)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gen_flujoDetalleFormulariosXusuario_creo]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gen_flujoDetalleFormulariosXusuario_creo]
+GO
+CREATE PROCEDURE [sel_gen_flujoDetalleFormulariosXusuario_creo]
+	@p_id_usuario_creo INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_gen_flujoDetalleFormulario]
+	WHERE ([id_usuario_creo]= @p_id_usuario_creo)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gen_flujoDetalleFormulariosXdetalleFormulario_origen]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gen_flujoDetalleFormulariosXdetalleFormulario_origen]
+GO
+CREATE PROCEDURE [sel_gen_flujoDetalleFormulariosXdetalleFormulario_origen]
+	@p_id_detalleFormulario_origen INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_gen_flujoDetalleFormulario]
+	WHERE ([id_detalleFormulario_origen]= @p_id_detalleFormulario_origen)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gen_flujoDetalleFormulariosXdetalleFormulario_destino]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gen_flujoDetalleFormulariosXdetalleFormulario_destino]
+GO
+CREATE PROCEDURE [sel_gen_flujoDetalleFormulariosXdetalleFormulario_destino]
+	@p_id_detalleFormulario_destino INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_gen_flujoDetalleFormulario]
+	WHERE ([id_detalleFormulario_destino]= @p_id_detalleFormulario_destino)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gen_flujoDetalleFormulariosXflujoFormulario]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gen_flujoDetalleFormulariosXflujoFormulario]
+GO
+CREATE PROCEDURE [sel_gen_flujoDetalleFormulariosXflujoFormulario]
+	@p_id_flujoFormulario INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_gen_flujoDetalleFormulario]
+	WHERE ([id_flujoFormulario]= @p_id_flujoFormulario)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gen_flujoDetalleFormularios]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gen_flujoDetalleFormularios]
+GO
+CREATE PROCEDURE [sel_gen_flujoDetalleFormularios]
+	
+	@p_filtro as varchar (8000) = '1=1',
+	@p_orden as varchar (8000) = 'id',
+	@p_campos as varchar (8000) = '*' AS
+BEGIN
+exec ('SELECT '+ @p_campos +
+' FROM [view_gen_flujoDetalleFormulario]
+WHERE (' + @p_filtro + ') ORDER BY ' + @p_orden)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[lis_gen_flujoDetalleFormularios]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[lis_gen_flujoDetalleFormularios]
+GO
+CREATE PROCEDURE [lis_gen_flujoDetalleFormularios]
+	AS
+BEGIN
+	SELECT id AS id,
+[flujoDetalleFormulario] AS [gen_flujoDetalleFormulario]
+	FROM [gen_flujoDetalleFormulario]
+	WHERE active = 1
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[upd_gen_flujoDetalleFormulario]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[upd_gen_flujoDetalleFormulario]
+GO
+CREATE PROCEDURE [upd_gen_flujoDetalleFormulario]
+	@p_id int = null,
+		@p_uid varchar(500) = null,
+		@p_eid varchar(50) = null,
+		@p_id_usuario_modifico int = null,
+		@p_id_usuario_creo int = null,
+		@p_fechaCreacion smalldatetime = null,
+		@p_flujoDetalleFormulario varchar(300) = null,
+		@p_flujoDetalleFormulario_codigo varchar(100) = null,
+		@p_id_detalleFormulario_origen int = null,
+		@p_id_detalleFormulario_destino int = null,
+		@p_valorDefecto varchar(300) = null,
+		@p_id_flujoFormulario int = null,
+		@p_cmm varchar(300) = null
+AS
+BEGIN
+		UPDATE [gen_flujoDetalleFormulario]
+		SET	[uid] = isnull(@p_uid,[uid]),
+			[eid] = isnull(@p_eid,[eid]),
+			[id_usuario_modifico] = isnull(@p_id_usuario_modifico,[id_usuario_modifico]),
+			[id_usuario_creo] = isnull(@p_id_usuario_creo,[id_usuario_creo]),
+			[fechaModificacion] = GETDATE(),
+			[flujoDetalleFormulario] = isnull(@p_flujoDetalleFormulario,[flujoDetalleFormulario]),
+			[flujoDetalleFormulario_codigo] = isnull(@p_flujoDetalleFormulario_codigo,[flujoDetalleFormulario_codigo]),
+			[id_detalleFormulario_origen] = isnull(@p_id_detalleFormulario_origen,[id_detalleFormulario_origen]),
+			[id_detalleFormulario_destino] = isnull(@p_id_detalleFormulario_destino,[id_detalleFormulario_destino]),
+			[valorDefecto] = isnull(@p_valorDefecto,[valorDefecto]),
+			[id_flujoFormulario] = isnull(@p_id_flujoFormulario,[id_flujoFormulario]),
+			[cmm] = isnull(@p_cmm,[cmm])
+		WHERE (id = @p_id)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[ins_gen_flujoDetalleFormulario]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[ins_gen_flujoDetalleFormulario]
+GO
+CREATE PROCEDURE [ins_gen_flujoDetalleFormulario]
+	@p_uid varchar(500),
+		@p_eid varchar(50),
+		@p_id_usuario_modifico int,
+		@p_id_usuario_creo int,
+		@p_flujoDetalleFormulario varchar(300),
+		@p_flujoDetalleFormulario_codigo varchar(100),
+		@p_id_detalleFormulario_origen int,
+		@p_id_detalleFormulario_destino int,
+		@p_valorDefecto varchar(300),
+		@p_id_flujoFormulario int,
+		@p_cmm varchar(300)
+AS
+BEGIN
+	DECLARE @v_id int
+		INSERT INTO [gen_flujoDetalleFormulario]
+			([uid],
+			[eid],
+			[id_usuario_modifico],
+			[id_usuario_creo],
+			[fechaModificacion],
+			[fechaCreacion],
+			[flujoDetalleFormulario],
+			[flujoDetalleFormulario_codigo],
+			[id_detalleFormulario_origen],
+			[id_detalleFormulario_destino],
+			[valorDefecto],
+			[id_flujoFormulario],
+			[cmm])
+		VALUES(	@p_uid,
+			@p_eid,
+			@p_id_usuario_modifico,
+			@p_id_usuario_creo,
+			GETDATE(),
+			GETDATE(),
+			@p_flujoDetalleFormulario,
+			@p_flujoDetalleFormulario_codigo,
+			@p_id_detalleFormulario_origen,
+			@p_id_detalleFormulario_destino,
+			@p_valorDefecto,
+			@p_id_flujoFormulario,
+			@p_cmm)
+		SET @v_id = scope_identity()
+UPDATE [gen_flujoDetalleFormulario] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
+SELECT @v_id as id
+RETURN @v_id
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[act_gen_flujoDetalleFormulario]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[act_gen_flujoDetalleFormulario]
+GO
+CREATE PROCEDURE [act_gen_flujoDetalleFormulario]
+	@p_active BIT,
+	@p_id INT,
+@p_id_usuario_modifico int = null
+AS
+BEGIN
+	UPDATE [gen_flujoDetalleFormulario]
+	SET active=@p_active,
+	[id_usuario_modifico] = isnull(@p_id_usuario_modifico,[id_usuario_modifico]),
+	[fechaModificacion] = GETDATE()
+	WHERE	(id = @p_id)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[reg_gen_flujoDetalleFormulario_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[reg_gen_flujoDetalleFormulario_m]
+GO
+CREATE PROCEDURE [reg_gen_flujoDetalleFormulario_m]
+	@p_id INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT 	[id] AS [id],
+		[uid] AS [uid],
+		[eid] AS [eid],
+		[id_usuario_modifico] AS [id_usuario_modifico],
+		[id_usuario_creo] AS [id_usuario_creo],
+		[fechaModificacion] AS [fechaModificacion],
+		[fechaCreacion] AS [fechaCreacion],
+		[active] AS [active],
+		[flujoDetalleFormulario] AS [flujoDetalleFormulario],
+		[flujoDetalleFormulario_codigo] AS [flujoDetalleFormulario_codigo],
+		[id_detalleFormulario_origen] AS [id_detalleFormulario_origen],
+		[id_detalleFormulario_destino] AS [id_detalleFormulario_destino],
+		[valorDefecto] AS [valorDefecto],
+		[id_flujoFormulario] AS [id_flujoFormulario],
+		[cmm] AS [cmm]
+	FROM [gen_flujoDetalleFormulario]
+	WHERE	(id = @p_id)
+	AND	(eid LIKE @p_eid+'%')
+
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gen_flujoDetalleFormulariosXusuario_modifico_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gen_flujoDetalleFormulariosXusuario_modifico_m]
+GO
+CREATE PROCEDURE [sel_gen_flujoDetalleFormulariosXusuario_modifico_m]
+	@p_id_usuario_modifico INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_gen_flujoDetalleFormulario]
+	WHERE ([id_usuario_modifico]= @p_id_usuario_modifico)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gen_flujoDetalleFormulariosXusuario_creo_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gen_flujoDetalleFormulariosXusuario_creo_m]
+GO
+CREATE PROCEDURE [sel_gen_flujoDetalleFormulariosXusuario_creo_m]
+	@p_id_usuario_creo INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_gen_flujoDetalleFormulario]
+	WHERE ([id_usuario_creo]= @p_id_usuario_creo)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gen_flujoDetalleFormulariosXdetalleFormulario_origen_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gen_flujoDetalleFormulariosXdetalleFormulario_origen_m]
+GO
+CREATE PROCEDURE [sel_gen_flujoDetalleFormulariosXdetalleFormulario_origen_m]
+	@p_id_detalleFormulario_origen INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_gen_flujoDetalleFormulario]
+	WHERE ([id_detalleFormulario_origen]= @p_id_detalleFormulario_origen)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gen_flujoDetalleFormulariosXdetalleFormulario_destino_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gen_flujoDetalleFormulariosXdetalleFormulario_destino_m]
+GO
+CREATE PROCEDURE [sel_gen_flujoDetalleFormulariosXdetalleFormulario_destino_m]
+	@p_id_detalleFormulario_destino INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_gen_flujoDetalleFormulario]
+	WHERE ([id_detalleFormulario_destino]= @p_id_detalleFormulario_destino)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gen_flujoDetalleFormulariosXflujoFormulario_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gen_flujoDetalleFormulariosXflujoFormulario_m]
+GO
+CREATE PROCEDURE [sel_gen_flujoDetalleFormulariosXflujoFormulario_m]
+	@p_id_flujoFormulario INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_gen_flujoDetalleFormulario]
+	WHERE ([id_flujoFormulario]= @p_id_flujoFormulario)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gen_flujoDetalleFormularios_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gen_flujoDetalleFormularios_m]
+GO
+CREATE PROCEDURE [sel_gen_flujoDetalleFormularios_m]
+	@p_eid as varchar (50)='',
+	@p_filtro as varchar (8000) = '1=1',
+	@p_orden as varchar (8000) = 'id',
+	@p_campos as varchar (8000) = '*' AS
+BEGIN
+exec ('SELECT '+ @p_campos +
+' FROM [view_gen_flujoDetalleFormulario]
+WHERE  (eid like '''+@p_eid+'%'+''' ) AND (' + @p_filtro + ') ORDER BY ' + @p_orden)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[lis_gen_flujoDetalleFormularios_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[lis_gen_flujoDetalleFormularios_m]
+GO
+CREATE PROCEDURE [lis_gen_flujoDetalleFormularios_m]
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT id AS id,
+[flujoDetalleFormulario] AS [gen_flujoDetalleFormulario]
+	FROM [gen_flujoDetalleFormulario]
+	WHERE active = 1
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[aud_gen_flujoDetalleFormulario]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[aud_gen_flujoDetalleFormulario]
+GO
+CREATE PROCEDURE [aud_gen_flujoDetalleFormulario]
+	@p_filtro as varchar (8000) = '1=1'
+AS
+BEGIN
+exec(	'SELECT [gen_flujoDetalleFormulario].id as id_tabla,
+	[gen_flujoDetalleFormulario].id_usuario_modifico as id_usuario_modifico,
+	[gen_flujoDetalleFormulario].id_usuario_creo as id_usuario_creo,
+	[gen_flujoDetalleFormulario].fechaModificacion as fechaModificacion,
+	[gen_flujoDetalleFormulario].fechaCreacion as fechaCreacion,
+	[gen_flujoDetalleFormulario].active as active,
+	[gen_flujoDetalleFormulario].[flujoDetalleFormulario] as campoPrincipal,
+	[seg_usuario_creo].usuario as usuarioCreo,
+	[seg_usuario_modifico].usuario as usuarioModifico
+
+	FROM [gen_flujoDetalleFormulario]
+	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[gen_flujoDetalleFormulario].[id_usuario_modifico]
+	INNER JOIN [seg_usuario] AS [seg_usuario_creo] ON [seg_usuario_creo].id=[gen_flujoDetalleFormulario].[id_usuario_creo]
+	where ' + @p_filtro)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+print 'gen_flujoDetalleFormulario'
+--------------------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[reg_gen_flujoFormulario]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[reg_gen_flujoFormulario]
+GO
+CREATE PROCEDURE [reg_gen_flujoFormulario]
+	@p_id INT
+AS
+BEGIN
+	SELECT 	[id] AS [id],
+		[uid] AS [uid],
+		[eid] AS [eid],
+		[id_usuario_modifico] AS [id_usuario_modifico],
+		[id_usuario_creo] AS [id_usuario_creo],
+		[fechaModificacion] AS [fechaModificacion],
+		[fechaCreacion] AS [fechaCreacion],
+		[active] AS [active],
+		[flujoFormulario] AS [flujoFormulario],
+		[flujoFormulario_codigo] AS [flujoFormulario_codigo],
+		[id_formulario_origen] AS [id_formulario_origen],
+		[id_formulario_destino] AS [id_formulario_destino],
+		[cmm] AS [cmm],
+		[esAutomatico] AS [esAutomatico]
+	FROM [gen_flujoFormulario]
+	WHERE	(id = @p_id)
+
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+IF  EXISTS (SELECT * FROM sys.views WHERE object_id = OBJECT_ID(N'[dbo].[view_gen_flujoFormulario]')) DROP VIEW [dbo].[view_gen_flujoFormulario]
+GO
+CREATE  VIEW [view_gen_flujoFormulario] AS
+SELECT 	[gen_flujoFormulario].[id] AS [id],
+		[gen_flujoFormulario].[uid] AS [uid],
+		[gen_flujoFormulario].[eid] AS [eid],
+		[gen_flujoFormulario].[id_usuario_modifico] AS [id_usuario_modifico],
+		[gen_flujoFormulario].[id_usuario_creo] AS [id_usuario_creo],
+		[gen_flujoFormulario].[fechaModificacion] AS [fechaModificacion],
+		[gen_flujoFormulario].[fechaCreacion] AS [fechaCreacion],
+		[gen_flujoFormulario].[active] AS [active],
+		[gen_flujoFormulario].[flujoFormulario] AS [flujoFormulario],
+		[gen_flujoFormulario].[flujoFormulario_codigo] AS [flujoFormulario_codigo],
+		[gen_flujoFormulario].[id_formulario_origen] AS [id_formulario_origen],
+[gen_formulario_origen].[formulario] as [gen_formulario_origen_formulario],
+[gen_formulario_origen].[formulario_codigo] as [gen_formulario_origen_formulario_codigo],
+[gen_formulario_origen].[duplicar] as [gen_formulario_origen_duplicar],
+[gen_formulario_origen].[eliminarIntermedias] as [gen_formulario_origen_eliminarIntermedias],
+[gen_formulario_origen].[id_configuracionAtributos] as [gen_formulario_origen_id_configuracionAtributos],
+[gen_formulario_origen].[id_tabla_destino] as [gen_formulario_origen_id_tabla_destino],
+[gen_formulario_origen].[cmm] as [gen_formulario_origen_cmm],
+[gen_formulario_origen].[id_formulario] as [gen_formulario_origen_id_formulario],
+[gen_formulario_origen].[condicion] as [gen_formulario_origen_condicion],
+		[gen_flujoFormulario].[id_formulario_destino] AS [id_formulario_destino],
+[gen_formulario_destino].[formulario] as [gen_formulario_destino_formulario],
+[gen_formulario_destino].[formulario_codigo] as [gen_formulario_destino_formulario_codigo],
+[gen_formulario_destino].[duplicar] as [gen_formulario_destino_duplicar],
+[gen_formulario_destino].[eliminarIntermedias] as [gen_formulario_destino_eliminarIntermedias],
+[gen_formulario_destino].[id_configuracionAtributos] as [gen_formulario_destino_id_configuracionAtributos],
+[gen_formulario_destino].[id_tabla_destino] as [gen_formulario_destino_id_tabla_destino],
+[gen_formulario_destino].[cmm] as [gen_formulario_destino_cmm],
+[gen_formulario_destino].[id_formulario] as [gen_formulario_destino_id_formulario],
+[gen_formulario_destino].[condicion] as [gen_formulario_destino_condicion],
+		[gen_flujoFormulario].[cmm] AS [cmm],
+		[gen_flujoFormulario].[esAutomatico] AS [esAutomatico],
+		[empresaCodigo].[empresa] As [multiempresa]
+FROM [gen_flujoFormulario]
+	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[gen_flujoFormulario].[id_usuario_modifico]
+	INNER JOIN [seg_usuario] AS [seg_usuario_creo] ON [seg_usuario_creo].id=[gen_flujoFormulario].[id_usuario_creo]
+	INNER JOIN [gen_formulario] AS [gen_formulario_origen] ON [gen_formulario_origen].id=[gen_flujoFormulario].[id_formulario_origen]
+	INNER JOIN [gen_formulario] AS [gen_formulario_destino] ON [gen_formulario_destino].id=[gen_flujoFormulario].[id_formulario_destino]
+	INNER JOIN [gen_empresa] AS empresaCodigo ON [gen_flujoFormulario].eid = [empresaCodigo].[codigo] and empresaCodigo.active=1
+WHERE [gen_flujoFormulario].active=1
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gen_flujoFormulariosXusuario_modifico]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gen_flujoFormulariosXusuario_modifico]
+GO
+CREATE PROCEDURE [sel_gen_flujoFormulariosXusuario_modifico]
+	@p_id_usuario_modifico INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_gen_flujoFormulario]
+	WHERE ([id_usuario_modifico]= @p_id_usuario_modifico)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gen_flujoFormulariosXusuario_creo]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gen_flujoFormulariosXusuario_creo]
+GO
+CREATE PROCEDURE [sel_gen_flujoFormulariosXusuario_creo]
+	@p_id_usuario_creo INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_gen_flujoFormulario]
+	WHERE ([id_usuario_creo]= @p_id_usuario_creo)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gen_flujoFormulariosXformulario_origen]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gen_flujoFormulariosXformulario_origen]
+GO
+CREATE PROCEDURE [sel_gen_flujoFormulariosXformulario_origen]
+	@p_id_formulario_origen INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_gen_flujoFormulario]
+	WHERE ([id_formulario_origen]= @p_id_formulario_origen)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gen_flujoFormulariosXformulario_destino]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gen_flujoFormulariosXformulario_destino]
+GO
+CREATE PROCEDURE [sel_gen_flujoFormulariosXformulario_destino]
+	@p_id_formulario_destino INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_gen_flujoFormulario]
+	WHERE ([id_formulario_destino]= @p_id_formulario_destino)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gen_flujoFormularios]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gen_flujoFormularios]
+GO
+CREATE PROCEDURE [sel_gen_flujoFormularios]
+	
+	@p_filtro as varchar (8000) = '1=1',
+	@p_orden as varchar (8000) = 'id',
+	@p_campos as varchar (8000) = '*' AS
+BEGIN
+exec ('SELECT '+ @p_campos +
+' FROM [view_gen_flujoFormulario]
+WHERE (' + @p_filtro + ') ORDER BY ' + @p_orden)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[lis_gen_flujoFormularios]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[lis_gen_flujoFormularios]
+GO
+CREATE PROCEDURE [lis_gen_flujoFormularios]
+	AS
+BEGIN
+	SELECT id AS id,
+[flujoFormulario] AS [gen_flujoFormulario]
+	FROM [gen_flujoFormulario]
+	WHERE active = 1
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[upd_gen_flujoFormulario]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[upd_gen_flujoFormulario]
+GO
+CREATE PROCEDURE [upd_gen_flujoFormulario]
+	@p_id int = null,
+		@p_uid varchar(500) = null,
+		@p_eid varchar(50) = null,
+		@p_id_usuario_modifico int = null,
+		@p_id_usuario_creo int = null,
+		@p_fechaCreacion smalldatetime = null,
+		@p_flujoFormulario varchar(300) = null,
+		@p_flujoFormulario_codigo varchar(100) = null,
+		@p_id_formulario_origen int = null,
+		@p_id_formulario_destino int = null,
+		@p_cmm varchar(300) = null,
+		@p_esAutomatico bit = null
+AS
+BEGIN
+		UPDATE [gen_flujoFormulario]
+		SET	[uid] = isnull(@p_uid,[uid]),
+			[eid] = isnull(@p_eid,[eid]),
+			[id_usuario_modifico] = isnull(@p_id_usuario_modifico,[id_usuario_modifico]),
+			[id_usuario_creo] = isnull(@p_id_usuario_creo,[id_usuario_creo]),
+			[fechaModificacion] = GETDATE(),
+			[flujoFormulario] = isnull(@p_flujoFormulario,[flujoFormulario]),
+			[flujoFormulario_codigo] = isnull(@p_flujoFormulario_codigo,[flujoFormulario_codigo]),
+			[id_formulario_origen] = isnull(@p_id_formulario_origen,[id_formulario_origen]),
+			[id_formulario_destino] = isnull(@p_id_formulario_destino,[id_formulario_destino]),
+			[cmm] = isnull(@p_cmm,[cmm]),
+			[esAutomatico] = isnull(@p_esAutomatico,[esAutomatico])
+		WHERE (id = @p_id)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[ins_gen_flujoFormulario]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[ins_gen_flujoFormulario]
+GO
+CREATE PROCEDURE [ins_gen_flujoFormulario]
+	@p_uid varchar(500),
+		@p_eid varchar(50),
+		@p_id_usuario_modifico int,
+		@p_id_usuario_creo int,
+		@p_flujoFormulario varchar(300),
+		@p_flujoFormulario_codigo varchar(100),
+		@p_id_formulario_origen int,
+		@p_id_formulario_destino int,
+		@p_cmm varchar(300),
+		@p_esAutomatico bit
+AS
+BEGIN
+	DECLARE @v_id int
+		INSERT INTO [gen_flujoFormulario]
+			([uid],
+			[eid],
+			[id_usuario_modifico],
+			[id_usuario_creo],
+			[fechaModificacion],
+			[fechaCreacion],
+			[flujoFormulario],
+			[flujoFormulario_codigo],
+			[id_formulario_origen],
+			[id_formulario_destino],
+			[cmm],
+			[esAutomatico])
+		VALUES(	@p_uid,
+			@p_eid,
+			@p_id_usuario_modifico,
+			@p_id_usuario_creo,
+			GETDATE(),
+			GETDATE(),
+			@p_flujoFormulario,
+			@p_flujoFormulario_codigo,
+			@p_id_formulario_origen,
+			@p_id_formulario_destino,
+			@p_cmm,
+			@p_esAutomatico)
+		SET @v_id = scope_identity()
+UPDATE [gen_flujoFormulario] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
+SELECT @v_id as id
+RETURN @v_id
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[act_gen_flujoFormulario]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[act_gen_flujoFormulario]
+GO
+CREATE PROCEDURE [act_gen_flujoFormulario]
+	@p_active BIT,
+	@p_id INT,
+@p_id_usuario_modifico int = null
+AS
+BEGIN
+	UPDATE [gen_flujoFormulario]
+	SET active=@p_active,
+	[id_usuario_modifico] = isnull(@p_id_usuario_modifico,[id_usuario_modifico]),
+	[fechaModificacion] = GETDATE()
+	WHERE	(id = @p_id)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[reg_gen_flujoFormulario_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[reg_gen_flujoFormulario_m]
+GO
+CREATE PROCEDURE [reg_gen_flujoFormulario_m]
+	@p_id INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT 	[id] AS [id],
+		[uid] AS [uid],
+		[eid] AS [eid],
+		[id_usuario_modifico] AS [id_usuario_modifico],
+		[id_usuario_creo] AS [id_usuario_creo],
+		[fechaModificacion] AS [fechaModificacion],
+		[fechaCreacion] AS [fechaCreacion],
+		[active] AS [active],
+		[flujoFormulario] AS [flujoFormulario],
+		[flujoFormulario_codigo] AS [flujoFormulario_codigo],
+		[id_formulario_origen] AS [id_formulario_origen],
+		[id_formulario_destino] AS [id_formulario_destino],
+		[cmm] AS [cmm],
+		[esAutomatico] AS [esAutomatico]
+	FROM [gen_flujoFormulario]
+	WHERE	(id = @p_id)
+	AND	(eid LIKE @p_eid+'%')
+
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gen_flujoFormulariosXusuario_modifico_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gen_flujoFormulariosXusuario_modifico_m]
+GO
+CREATE PROCEDURE [sel_gen_flujoFormulariosXusuario_modifico_m]
+	@p_id_usuario_modifico INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_gen_flujoFormulario]
+	WHERE ([id_usuario_modifico]= @p_id_usuario_modifico)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gen_flujoFormulariosXusuario_creo_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gen_flujoFormulariosXusuario_creo_m]
+GO
+CREATE PROCEDURE [sel_gen_flujoFormulariosXusuario_creo_m]
+	@p_id_usuario_creo INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_gen_flujoFormulario]
+	WHERE ([id_usuario_creo]= @p_id_usuario_creo)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gen_flujoFormulariosXformulario_origen_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gen_flujoFormulariosXformulario_origen_m]
+GO
+CREATE PROCEDURE [sel_gen_flujoFormulariosXformulario_origen_m]
+	@p_id_formulario_origen INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_gen_flujoFormulario]
+	WHERE ([id_formulario_origen]= @p_id_formulario_origen)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gen_flujoFormulariosXformulario_destino_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gen_flujoFormulariosXformulario_destino_m]
+GO
+CREATE PROCEDURE [sel_gen_flujoFormulariosXformulario_destino_m]
+	@p_id_formulario_destino INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_gen_flujoFormulario]
+	WHERE ([id_formulario_destino]= @p_id_formulario_destino)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_gen_flujoFormularios_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_gen_flujoFormularios_m]
+GO
+CREATE PROCEDURE [sel_gen_flujoFormularios_m]
+	@p_eid as varchar (50)='',
+	@p_filtro as varchar (8000) = '1=1',
+	@p_orden as varchar (8000) = 'id',
+	@p_campos as varchar (8000) = '*' AS
+BEGIN
+exec ('SELECT '+ @p_campos +
+' FROM [view_gen_flujoFormulario]
+WHERE  (eid like '''+@p_eid+'%'+''' ) AND (' + @p_filtro + ') ORDER BY ' + @p_orden)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[lis_gen_flujoFormularios_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[lis_gen_flujoFormularios_m]
+GO
+CREATE PROCEDURE [lis_gen_flujoFormularios_m]
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT id AS id,
+[flujoFormulario] AS [gen_flujoFormulario]
+	FROM [gen_flujoFormulario]
+	WHERE active = 1
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[aud_gen_flujoFormulario]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[aud_gen_flujoFormulario]
+GO
+CREATE PROCEDURE [aud_gen_flujoFormulario]
+	@p_filtro as varchar (8000) = '1=1'
+AS
+BEGIN
+exec(	'SELECT [gen_flujoFormulario].id as id_tabla,
+	[gen_flujoFormulario].id_usuario_modifico as id_usuario_modifico,
+	[gen_flujoFormulario].id_usuario_creo as id_usuario_creo,
+	[gen_flujoFormulario].fechaModificacion as fechaModificacion,
+	[gen_flujoFormulario].fechaCreacion as fechaCreacion,
+	[gen_flujoFormulario].active as active,
+	[gen_flujoFormulario].[flujoFormulario] as campoPrincipal,
+	[seg_usuario_creo].usuario as usuarioCreo,
+	[seg_usuario_modifico].usuario as usuarioModifico
+
+	FROM [gen_flujoFormulario]
+	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[gen_flujoFormulario].[id_usuario_modifico]
+	INNER JOIN [seg_usuario] AS [seg_usuario_creo] ON [seg_usuario_creo].id=[gen_flujoFormulario].[id_usuario_creo]
+	where ' + @p_filtro)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+print 'gen_flujoFormulario'
 --------------------------------
 SET QUOTED_IDENTIFIER OFF
 GO
@@ -161222,4 +162454,4 @@ SET ANSI_NULLS ON
 GO
 ----------------------
 print 'ter_tercero_usuario'
------------------------------------5/2/2025 09:08:08
+-----------------------------------21/05/2025 21:07:32
