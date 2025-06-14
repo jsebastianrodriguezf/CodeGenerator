@@ -1024,7 +1024,7 @@ namespace CodeGenerator.BLL
 
                 if (!hasParentTable && !isParentTable && x.Contains("[cmm]"))
                 {
-                        x = $"			CASE WHEN id > 0 THEN id ELSE '' END" + (x.Contains(',') ? "," : "");
+                        x = $"			CASE WHEN id < 0 THEN id ELSE '' END" + (x.Contains(',') ? "," : "");
                 }
 
                 if (isParentTable && tableName == "doc_documento" && x.Contains("[cmm]"))

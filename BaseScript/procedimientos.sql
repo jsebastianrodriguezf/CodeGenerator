@@ -69734,11 +69734,11 @@ BEGIN
 		[cantidad] AS [cantidad],
 		[id_documento] AS [id_documento],
 		[id_catalogo] AS [id_catalogo],
-		[id_tipoDocumento] AS [id_tipoDocumento],
 		[olvidar] AS [olvidar],
 		[id_reporteTecnico] AS [id_reporteTecnico],
 		[id_tipoPendiente] AS [id_tipoPendiente],
-		[cmm] AS [cmm]
+		[cmm] AS [cmm],
+		[id_subtipoDocumento] AS [id_subtipoDocumento]
 	FROM [doc_pendienteDocumento]
 	WHERE	(id = @p_id)
 
@@ -69814,17 +69814,6 @@ SELECT 	[doc_pendienteDocumento].[id] AS [id],
 [cat_catalogo].[descripcion] as [cat_catalogo_descripcion],
 [cat_catalogo].[bloquearCostear] as [cat_catalogo_bloquearCostear],
 [cat_catalogo].[cmm] as [cat_catalogo_cmm],
-		[doc_pendienteDocumento].[id_tipoDocumento] AS [id_tipoDocumento],
-[doc_tipoDocumento].[tipoDocumento] as [doc_tipoDocumento_tipoDocumento],
-[doc_tipoDocumento].[tipoDocumento_codigo] as [doc_tipoDocumento_tipoDocumento_codigo],
-[doc_tipoDocumento].[esSalida] as [doc_tipoDocumento_esSalida],
-[doc_tipoDocumento].[mostrarBodega] as [doc_tipoDocumento_mostrarBodega],
-[doc_tipoDocumento].[mostrarCentroCosto] as [doc_tipoDocumento_mostrarCentroCosto],
-[doc_tipoDocumento].[mostrarIncoterm] as [doc_tipoDocumento_mostrarIncoterm],
-[doc_tipoDocumento].[puedeSerMayor] as [doc_tipoDocumento_puedeSerMayor],
-[doc_tipoDocumento].[puedeSerMenor] as [doc_tipoDocumento_puedeSerMenor],
-[doc_tipoDocumento].[esUrgente] as [doc_tipoDocumento_esUrgente],
-[doc_tipoDocumento].[cmm] as [doc_tipoDocumento_cmm],
 		[doc_pendienteDocumento].[olvidar] AS [olvidar],
 		[doc_pendienteDocumento].[id_reporteTecnico] AS [id_reporteTecnico],
 [ort_reporteTecnico].[reporteTecnico] as [ort_reporteTecnico_reporteTecnico],
@@ -69844,15 +69833,35 @@ SELECT 	[doc_pendienteDocumento].[id] AS [id],
 [doc_tipoPendiente].[tipoPendiente_codigo] as [doc_tipoPendiente_tipoPendiente_codigo],
 [doc_tipoPendiente].[cmm] as [doc_tipoPendiente_cmm],
 		[doc_pendienteDocumento].[cmm] AS [cmm],
+		[doc_pendienteDocumento].[id_subtipoDocumento] AS [id_subtipoDocumento],
+[doc_subtipoDocumento].[subtipoDocumento] as [doc_subtipoDocumento_subtipoDocumento],
+[doc_subtipoDocumento].[subtipoDocumento_codigo] as [doc_subtipoDocumento_subtipoDocumento_codigo],
+[doc_subtipoDocumento].[prefijo] as [doc_subtipoDocumento_prefijo],
+[doc_subtipoDocumento].[consecutivo] as [doc_subtipoDocumento_consecutivo],
+[doc_subtipoDocumento].[id_tipoDocumento] as [doc_subtipoDocumento_id_tipoDocumento],
+[doc_subtipoDocumento].[programarPlaneadas] as [doc_subtipoDocumento_programarPlaneadas],
+[doc_subtipoDocumento].[cargarSolicitante] as [doc_subtipoDocumento_cargarSolicitante],
+[doc_subtipoDocumento].[verCentroCosto] as [doc_subtipoDocumento_verCentroCosto],
+[doc_subtipoDocumento].[verIncoterm] as [doc_subtipoDocumento_verIncoterm],
+[doc_subtipoDocumento].[valUrgente] as [doc_subtipoDocumento_valUrgente],
+[doc_subtipoDocumento].[bloquearDespacho] as [doc_subtipoDocumento_bloquearDespacho],
+[doc_subtipoDocumento].[cerrarSol] as [doc_subtipoDocumento_cerrarSol],
+[doc_subtipoDocumento].[ejecutaDevolucion] as [doc_subtipoDocumento_ejecutaDevolucion],
+[doc_subtipoDocumento].[tipoCobro] as [doc_subtipoDocumento_tipoCobro],
+[doc_subtipoDocumento].[mostrarPendienteDocumento] as [doc_subtipoDocumento_mostrarPendienteDocumento],
+[doc_subtipoDocumento].[cantidadAuxiliar] as [doc_subtipoDocumento_cantidadAuxiliar],
+[doc_subtipoDocumento].[mostrarValoresEjecutados] as [doc_subtipoDocumento_mostrarValoresEjecutados],
+[doc_subtipoDocumento].[archivosAdjuntosApp] as [doc_subtipoDocumento_archivosAdjuntosApp],
+[doc_subtipoDocumento].[cmm] as [doc_subtipoDocumento_cmm],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [doc_pendienteDocumento]
 	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[doc_pendienteDocumento].[id_usuario_modifico]
 	INNER JOIN [seg_usuario] AS [seg_usuario_creo] ON [seg_usuario_creo].id=[doc_pendienteDocumento].[id_usuario_creo]
 	INNER JOIN [doc_documento] ON [doc_documento].id=[doc_pendienteDocumento].[id_documento]
 	INNER JOIN [cat_catalogo] ON [cat_catalogo].id=[doc_pendienteDocumento].[id_catalogo]
-	INNER JOIN [doc_tipoDocumento] ON [doc_tipoDocumento].id=[doc_pendienteDocumento].[id_tipoDocumento]
 	INNER JOIN [ort_reporteTecnico] ON [ort_reporteTecnico].id=[doc_pendienteDocumento].[id_reporteTecnico]
 	INNER JOIN [doc_tipoPendiente] ON [doc_tipoPendiente].id=[doc_pendienteDocumento].[id_tipoPendiente]
+	INNER JOIN [doc_subtipoDocumento] ON [doc_subtipoDocumento].id=[doc_pendienteDocumento].[id_subtipoDocumento]
 	INNER JOIN [gen_empresa] AS empresaCodigo ON [doc_pendienteDocumento].eid = [empresaCodigo].[codigo] and empresaCodigo.active=1
 WHERE [doc_pendienteDocumento].active=1
 GO
@@ -69949,27 +69958,6 @@ GO
 SET ANSI_NULLS OFF
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_doc_pendienteDocumentosXtipoDocumento]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_doc_pendienteDocumentosXtipoDocumento]
-GO
-CREATE PROCEDURE [sel_doc_pendienteDocumentosXtipoDocumento]
-	@p_id_tipoDocumento INT
-AS
-BEGIN
-	SELECT * 
-	FROM [view_doc_pendienteDocumento]
-	WHERE ([id_tipoDocumento]= @p_id_tipoDocumento)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_doc_pendienteDocumentosXreporteTecnico]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_doc_pendienteDocumentosXreporteTecnico]
 GO
 CREATE PROCEDURE [sel_doc_pendienteDocumentosXreporteTecnico]
@@ -70000,6 +69988,27 @@ BEGIN
 	SELECT * 
 	FROM [view_doc_pendienteDocumento]
 	WHERE ([id_tipoPendiente]= @p_id_tipoPendiente)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_doc_pendienteDocumentosXsubtipoDocumento]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_doc_pendienteDocumentosXsubtipoDocumento]
+GO
+CREATE PROCEDURE [sel_doc_pendienteDocumentosXsubtipoDocumento]
+	@p_id_subtipoDocumento INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_doc_pendienteDocumento]
+	WHERE ([id_subtipoDocumento]= @p_id_subtipoDocumento)
 END
 GO
 SET QUOTED_IDENTIFIER OFF 
@@ -70071,11 +70080,11 @@ CREATE PROCEDURE [upd_doc_pendienteDocumento]
 		@p_cantidad float = null,
 		@p_id_documento int = null,
 		@p_id_catalogo int = null,
-		@p_id_tipoDocumento int = null,
 		@p_olvidar bit = null,
 		@p_id_reporteTecnico int = null,
 		@p_id_tipoPendiente int = null,
-		@p_cmm varchar(300) = null
+		@p_cmm varchar(300) = null,
+		@p_id_subtipoDocumento int = null
 AS
 BEGIN
 		UPDATE [doc_pendienteDocumento]
@@ -70089,11 +70098,11 @@ BEGIN
 			[cantidad] = isnull(@p_cantidad,[cantidad]),
 			[id_documento] = isnull(@p_id_documento,[id_documento]),
 			[id_catalogo] = isnull(@p_id_catalogo,[id_catalogo]),
-			[id_tipoDocumento] = isnull(@p_id_tipoDocumento,[id_tipoDocumento]),
 			[olvidar] = isnull(@p_olvidar,[olvidar]),
 			[id_reporteTecnico] = isnull(@p_id_reporteTecnico,[id_reporteTecnico]),
 			[id_tipoPendiente] = isnull(@p_id_tipoPendiente,[id_tipoPendiente]),
-			[cmm] = isnull(@p_cmm,[cmm])
+			[cmm] = isnull(@p_cmm,[cmm]),
+			[id_subtipoDocumento] = isnull(@p_id_subtipoDocumento,[id_subtipoDocumento])
 		WHERE (id = @p_id)
 END
 GO
@@ -70119,11 +70128,11 @@ CREATE PROCEDURE [ins_doc_pendienteDocumento]
 		@p_cantidad float,
 		@p_id_documento int,
 		@p_id_catalogo int,
-		@p_id_tipoDocumento int,
 		@p_olvidar bit,
 		@p_id_reporteTecnico int,
 		@p_id_tipoPendiente int,
-		@p_cmm varchar(300)
+		@p_cmm varchar(300),
+		@p_id_subtipoDocumento int
 AS
 BEGIN
 	DECLARE @v_id int
@@ -70139,11 +70148,11 @@ BEGIN
 			[cantidad],
 			[id_documento],
 			[id_catalogo],
-			[id_tipoDocumento],
 			[olvidar],
 			[id_reporteTecnico],
 			[id_tipoPendiente],
-			[cmm])
+			[cmm],
+			[id_subtipoDocumento])
 		VALUES(	@p_uid,
 			@p_eid,
 			@p_id_usuario_modifico,
@@ -70155,11 +70164,11 @@ BEGIN
 			@p_cantidad,
 			@p_id_documento,
 			@p_id_catalogo,
-			@p_id_tipoDocumento,
 			@p_olvidar,
 			@p_id_reporteTecnico,
 			@p_id_tipoPendiente,
-			@p_cmm)
+			@p_cmm,
+			@p_id_subtipoDocumento)
 		SET @v_id = scope_identity()
 UPDATE [doc_pendienteDocumento] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
 SELECT @v_id as id
@@ -70222,11 +70231,11 @@ BEGIN
 		[cantidad] AS [cantidad],
 		[id_documento] AS [id_documento],
 		[id_catalogo] AS [id_catalogo],
-		[id_tipoDocumento] AS [id_tipoDocumento],
 		[olvidar] AS [olvidar],
 		[id_reporteTecnico] AS [id_reporteTecnico],
 		[id_tipoPendiente] AS [id_tipoPendiente],
-		[cmm] AS [cmm]
+		[cmm] AS [cmm],
+		[id_subtipoDocumento] AS [id_subtipoDocumento]
 	FROM [doc_pendienteDocumento]
 	WHERE	(id = @p_id)
 	AND	(eid LIKE @p_eid+'%')
@@ -70335,29 +70344,6 @@ GO
 SET ANSI_NULLS OFF
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_doc_pendienteDocumentosXtipoDocumento_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_doc_pendienteDocumentosXtipoDocumento_m]
-GO
-CREATE PROCEDURE [sel_doc_pendienteDocumentosXtipoDocumento_m]
-	@p_id_tipoDocumento INT,
-	@p_eid as varchar(50) = ''
-AS
-BEGIN
-	SELECT *
-	FROM [view_doc_pendienteDocumento]
-	WHERE ([id_tipoDocumento]= @p_id_tipoDocumento)
-	AND	(eid LIKE @p_eid+'%')
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_doc_pendienteDocumentosXreporteTecnico_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_doc_pendienteDocumentosXreporteTecnico_m]
 GO
 CREATE PROCEDURE [sel_doc_pendienteDocumentosXreporteTecnico_m]
@@ -70391,6 +70377,29 @@ BEGIN
 	SELECT *
 	FROM [view_doc_pendienteDocumento]
 	WHERE ([id_tipoPendiente]= @p_id_tipoPendiente)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_doc_pendienteDocumentosXsubtipoDocumento_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_doc_pendienteDocumentosXsubtipoDocumento_m]
+GO
+CREATE PROCEDURE [sel_doc_pendienteDocumentosXsubtipoDocumento_m]
+	@p_id_subtipoDocumento INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_doc_pendienteDocumento]
+	WHERE ([id_subtipoDocumento]= @p_id_subtipoDocumento)
 	AND	(eid LIKE @p_eid+'%')
 END
 GO
@@ -70536,11 +70545,11 @@ SELECT 	[doc_pendienteDocumento_doc_itemDocumento].[id] AS [id],
 [doc_pendienteDocumento].[cantidad] as [doc_pendienteDocumento_cantidad],
 [doc_pendienteDocumento].[id_documento] as [doc_pendienteDocumento_id_documento],
 [doc_pendienteDocumento].[id_catalogo] as [doc_pendienteDocumento_id_catalogo],
-[doc_pendienteDocumento].[id_tipoDocumento] as [doc_pendienteDocumento_id_tipoDocumento],
 [doc_pendienteDocumento].[olvidar] as [doc_pendienteDocumento_olvidar],
 [doc_pendienteDocumento].[id_reporteTecnico] as [doc_pendienteDocumento_id_reporteTecnico],
 [doc_pendienteDocumento].[id_tipoPendiente] as [doc_pendienteDocumento_id_tipoPendiente],
 [doc_pendienteDocumento].[cmm] as [doc_pendienteDocumento_cmm],
+[doc_pendienteDocumento].[id_subtipoDocumento] as [doc_pendienteDocumento_id_subtipoDocumento],
 		[doc_pendienteDocumento_doc_itemDocumento].[id_itemDocumento] AS [id_itemDocumento],
 [doc_itemDocumento].[itemDocumento] as [doc_itemDocumento_itemDocumento],
 [doc_itemDocumento].[itemDocumento_codigo] as [doc_itemDocumento_itemDocumento_codigo],
@@ -95497,7 +95506,8 @@ BEGIN
 		[id_seccionFormulario] AS [id_seccionFormulario],
 		[cmm] AS [cmm],
 		[mostrarEnGrilla] AS [mostrarEnGrilla],
-		[condicion] AS [condicion]
+		[condicion] AS [condicion],
+		[valorDefecto] AS [valorDefecto]
 	FROM [gen_detalleFormulario]
 	WHERE	(id = @p_id)
 
@@ -95556,6 +95566,7 @@ SELECT 	[gen_detalleFormulario].[id] AS [id],
 [gen_formulario].[cmm] as [gen_formulario_cmm],
 [gen_formulario].[id_formulario] as [gen_formulario_id_formulario],
 [gen_formulario].[condicion] as [gen_formulario_condicion],
+[gen_formulario].[valorDefecto] as [gen_formulario_valorDefecto],
 		[gen_detalleFormulario].[id_seccionFormulario] AS [id_seccionFormulario],
 [gen_seccionFormulario].[seccionFormulario] as [gen_seccionFormulario_seccionFormulario],
 [gen_seccionFormulario].[seccionFormulario_codigo] as [gen_seccionFormulario_seccionFormulario_codigo],
@@ -95564,6 +95575,7 @@ SELECT 	[gen_detalleFormulario].[id] AS [id],
 		[gen_detalleFormulario].[cmm] AS [cmm],
 		[gen_detalleFormulario].[mostrarEnGrilla] AS [mostrarEnGrilla],
 		[gen_detalleFormulario].[condicion] AS [condicion],
+		[gen_detalleFormulario].[valorDefecto] AS [valorDefecto],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [gen_detalleFormulario]
 	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[gen_detalleFormulario].[id_usuario_modifico]
@@ -95799,7 +95811,8 @@ CREATE PROCEDURE [upd_gen_detalleFormulario]
 		@p_id_seccionFormulario int = null,
 		@p_cmm varchar(300) = null,
 		@p_mostrarEnGrilla bit = null,
-		@p_condicion varchar(300) = null
+		@p_condicion varchar(300) = null,
+		@p_valorDefecto varchar(300) = null
 AS
 BEGIN
 		UPDATE [gen_detalleFormulario]
@@ -95821,7 +95834,8 @@ BEGIN
 			[id_seccionFormulario] = isnull(@p_id_seccionFormulario,[id_seccionFormulario]),
 			[cmm] = isnull(@p_cmm,[cmm]),
 			[mostrarEnGrilla] = isnull(@p_mostrarEnGrilla,[mostrarEnGrilla]),
-			[condicion] = isnull(@p_condicion,[condicion])
+			[condicion] = isnull(@p_condicion,[condicion]),
+			[valorDefecto] = isnull(@p_valorDefecto,[valorDefecto])
 		WHERE (id = @p_id)
 END
 GO
@@ -95855,7 +95869,8 @@ CREATE PROCEDURE [ins_gen_detalleFormulario]
 		@p_id_seccionFormulario int,
 		@p_cmm varchar(300),
 		@p_mostrarEnGrilla bit,
-		@p_condicion varchar(300)
+		@p_condicion varchar(300),
+		@p_valorDefecto varchar(300)
 AS
 BEGIN
 	DECLARE @v_id int
@@ -95879,7 +95894,8 @@ BEGIN
 			[id_seccionFormulario],
 			[cmm],
 			[mostrarEnGrilla],
-			[condicion])
+			[condicion],
+			[valorDefecto])
 		VALUES(	@p_uid,
 			@p_eid,
 			@p_id_usuario_modifico,
@@ -95899,7 +95915,8 @@ BEGIN
 			@p_id_seccionFormulario,
 			@p_cmm,
 			@p_mostrarEnGrilla,
-			@p_condicion)
+			@p_condicion,
+			@p_valorDefecto)
 		SET @v_id = scope_identity()
 UPDATE [gen_detalleFormulario] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
 SELECT @v_id as id
@@ -95970,7 +95987,8 @@ BEGIN
 		[id_seccionFormulario] AS [id_seccionFormulario],
 		[cmm] AS [cmm],
 		[mostrarEnGrilla] AS [mostrarEnGrilla],
-		[condicion] AS [condicion]
+		[condicion] AS [condicion],
+		[valorDefecto] AS [valorDefecto]
 	FROM [gen_detalleFormulario]
 	WHERE	(id = @p_id)
 	AND	(eid LIKE @p_eid+'%')
@@ -101174,7 +101192,8 @@ BEGIN
 		[id_tabla_destino] AS [id_tabla_destino],
 		[cmm] AS [cmm],
 		[id_formulario] AS [id_formulario],
-		[condicion] AS [condicion]
+		[condicion] AS [condicion],
+		[valorDefecto] AS [valorDefecto]
 	FROM [gen_formulario]
 	WHERE	(id = @p_id)
 
@@ -101224,7 +101243,9 @@ SELECT 	[gen_formulario].[id] AS [id],
 [gen_formulario_padre].[cmm] as [gen_formulario_padre_cmm],
 [gen_formulario_padre].[id_formulario] as [gen_formulario_padre_id_formulario],
 [gen_formulario_padre].[condicion] as [gen_formulario_padre_condicion],
+[gen_formulario_padre].[valorDefecto] as [gen_formulario_padre_valorDefecto],
 		[gen_formulario].[condicion] AS [condicion],
+		[gen_formulario].[valorDefecto] AS [valorDefecto],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [gen_formulario]
 	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[gen_formulario].[id_usuario_modifico]
@@ -101411,7 +101432,8 @@ CREATE PROCEDURE [upd_gen_formulario]
 		@p_id_tabla_destino int = null,
 		@p_cmm varchar(300) = null,
 		@p_id_formulario int = null,
-		@p_condicion varchar(300) = null
+		@p_condicion varchar(300) = null,
+		@p_valorDefecto varchar(300) = null
 AS
 BEGIN
 		UPDATE [gen_formulario]
@@ -101428,7 +101450,8 @@ BEGIN
 			[id_tabla_destino] = isnull(@p_id_tabla_destino,[id_tabla_destino]),
 			[cmm] = isnull(@p_cmm,[cmm]),
 			[id_formulario] = isnull(@p_id_formulario,[id_formulario]),
-			[condicion] = isnull(@p_condicion,[condicion])
+			[condicion] = isnull(@p_condicion,[condicion]),
+			[valorDefecto] = isnull(@p_valorDefecto,[valorDefecto])
 		WHERE (id = @p_id)
 END
 GO
@@ -101457,7 +101480,8 @@ CREATE PROCEDURE [ins_gen_formulario]
 		@p_id_tabla_destino int,
 		@p_cmm varchar(300),
 		@p_id_formulario int,
-		@p_condicion varchar(300)
+		@p_condicion varchar(300),
+		@p_valorDefecto varchar(300)
 AS
 BEGIN
 	DECLARE @v_id int
@@ -101476,7 +101500,8 @@ BEGIN
 			[id_tabla_destino],
 			[cmm],
 			[id_formulario],
-			[condicion])
+			[condicion],
+			[valorDefecto])
 		VALUES(	@p_uid,
 			@p_eid,
 			@p_id_usuario_modifico,
@@ -101491,7 +101516,8 @@ BEGIN
 			@p_id_tabla_destino,
 			@p_cmm,
 			@p_id_formulario,
-			@p_condicion)
+			@p_condicion,
+			@p_valorDefecto)
 		SET @v_id = scope_identity()
 UPDATE [gen_formulario] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
 SELECT @v_id as id
@@ -101557,7 +101583,8 @@ BEGIN
 		[id_tabla_destino] AS [id_tabla_destino],
 		[cmm] AS [cmm],
 		[id_formulario] AS [id_formulario],
-		[condicion] AS [condicion]
+		[condicion] AS [condicion],
+		[valorDefecto] AS [valorDefecto]
 	FROM [gen_formulario]
 	WHERE	(id = @p_id)
 	AND	(eid LIKE @p_eid+'%')
@@ -101943,6 +101970,7 @@ SELECT 	[gen_formulario_catalogo.equipo].[id] AS [id],
 [gen_formulario].[cmm] as [gen_formulario_cmm],
 [gen_formulario].[id_formulario] as [gen_formulario_id_formulario],
 [gen_formulario].[condicion] as [gen_formulario_condicion],
+[gen_formulario].[valorDefecto] as [gen_formulario_valorDefecto],
 		[gen_formulario_catalogo.equipo].[id_catalogo.equipo] AS [id_catalogo.equipo],
 [cat_catalogo.equipo].[catalogo.equipo] as [cat_catalogo.equipo_catalogo.equipo],
 [cat_catalogo.equipo].[garantiaMeses] as [cat_catalogo.equipo_garantiaMeses],
@@ -111670,6 +111698,7 @@ SELECT 	[gui_campoTexto].[id] AS [id],
 [gui_funcionalidad].[id_formulario] as [gui_funcionalidad_id_formulario],
 [gui_funcionalidad].[cmm] as [gui_funcionalidad_cmm],
 [gui_funcionalidad].[icono] as [gui_funcionalidad_icono],
+[gui_funcionalidad].[valorDefecto] as [gui_funcionalidad_valorDefecto],
 		[gui_campoTexto].[cmm] AS [cmm],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [gui_campoTexto]
@@ -113651,7 +113680,8 @@ BEGIN
 		[id_aplicacion] AS [id_aplicacion],
 		[id_formulario] AS [id_formulario],
 		[cmm] AS [cmm],
-		[icono] AS [icono]
+		[icono] AS [icono],
+		[valorDefecto] AS [valorDefecto]
 	FROM [gui_funcionalidad]
 	WHERE	(id = @p_id)
 
@@ -113690,6 +113720,7 @@ SELECT 	[gui_funcionalidad].[id] AS [id],
 [gui_funcionalidad_padre].[id_formulario] as [gui_funcionalidad_padre_id_formulario],
 [gui_funcionalidad_padre].[cmm] as [gui_funcionalidad_padre_cmm],
 [gui_funcionalidad_padre].[icono] as [gui_funcionalidad_padre_icono],
+[gui_funcionalidad_padre].[valorDefecto] as [gui_funcionalidad_padre_valorDefecto],
 		[gui_funcionalidad].[id_tipoFuncionalidad] AS [id_tipoFuncionalidad],
 [gui_tipoFuncionalidad].[tipoFuncionalidad] as [gui_tipoFuncionalidad_tipoFuncionalidad],
 [gui_tipoFuncionalidad].[tipoFuncionalidad_codigo] as [gui_tipoFuncionalidad_tipoFuncionalidad_codigo],
@@ -113707,8 +113738,10 @@ SELECT 	[gui_funcionalidad].[id] AS [id],
 [gen_formulario].[cmm] as [gen_formulario_cmm],
 [gen_formulario].[id_formulario] as [gen_formulario_id_formulario],
 [gen_formulario].[condicion] as [gen_formulario_condicion],
+[gen_formulario].[valorDefecto] as [gen_formulario_valorDefecto],
 		[gui_funcionalidad].[cmm] AS [cmm],
 		[gui_funcionalidad].[icono] AS [icono],
+		[gui_funcionalidad].[valorDefecto] AS [valorDefecto],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [gui_funcionalidad]
 	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[gui_funcionalidad].[id_usuario_modifico]
@@ -113917,7 +113950,8 @@ CREATE PROCEDURE [upd_gui_funcionalidad]
 		@p_id_aplicacion int = null,
 		@p_id_formulario int = null,
 		@p_cmm varchar(300) = null,
-		@p_icono varchar(100) = null
+		@p_icono varchar(100) = null,
+		@p_valorDefecto varchar(300) = null
 AS
 BEGIN
 		UPDATE [gui_funcionalidad]
@@ -113934,7 +113968,8 @@ BEGIN
 			[id_aplicacion] = isnull(@p_id_aplicacion,[id_aplicacion]),
 			[id_formulario] = isnull(@p_id_formulario,[id_formulario]),
 			[cmm] = isnull(@p_cmm,[cmm]),
-			[icono] = isnull(@p_icono,[icono])
+			[icono] = isnull(@p_icono,[icono]),
+			[valorDefecto] = isnull(@p_valorDefecto,[valorDefecto])
 		WHERE (id = @p_id)
 END
 GO
@@ -113963,7 +113998,8 @@ CREATE PROCEDURE [ins_gui_funcionalidad]
 		@p_id_aplicacion int,
 		@p_id_formulario int,
 		@p_cmm varchar(300),
-		@p_icono varchar(100)
+		@p_icono varchar(100),
+		@p_valorDefecto varchar(300)
 AS
 BEGIN
 	DECLARE @v_id int
@@ -113982,7 +114018,8 @@ BEGIN
 			[id_aplicacion],
 			[id_formulario],
 			[cmm],
-			[icono])
+			[icono],
+			[valorDefecto])
 		VALUES(	@p_uid,
 			@p_eid,
 			@p_id_usuario_modifico,
@@ -113997,7 +114034,8 @@ BEGIN
 			@p_id_aplicacion,
 			@p_id_formulario,
 			@p_cmm,
-			@p_icono)
+			@p_icono,
+			@p_valorDefecto)
 		SET @v_id = scope_identity()
 UPDATE [gui_funcionalidad] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
 SELECT @v_id as id
@@ -114063,7 +114101,8 @@ BEGIN
 		[id_aplicacion] AS [id_aplicacion],
 		[id_formulario] AS [id_formulario],
 		[cmm] AS [cmm],
-		[icono] AS [icono]
+		[icono] AS [icono],
+		[valorDefecto] AS [valorDefecto]
 	FROM [gui_funcionalidad]
 	WHERE	(id = @p_id)
 	AND	(eid LIKE @p_eid+'%')
@@ -114477,6 +114516,7 @@ SELECT 	[gui_funcionalidadFlujoEvento].[id] AS [id],
 [gui_funcionalidad].[id_formulario] as [gui_funcionalidad_id_formulario],
 [gui_funcionalidad].[cmm] as [gui_funcionalidad_cmm],
 [gui_funcionalidad].[icono] as [gui_funcionalidad_icono],
+[gui_funcionalidad].[valorDefecto] as [gui_funcionalidad_valorDefecto],
 		[gui_funcionalidadFlujoEvento].[tipoAccion] AS [tipoAccion],
 		[gui_funcionalidadFlujoEvento].[validador] AS [validador],
 		[gui_funcionalidadFlujoEvento].[id_flujoEventoCondicion_exitoso] AS [id_flujoEventoCondicion_exitoso],
@@ -139400,6 +139440,7 @@ SELECT 	[rep_reporte].[id] AS [id],
 [gui_funcionalidad].[id_formulario] as [gui_funcionalidad_id_formulario],
 [gui_funcionalidad].[cmm] as [gui_funcionalidad_cmm],
 [gui_funcionalidad].[icono] as [gui_funcionalidad_icono],
+[gui_funcionalidad].[valorDefecto] as [gui_funcionalidad_valorDefecto],
 		[rep_reporte].[esFormato] AS [esFormato],
 		[rep_reporte].[tieneGraficos] AS [tieneGraficos],
 		[rep_reporte].[cabecera] AS [cabecera],
@@ -143951,6 +143992,7 @@ SELECT 	[seg_perfil_formulario].[id] AS [id],
 [gen_formulario].[cmm] as [gen_formulario_cmm],
 [gen_formulario].[id_formulario] as [gen_formulario_id_formulario],
 [gen_formulario].[condicion] as [gen_formulario_condicion],
+[gen_formulario].[valorDefecto] as [gen_formulario_valorDefecto],
 		[seg_perfil_formulario].[cmm] AS [cmm],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [seg_perfil_formulario]
@@ -144484,6 +144526,7 @@ SELECT 	[seg_perfil_funcionalidad].[id] AS [id],
 [gui_funcionalidad].[id_formulario] as [gui_funcionalidad_id_formulario],
 [gui_funcionalidad].[cmm] as [gui_funcionalidad_cmm],
 [gui_funcionalidad].[icono] as [gui_funcionalidad_icono],
+[gui_funcionalidad].[valorDefecto] as [gui_funcionalidad_valorDefecto],
 		[seg_perfil_funcionalidad].[cmm] AS [cmm],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [seg_perfil_funcionalidad]
@@ -146134,6 +146177,7 @@ SELECT 	[seg_preferencia].[id] AS [id],
 [gui_funcionalidad].[id_formulario] as [gui_funcionalidad_id_formulario],
 [gui_funcionalidad].[cmm] as [gui_funcionalidad_cmm],
 [gui_funcionalidad].[icono] as [gui_funcionalidad_icono],
+[gui_funcionalidad].[valorDefecto] as [gui_funcionalidad_valorDefecto],
 		[seg_preferencia].[cmm] AS [cmm],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [seg_preferencia]
@@ -162454,4 +162498,4 @@ SET ANSI_NULLS ON
 GO
 ----------------------
 print 'ter_tercero_usuario'
------------------------------------21/05/2025 21:07:32
+-----------------------------------5/15/2025 09:20:17
