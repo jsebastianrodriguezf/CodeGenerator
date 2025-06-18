@@ -60295,6 +60295,7 @@ SELECT 	[doc_documentoComentario].[id] AS [id],
 [ort_reporteTecnico].[cmm] as [ort_reporteTecnico_cmm],
 [ort_reporteTecnico].[desde_fh] as [ort_reporteTecnico_desde_fh],
 [ort_reporteTecnico].[duracion] as [ort_reporteTecnico_duracion],
+[ort_reporteTecnico].[id_reporteTecnico] as [ort_reporteTecnico_id_reporteTecnico],
 		[doc_documentoComentario].[finalizado] AS [finalizado],
 		[doc_documentoComentario].[cmm] AS [cmm],
 		[empresaCodigo].[empresa] As [multiempresa]
@@ -66125,6 +66126,7 @@ SELECT 	[doc_itemDocumento].[id] AS [id],
 [ort_reporteTecnico].[cmm] as [ort_reporteTecnico_cmm],
 [ort_reporteTecnico].[desde_fh] as [ort_reporteTecnico_desde_fh],
 [ort_reporteTecnico].[duracion] as [ort_reporteTecnico_duracion],
+[ort_reporteTecnico].[id_reporteTecnico] as [ort_reporteTecnico_id_reporteTecnico],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [doc_itemDocumento]
 	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[doc_itemDocumento].[id_usuario_modifico]
@@ -69769,6 +69771,7 @@ SELECT 	[doc_pendienteDocumento].[id] AS [id],
 [ort_reporteTecnico].[cmm] as [ort_reporteTecnico_cmm],
 [ort_reporteTecnico].[desde_fh] as [ort_reporteTecnico_desde_fh],
 [ort_reporteTecnico].[duracion] as [ort_reporteTecnico_duracion],
+[ort_reporteTecnico].[id_reporteTecnico] as [ort_reporteTecnico_id_reporteTecnico],
 		[doc_pendienteDocumento].[id_tipoPendiente] AS [id_tipoPendiente],
 [doc_tipoPendiente].[tipoPendiente] as [doc_tipoPendiente_tipoPendiente],
 [doc_tipoPendiente].[tipoPendiente_codigo] as [doc_tipoPendiente_tipoPendiente_codigo],
@@ -89721,6 +89724,7 @@ SELECT 	[equ_trazabilidad].[id] AS [id],
 [ort_reporteTecnico].[cmm] as [ort_reporteTecnico_cmm],
 [ort_reporteTecnico].[desde_fh] as [ort_reporteTecnico_desde_fh],
 [ort_reporteTecnico].[duracion] as [ort_reporteTecnico_duracion],
+[ort_reporteTecnico].[id_reporteTecnico] as [ort_reporteTecnico_id_reporteTecnico],
 		[equ_trazabilidad].[id_evento] AS [id_evento],
 [dis_evento].[evento] as [dis_evento_evento],
 [dis_evento].[evento_codigo] as [dis_evento_evento_codigo],
@@ -118524,6 +118528,7 @@ SELECT 	[ort_programacion].[id] AS [id],
 [ort_reporteTecnico].[cmm] as [ort_reporteTecnico_cmm],
 [ort_reporteTecnico].[desde_fh] as [ort_reporteTecnico_desde_fh],
 [ort_reporteTecnico].[duracion] as [ort_reporteTecnico_duracion],
+[ort_reporteTecnico].[id_reporteTecnico] as [ort_reporteTecnico_id_reporteTecnico],
 		[ort_programacion].[id_catalogo.actividad] AS [id_catalogo.actividad],
 [cat_catalogo.actividad].[catalogo.actividad] as [cat_catalogo.actividad_catalogo.actividad],
 [cat_catalogo.actividad].[esProductiva] as [cat_catalogo.actividad_esProductiva],
@@ -119503,7 +119508,8 @@ BEGIN
 		[id_documento.gasto] AS [id_documento.gasto],
 		[cmm] AS [cmm],
 		[desde_fh] AS [desde_fh],
-		[duracion] AS [duracion]
+		[duracion] AS [duracion],
+		[id_reporteTecnico] AS [id_reporteTecnico]
 	FROM [ort_reporteTecnico]
 	WHERE	(id = @p_id)
 
@@ -119582,6 +119588,20 @@ SELECT 	[ort_reporteTecnico].[id] AS [id],
 		[ort_reporteTecnico].[cmm] AS [cmm],
 		[ort_reporteTecnico].[desde_fh] AS [desde_fh],
 		[ort_reporteTecnico].[duracion] AS [duracion],
+		[ort_reporteTecnico].[id_reporteTecnico] AS [id_reporteTecnico],
+[ort_reporteTecnico_padre].[reporteTecnico] as [ort_reporteTecnico_padre_reporteTecnico],
+[ort_reporteTecnico_padre].[reporteTecnico_codigo] as [ort_reporteTecnico_padre_reporteTecnico_codigo],
+[ort_reporteTecnico_padre].[numero] as [ort_reporteTecnico_padre_numero],
+[ort_reporteTecnico_padre].[trabajos] as [ort_reporteTecnico_padre_trabajos],
+[ort_reporteTecnico_padre].[recomendaciones] as [ort_reporteTecnico_padre_recomendaciones],
+[ort_reporteTecnico_padre].[compromisos] as [ort_reporteTecnico_padre_compromisos],
+[ort_reporteTecnico_padre].[id_canalAtencion] as [ort_reporteTecnico_padre_id_canalAtencion],
+[ort_reporteTecnico_padre].[diagnostico] as [ort_reporteTecnico_padre_diagnostico],
+[ort_reporteTecnico_padre].[id_documento.gasto] as [ort_reporteTecnico_padre_id_documento.gasto],
+[ort_reporteTecnico_padre].[cmm] as [ort_reporteTecnico_padre_cmm],
+[ort_reporteTecnico_padre].[desde_fh] as [ort_reporteTecnico_padre_desde_fh],
+[ort_reporteTecnico_padre].[duracion] as [ort_reporteTecnico_padre_duracion],
+[ort_reporteTecnico_padre].[id_reporteTecnico] as [ort_reporteTecnico_padre_id_reporteTecnico],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [ort_reporteTecnico]
 	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[ort_reporteTecnico].[id_usuario_modifico]
@@ -119589,6 +119609,7 @@ FROM [ort_reporteTecnico]
 	INNER JOIN [ort_canalAtencion] ON [ort_canalAtencion].id=[ort_reporteTecnico].[id_canalAtencion]
 	INNER JOIN [doc_documento.gasto] ON [doc_documento.gasto].id=[ort_reporteTecnico].[id_documento.gasto]
 	INNER JOIN [doc_documento] aS [doc_documento_gasto] ON [doc_documento.gasto].id = [doc_documento_gasto].id
+	INNER JOIN [ort_reporteTecnico] AS [ort_reporteTecnico_padre] ON [ort_reporteTecnico_padre].id=[ort_reporteTecnico].[id_reporteTecnico]
 	INNER JOIN [gen_empresa] AS empresaCodigo ON [ort_reporteTecnico].eid = [empresaCodigo].[codigo] and empresaCodigo.active=1
 WHERE [ort_reporteTecnico].active=1
 GO
@@ -119685,6 +119706,27 @@ GO
 SET ANSI_NULLS OFF
 GO
 
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ort_reporteTecnicosXreporteTecnico]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ort_reporteTecnicosXreporteTecnico]
+GO
+CREATE PROCEDURE [sel_ort_reporteTecnicosXreporteTecnico]
+	@p_id_reporteTecnico INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_ort_reporteTecnico]
+	WHERE ([id_reporteTecnico]= @p_id_reporteTecnico)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ort_reporteTecnicos]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ort_reporteTecnicos]
 GO
 CREATE PROCEDURE [sel_ort_reporteTecnicos]
@@ -119750,7 +119792,8 @@ CREATE PROCEDURE [upd_ort_reporteTecnico]
 		@p_id_documento_gasto int = null,
 		@p_cmm varchar(300) = null,
 		@p_desde_fh smalldatetime = null,
-		@p_duracion int = null
+		@p_duracion int = null,
+		@p_id_reporteTecnico int = null
 AS
 BEGIN
 		UPDATE [ort_reporteTecnico]
@@ -119770,7 +119813,8 @@ BEGIN
 			[id_documento.gasto] = isnull(@p_id_documento_gasto,[id_documento.gasto]),
 			[cmm] = isnull(@p_cmm,[cmm]),
 			[desde_fh] = isnull(@p_desde_fh,[desde_fh]),
-			[duracion] = isnull(@p_duracion,[duracion])
+			[duracion] = isnull(@p_duracion,[duracion]),
+			[id_reporteTecnico] = isnull(@p_id_reporteTecnico,[id_reporteTecnico])
 		WHERE (id = @p_id)
 END
 GO
@@ -119802,7 +119846,8 @@ CREATE PROCEDURE [ins_ort_reporteTecnico]
 		@p_id_documento_gasto int,
 		@p_cmm varchar(300),
 		@p_desde_fh smalldatetime,
-		@p_duracion int
+		@p_duracion int,
+		@p_id_reporteTecnico int
 AS
 BEGIN
 	DECLARE @v_id int
@@ -119824,7 +119869,8 @@ BEGIN
 			[id_documento.gasto],
 			[cmm],
 			[desde_fh],
-			[duracion])
+			[duracion],
+			[id_reporteTecnico])
 		VALUES(	@p_uid,
 			@p_eid,
 			@p_id_usuario_modifico,
@@ -119842,7 +119888,8 @@ BEGIN
 			@p_id_documento_gasto,
 			@p_cmm,
 			@p_desde_fh,
-			@p_duracion)
+			@p_duracion,
+			@p_id_reporteTecnico)
 		SET @v_id = scope_identity()
 UPDATE [ort_reporteTecnico] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
 SELECT @v_id as id
@@ -119911,7 +119958,8 @@ BEGIN
 		[id_documento.gasto] AS [id_documento.gasto],
 		[cmm] AS [cmm],
 		[desde_fh] AS [desde_fh],
-		[duracion] AS [duracion]
+		[duracion] AS [duracion],
+		[id_reporteTecnico] AS [id_reporteTecnico]
 	FROM [ort_reporteTecnico]
 	WHERE	(id = @p_id)
 	AND	(eid LIKE @p_eid+'%')
@@ -120007,6 +120055,29 @@ BEGIN
 	SELECT *
 	FROM [view_ort_reporteTecnico]
 	WHERE ([id_documento.gasto]= @p_id_documento_gasto)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_ort_reporteTecnicosXreporteTecnico_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_ort_reporteTecnicosXreporteTecnico_m]
+GO
+CREATE PROCEDURE [sel_ort_reporteTecnicosXreporteTecnico_m]
+	@p_id_reporteTecnico INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_ort_reporteTecnico]
+	WHERE ([id_reporteTecnico]= @p_id_reporteTecnico)
 	AND	(eid LIKE @p_eid+'%')
 END
 GO
@@ -120161,6 +120232,7 @@ SELECT 	[ort_reporteTecnico_falla].[id] AS [id],
 [ort_reporteTecnico].[cmm] as [ort_reporteTecnico_cmm],
 [ort_reporteTecnico].[desde_fh] as [ort_reporteTecnico_desde_fh],
 [ort_reporteTecnico].[duracion] as [ort_reporteTecnico_duracion],
+[ort_reporteTecnico].[id_reporteTecnico] as [ort_reporteTecnico_id_reporteTecnico],
 		[ort_reporteTecnico_falla].[id_falla] AS [id_falla],
 [equ_falla].[falla] as [equ_falla_falla],
 [equ_falla].[falla_codigo] as [equ_falla_falla_codigo],
@@ -120811,6 +120883,7 @@ SELECT 	[ort_reporteTecnico_ot].[id] AS [id],
 [ort_reporteTecnico].[cmm] as [ort_reporteTecnico_cmm],
 [ort_reporteTecnico].[desde_fh] as [ort_reporteTecnico_desde_fh],
 [ort_reporteTecnico].[duracion] as [ort_reporteTecnico_duracion],
+[ort_reporteTecnico].[id_reporteTecnico] as [ort_reporteTecnico_id_reporteTecnico],
 		[ort_reporteTecnico_ot].[id_documento.ot] AS [id_documento.ot],
 [doc_documento.ot].[documento.ot] as [doc_documento.ot_documento.ot],
 [doc_documento.ot].[motivoServicio] as [doc_documento.ot_motivoServicio],
@@ -121362,6 +121435,7 @@ SELECT 	[ort_reporteTecnicoAtributo].[id] AS [id],
 [ort_reporteTecnico].[cmm] as [ort_reporteTecnico_cmm],
 [ort_reporteTecnico].[desde_fh] as [ort_reporteTecnico_desde_fh],
 [ort_reporteTecnico].[duracion] as [ort_reporteTecnico_duracion],
+[ort_reporteTecnico].[id_reporteTecnico] as [ort_reporteTecnico_id_reporteTecnico],
 		[ort_reporteTecnicoAtributo].[id_atributo] AS [id_atributo],
 [cat_atributo].[atributo] as [cat_atributo_atributo],
 [cat_atributo].[atributo_codigo] as [cat_atributo_atributo_codigo],
@@ -161266,4 +161340,4 @@ SET ANSI_NULLS ON
 GO
 ----------------------
 print 'ter_tercero_usuario'
------------------------------------5/15/2025 09:20:17
+-----------------------------------6/17/2025 10:34:30
