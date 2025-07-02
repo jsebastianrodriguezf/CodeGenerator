@@ -95448,7 +95448,9 @@ BEGIN
 		[cmm] AS [cmm],
 		[mostrarEnGrilla] AS [mostrarEnGrilla],
 		[condicion] AS [condicion],
-		[valorDefecto] AS [valorDefecto]
+		[valorDefecto] AS [valorDefecto],
+		[soloLectura] AS [soloLectura],
+		[ocultar] AS [ocultar]
 	FROM [gen_detalleFormulario]
 	WHERE	(id = @p_id)
 
@@ -95517,6 +95519,8 @@ SELECT 	[gen_detalleFormulario].[id] AS [id],
 		[gen_detalleFormulario].[mostrarEnGrilla] AS [mostrarEnGrilla],
 		[gen_detalleFormulario].[condicion] AS [condicion],
 		[gen_detalleFormulario].[valorDefecto] AS [valorDefecto],
+		[gen_detalleFormulario].[soloLectura] AS [soloLectura],
+		[gen_detalleFormulario].[ocultar] AS [ocultar],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [gen_detalleFormulario]
 	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[gen_detalleFormulario].[id_usuario_modifico]
@@ -95753,7 +95757,9 @@ CREATE PROCEDURE [upd_gen_detalleFormulario]
 		@p_cmm varchar(300) = null,
 		@p_mostrarEnGrilla bit = null,
 		@p_condicion varchar(300) = null,
-		@p_valorDefecto varchar(300) = null
+		@p_valorDefecto varchar(300) = null,
+		@p_soloLectura bit = null,
+		@p_ocultar bit = null
 AS
 BEGIN
 		UPDATE [gen_detalleFormulario]
@@ -95776,7 +95782,9 @@ BEGIN
 			[cmm] = isnull(@p_cmm,[cmm]),
 			[mostrarEnGrilla] = isnull(@p_mostrarEnGrilla,[mostrarEnGrilla]),
 			[condicion] = isnull(@p_condicion,[condicion]),
-			[valorDefecto] = isnull(@p_valorDefecto,[valorDefecto])
+			[valorDefecto] = isnull(@p_valorDefecto,[valorDefecto]),
+			[soloLectura] = isnull(@p_soloLectura,[soloLectura]),
+			[ocultar] = isnull(@p_ocultar,[ocultar])
 		WHERE (id = @p_id)
 END
 GO
@@ -95811,7 +95819,9 @@ CREATE PROCEDURE [ins_gen_detalleFormulario]
 		@p_cmm varchar(300),
 		@p_mostrarEnGrilla bit,
 		@p_condicion varchar(300),
-		@p_valorDefecto varchar(300)
+		@p_valorDefecto varchar(300),
+		@p_soloLectura bit,
+		@p_ocultar bit
 AS
 BEGIN
 	DECLARE @v_id int
@@ -95836,7 +95846,9 @@ BEGIN
 			[cmm],
 			[mostrarEnGrilla],
 			[condicion],
-			[valorDefecto])
+			[valorDefecto],
+			[soloLectura],
+			[ocultar])
 		VALUES(	@p_uid,
 			@p_eid,
 			@p_id_usuario_modifico,
@@ -95857,7 +95869,9 @@ BEGIN
 			@p_cmm,
 			@p_mostrarEnGrilla,
 			@p_condicion,
-			@p_valorDefecto)
+			@p_valorDefecto,
+			@p_soloLectura,
+			@p_ocultar)
 		SET @v_id = scope_identity()
 UPDATE [gen_detalleFormulario] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
 SELECT @v_id as id
@@ -95929,7 +95943,9 @@ BEGIN
 		[cmm] AS [cmm],
 		[mostrarEnGrilla] AS [mostrarEnGrilla],
 		[condicion] AS [condicion],
-		[valorDefecto] AS [valorDefecto]
+		[valorDefecto] AS [valorDefecto],
+		[soloLectura] AS [soloLectura],
+		[ocultar] AS [ocultar]
 	FROM [gen_detalleFormulario]
 	WHERE	(id = @p_id)
 	AND	(eid LIKE @p_eid+'%')
@@ -120998,7 +121014,7 @@ SET ANSI_NULLS ON
 GO
 ----------------------
 
-SET QUOTED_IDENTIFIER OFF
+SET QUOTED_IDENTIFIER OFF 
 GO
 SET ANSI_NULLS OFF
 GO
@@ -161266,4 +161282,4 @@ SET ANSI_NULLS ON
 GO
 ----------------------
 print 'ter_tercero_usuario'
------------------------------------5/15/2025 09:20:17
+-----------------------------------25/06/2025 12:06:52
