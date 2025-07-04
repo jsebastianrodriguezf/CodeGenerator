@@ -1734,7 +1734,7 @@
     },
     {
       "Spanish": "Ocultar",
-      "English": "Disguise"
+      "English": "Hide"
     },
     {
       "Spanish": "Modulo",
@@ -2563,6 +2563,10 @@
     {
       "Spanish": "Validador",
       "English": "Validator"
+    },
+    {
+      "Spanish": "Solo",
+      "English": "Only"
     }
   ]
 }
