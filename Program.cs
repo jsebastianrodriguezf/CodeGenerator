@@ -68,7 +68,7 @@ internal class Program
 
                 break;
 
-            #region Singles
+            #region Singles TRY Do Not Use these ones, use the SPsTableGenerator and MapDataBase instead
             case InputEnum.I18NDictionaryGenerator:
                 i18NDictionaryGenerator = new I18NDictionaryGenerator(
                     contextName: context,
