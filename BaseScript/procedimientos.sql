@@ -64376,8 +64376,8 @@ SELECT 	[doc_flujoDocumento].[id] AS [id],
 [gen_flujoFormulario].[flujoFormulario_codigo] as [gen_flujoFormulario_flujoFormulario_codigo],
 [gen_flujoFormulario].[id_formulario_origen] as [gen_flujoFormulario_id_formulario_origen],
 [gen_flujoFormulario].[id_formulario_destino] as [gen_flujoFormulario_id_formulario_destino],
-[gen_flujoFormulario].[cmm] as [gen_flujoFormulario_cmm],
 [gen_flujoFormulario].[esAutomatico] as [gen_flujoFormulario_esAutomatico],
+[gen_flujoFormulario].[cmm] as [gen_flujoFormulario_cmm],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [doc_flujoDocumento]
 	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[doc_flujoDocumento].[id_usuario_modifico]
@@ -136778,7 +136778,8 @@ BEGIN
 		[esSerie] AS [esSerie],
 		[parametroTotal] AS [parametroTotal],
 		[cmm] AS [cmm],
-		[tabla] AS [tabla]
+		[tabla] AS [tabla],
+		[condicion] AS [condicion]
 	FROM [rep_campoReporte]
 	WHERE	(id = @p_id)
 
@@ -136826,6 +136827,7 @@ SELECT 	[rep_campoReporte].[id] AS [id],
 		[rep_campoReporte].[parametroTotal] AS [parametroTotal],
 		[rep_campoReporte].[cmm] AS [cmm],
 		[rep_campoReporte].[tabla] AS [tabla],
+		[rep_campoReporte].[condicion] AS [condicion],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [rep_campoReporte]
 	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[rep_campoReporte].[id_usuario_modifico]
@@ -136991,7 +136993,8 @@ CREATE PROCEDURE [upd_rep_campoReporte]
 		@p_esSerie bit = null,
 		@p_parametroTotal bit = null,
 		@p_cmm varchar(300) = null,
-		@p_tabla varchar(50) = null
+		@p_tabla varchar(50) = null,
+		@p_condicion varchar(100) = null
 AS
 BEGIN
 		UPDATE [rep_campoReporte]
@@ -137009,7 +137012,8 @@ BEGIN
 			[esSerie] = isnull(@p_esSerie,[esSerie]),
 			[parametroTotal] = isnull(@p_parametroTotal,[parametroTotal]),
 			[cmm] = isnull(@p_cmm,[cmm]),
-			[tabla] = isnull(@p_tabla,[tabla])
+			[tabla] = isnull(@p_tabla,[tabla]),
+			[condicion] = isnull(@p_condicion,[condicion])
 		WHERE (id = @p_id)
 END
 GO
@@ -137039,7 +137043,8 @@ CREATE PROCEDURE [ins_rep_campoReporte]
 		@p_esSerie bit,
 		@p_parametroTotal bit,
 		@p_cmm varchar(300),
-		@p_tabla varchar(50)
+		@p_tabla varchar(50),
+		@p_condicion varchar(100)
 AS
 BEGIN
 	DECLARE @v_id int
@@ -137059,7 +137064,8 @@ BEGIN
 			[esSerie],
 			[parametroTotal],
 			[cmm],
-			[tabla])
+			[tabla],
+			[condicion])
 		VALUES(	@p_uid,
 			@p_eid,
 			@p_id_usuario_modifico,
@@ -137075,7 +137081,8 @@ BEGIN
 			@p_esSerie,
 			@p_parametroTotal,
 			@p_cmm,
-			@p_tabla)
+			@p_tabla,
+			@p_condicion)
 		SET @v_id = scope_identity()
 UPDATE [rep_campoReporte] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
 SELECT @v_id as id
@@ -137142,7 +137149,8 @@ BEGIN
 		[esSerie] AS [esSerie],
 		[parametroTotal] AS [parametroTotal],
 		[cmm] AS [cmm],
-		[tabla] AS [tabla]
+		[tabla] AS [tabla],
+		[condicion] AS [condicion]
 	FROM [rep_campoReporte]
 	WHERE	(id = @p_id)
 	AND	(eid LIKE @p_eid+'%')
@@ -162596,4 +162604,4 @@ SET ANSI_NULLS ON
 GO
 ----------------------
 print 'ter_tercero_usuario'
------------------------------------13/8/2025 3:57:34 PM
+-----------------------------------19/8/2025 3:24:26 PM
