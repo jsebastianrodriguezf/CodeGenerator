@@ -64376,8 +64376,8 @@ SELECT 	[doc_flujoDocumento].[id] AS [id],
 [gen_flujoFormulario].[flujoFormulario_codigo] as [gen_flujoFormulario_flujoFormulario_codigo],
 [gen_flujoFormulario].[id_formulario_origen] as [gen_flujoFormulario_id_formulario_origen],
 [gen_flujoFormulario].[id_formulario_destino] as [gen_flujoFormulario_id_formulario_destino],
-[gen_flujoFormulario].[cmm] as [gen_flujoFormulario_cmm],
 [gen_flujoFormulario].[esAutomatico] as [gen_flujoFormulario_esAutomatico],
+[gen_flujoFormulario].[cmm] as [gen_flujoFormulario_cmm],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [doc_flujoDocumento]
 	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[doc_flujoDocumento].[id_usuario_modifico]
@@ -100080,6 +100080,9 @@ SELECT 	[gen_flujoDetalleFormulario].[id] AS [id],
 [gen_detalleFormulario_origen].[cmm] as [gen_detalleFormulario_origen_cmm],
 [gen_detalleFormulario_origen].[mostrarEnGrilla] as [gen_detalleFormulario_origen_mostrarEnGrilla],
 [gen_detalleFormulario_origen].[condicion] as [gen_detalleFormulario_origen_condicion],
+[gen_detalleFormulario_origen].[valorDefecto] as [gen_detalleFormulario_origen_valorDefecto],
+[gen_detalleFormulario_origen].[soloLectura] as [gen_detalleFormulario_origen_soloLectura],
+[gen_detalleFormulario_origen].[ocultar] as [gen_detalleFormulario_origen_ocultar],
 		[gen_flujoDetalleFormulario].[id_detalleFormulario_destino] AS [id_detalleFormulario_destino],
 [gen_detalleFormulario_destino].[detalleFormulario] as [gen_detalleFormulario_destino_detalleFormulario],
 [gen_detalleFormulario_destino].[detalleFormulario_codigo] as [gen_detalleFormulario_destino_detalleFormulario_codigo],
@@ -100095,14 +100098,17 @@ SELECT 	[gen_flujoDetalleFormulario].[id] AS [id],
 [gen_detalleFormulario_destino].[cmm] as [gen_detalleFormulario_destino_cmm],
 [gen_detalleFormulario_destino].[mostrarEnGrilla] as [gen_detalleFormulario_destino_mostrarEnGrilla],
 [gen_detalleFormulario_destino].[condicion] as [gen_detalleFormulario_destino_condicion],
+[gen_detalleFormulario_destino].[valorDefecto] as [gen_detalleFormulario_destino_valorDefecto],
+[gen_detalleFormulario_destino].[soloLectura] as [gen_detalleFormulario_destino_soloLectura],
+[gen_detalleFormulario_destino].[ocultar] as [gen_detalleFormulario_destino_ocultar],
 		[gen_flujoDetalleFormulario].[valorDefecto] AS [valorDefecto],
 		[gen_flujoDetalleFormulario].[id_flujoFormulario] AS [id_flujoFormulario],
 [gen_flujoFormulario].[flujoFormulario] as [gen_flujoFormulario_flujoFormulario],
 [gen_flujoFormulario].[flujoFormulario_codigo] as [gen_flujoFormulario_flujoFormulario_codigo],
 [gen_flujoFormulario].[id_formulario_origen] as [gen_flujoFormulario_id_formulario_origen],
 [gen_flujoFormulario].[id_formulario_destino] as [gen_flujoFormulario_id_formulario_destino],
-[gen_flujoFormulario].[cmm] as [gen_flujoFormulario_cmm],
 [gen_flujoFormulario].[esAutomatico] as [gen_flujoFormulario_esAutomatico],
+[gen_flujoFormulario].[cmm] as [gen_flujoFormulario_cmm],
 		[gen_flujoDetalleFormulario].[cmm] AS [cmm],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [gen_flujoDetalleFormulario]
@@ -100656,8 +100662,8 @@ BEGIN
 		[flujoFormulario_codigo] AS [flujoFormulario_codigo],
 		[id_formulario_origen] AS [id_formulario_origen],
 		[id_formulario_destino] AS [id_formulario_destino],
-		[cmm] AS [cmm],
-		[esAutomatico] AS [esAutomatico]
+		[esAutomatico] AS [esAutomatico],
+		[cmm] AS [cmm]
 	FROM [gen_flujoFormulario]
 	WHERE	(id = @p_id)
 
@@ -100695,6 +100701,7 @@ SELECT 	[gen_flujoFormulario].[id] AS [id],
 [gen_formulario_origen].[cmm] as [gen_formulario_origen_cmm],
 [gen_formulario_origen].[id_formulario] as [gen_formulario_origen_id_formulario],
 [gen_formulario_origen].[condicion] as [gen_formulario_origen_condicion],
+[gen_formulario_origen].[valorDefecto] as [gen_formulario_origen_valorDefecto],
 		[gen_flujoFormulario].[id_formulario_destino] AS [id_formulario_destino],
 [gen_formulario_destino].[formulario] as [gen_formulario_destino_formulario],
 [gen_formulario_destino].[formulario_codigo] as [gen_formulario_destino_formulario_codigo],
@@ -100705,8 +100712,9 @@ SELECT 	[gen_flujoFormulario].[id] AS [id],
 [gen_formulario_destino].[cmm] as [gen_formulario_destino_cmm],
 [gen_formulario_destino].[id_formulario] as [gen_formulario_destino_id_formulario],
 [gen_formulario_destino].[condicion] as [gen_formulario_destino_condicion],
-		[gen_flujoFormulario].[cmm] AS [cmm],
+[gen_formulario_destino].[valorDefecto] as [gen_formulario_destino_valorDefecto],
 		[gen_flujoFormulario].[esAutomatico] AS [esAutomatico],
+		[gen_flujoFormulario].[cmm] AS [cmm],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [gen_flujoFormulario]
 	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[gen_flujoFormulario].[id_usuario_modifico]
@@ -100867,8 +100875,8 @@ CREATE PROCEDURE [upd_gen_flujoFormulario]
 		@p_flujoFormulario_codigo varchar(100) = null,
 		@p_id_formulario_origen int = null,
 		@p_id_formulario_destino int = null,
-		@p_cmm varchar(300) = null,
-		@p_esAutomatico bit = null
+		@p_esAutomatico bit = null,
+		@p_cmm varchar(300) = null
 AS
 BEGIN
 		UPDATE [gen_flujoFormulario]
@@ -100881,8 +100889,8 @@ BEGIN
 			[flujoFormulario_codigo] = isnull(@p_flujoFormulario_codigo,[flujoFormulario_codigo]),
 			[id_formulario_origen] = isnull(@p_id_formulario_origen,[id_formulario_origen]),
 			[id_formulario_destino] = isnull(@p_id_formulario_destino,[id_formulario_destino]),
-			[cmm] = isnull(@p_cmm,[cmm]),
-			[esAutomatico] = isnull(@p_esAutomatico,[esAutomatico])
+			[esAutomatico] = isnull(@p_esAutomatico,[esAutomatico]),
+			[cmm] = isnull(@p_cmm,[cmm])
 		WHERE (id = @p_id)
 END
 GO
@@ -100907,8 +100915,8 @@ CREATE PROCEDURE [ins_gen_flujoFormulario]
 		@p_flujoFormulario_codigo varchar(100),
 		@p_id_formulario_origen int,
 		@p_id_formulario_destino int,
-		@p_cmm varchar(300),
-		@p_esAutomatico bit
+		@p_esAutomatico bit,
+		@p_cmm varchar(300)
 AS
 BEGIN
 	DECLARE @v_id int
@@ -100923,8 +100931,8 @@ BEGIN
 			[flujoFormulario_codigo],
 			[id_formulario_origen],
 			[id_formulario_destino],
-			[cmm],
-			[esAutomatico])
+			[esAutomatico],
+			[cmm])
 		VALUES(	@p_uid,
 			@p_eid,
 			@p_id_usuario_modifico,
@@ -100935,8 +100943,8 @@ BEGIN
 			@p_flujoFormulario_codigo,
 			@p_id_formulario_origen,
 			@p_id_formulario_destino,
-			@p_cmm,
-			@p_esAutomatico)
+			@p_esAutomatico,
+			@p_cmm)
 		SET @v_id = scope_identity()
 UPDATE [gen_flujoFormulario] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
 SELECT @v_id as id
@@ -100998,8 +101006,8 @@ BEGIN
 		[flujoFormulario_codigo] AS [flujoFormulario_codigo],
 		[id_formulario_origen] AS [id_formulario_origen],
 		[id_formulario_destino] AS [id_formulario_destino],
-		[cmm] AS [cmm],
-		[esAutomatico] AS [esAutomatico]
+		[esAutomatico] AS [esAutomatico],
+		[cmm] AS [cmm]
 	FROM [gen_flujoFormulario]
 	WHERE	(id = @p_id)
 	AND	(eid LIKE @p_eid+'%')
@@ -122319,7 +122327,7 @@ SET ANSI_NULLS ON
 GO
 ----------------------
 
-SET QUOTED_IDENTIFIER OFF 
+SET QUOTED_IDENTIFIER OFF
 GO
 SET ANSI_NULLS OFF
 GO
@@ -136770,7 +136778,8 @@ BEGIN
 		[esSerie] AS [esSerie],
 		[parametroTotal] AS [parametroTotal],
 		[cmm] AS [cmm],
-		[id_tabla] AS [id_tabla]
+		[tabla] AS [tabla],
+		[condicion] AS [condicion]
 	FROM [rep_campoReporte]
 	WHERE	(id = @p_id)
 
@@ -136817,16 +136826,14 @@ SELECT 	[rep_campoReporte].[id] AS [id],
 		[rep_campoReporte].[esSerie] AS [esSerie],
 		[rep_campoReporte].[parametroTotal] AS [parametroTotal],
 		[rep_campoReporte].[cmm] AS [cmm],
-		[rep_campoReporte].[id_tabla] AS [id_tabla],
-		[_tablas].[tabla] AS [_tablas_tabla],
-		[_tablas].[id_tabla_padre] AS [_tablas_id_tabla_padre],
+		[rep_campoReporte].[tabla] AS [tabla],
+		[rep_campoReporte].[condicion] AS [condicion],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [rep_campoReporte]
 	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[rep_campoReporte].[id_usuario_modifico]
 	INNER JOIN [seg_usuario] AS [seg_usuario_creo] ON [seg_usuario_creo].id=[rep_campoReporte].[id_usuario_creo]
 	INNER JOIN [rep_reporte] ON [rep_reporte].id=[rep_campoReporte].[id_reporte]
 	INNER JOIN [rep_tipoCampoReporte] ON [rep_tipoCampoReporte].id=[rep_campoReporte].[id_tipoCampoReporte]
-	INNER JOIN [_tablas] ON [_tablas].id=[rep_campoReporte].[id_tabla]
 	INNER JOIN [gen_empresa] AS empresaCodigo ON [rep_campoReporte].eid = [empresaCodigo].[codigo] and empresaCodigo.active=1
 WHERE [rep_campoReporte].active=1
 GO
@@ -136923,27 +136930,6 @@ GO
 SET ANSI_NULLS OFF
 GO
 
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_rep_campoReportesXtabla]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_rep_campoReportesXtabla]
-GO
-CREATE PROCEDURE [sel_rep_campoReportesXtabla]
-	@p_id_tabla INT
-AS
-BEGIN
-	SELECT * 
-	FROM [view_rep_campoReporte]
-	WHERE ([id_tabla]= @p_id_tabla)
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_rep_campoReportes]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_rep_campoReportes]
 GO
 CREATE PROCEDURE [sel_rep_campoReportes]
@@ -137007,7 +136993,8 @@ CREATE PROCEDURE [upd_rep_campoReporte]
 		@p_esSerie bit = null,
 		@p_parametroTotal bit = null,
 		@p_cmm varchar(300) = null,
-		@p_id_tabla int = null
+		@p_tabla varchar(50) = null,
+		@p_condicion varchar(100) = null
 AS
 BEGIN
 		UPDATE [rep_campoReporte]
@@ -137025,7 +137012,8 @@ BEGIN
 			[esSerie] = isnull(@p_esSerie,[esSerie]),
 			[parametroTotal] = isnull(@p_parametroTotal,[parametroTotal]),
 			[cmm] = isnull(@p_cmm,[cmm]),
-			[id_tabla] = isnull(@p_id_tabla,[id_tabla])
+			[tabla] = isnull(@p_tabla,[tabla]),
+			[condicion] = isnull(@p_condicion,[condicion])
 		WHERE (id = @p_id)
 END
 GO
@@ -137055,7 +137043,8 @@ CREATE PROCEDURE [ins_rep_campoReporte]
 		@p_esSerie bit,
 		@p_parametroTotal bit,
 		@p_cmm varchar(300),
-		@p_id_tabla int
+		@p_tabla varchar(50),
+		@p_condicion varchar(100)
 AS
 BEGIN
 	DECLARE @v_id int
@@ -137075,7 +137064,8 @@ BEGIN
 			[esSerie],
 			[parametroTotal],
 			[cmm],
-			[id_tabla])
+			[tabla],
+			[condicion])
 		VALUES(	@p_uid,
 			@p_eid,
 			@p_id_usuario_modifico,
@@ -137091,7 +137081,8 @@ BEGIN
 			@p_esSerie,
 			@p_parametroTotal,
 			@p_cmm,
-			@p_id_tabla)
+			@p_tabla,
+			@p_condicion)
 		SET @v_id = scope_identity()
 UPDATE [rep_campoReporte] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
 SELECT @v_id as id
@@ -137158,7 +137149,8 @@ BEGIN
 		[esSerie] AS [esSerie],
 		[parametroTotal] AS [parametroTotal],
 		[cmm] AS [cmm],
-		[id_tabla] AS [id_tabla]
+		[tabla] AS [tabla],
+		[condicion] AS [condicion]
 	FROM [rep_campoReporte]
 	WHERE	(id = @p_id)
 	AND	(eid LIKE @p_eid+'%')
@@ -137254,29 +137246,6 @@ BEGIN
 	SELECT *
 	FROM [view_rep_campoReporte]
 	WHERE ([id_tipoCampoReporte]= @p_id_tipoCampoReporte)
-	AND	(eid LIKE @p_eid+'%')
-END
-GO
-SET QUOTED_IDENTIFIER OFF 
-GO
-SET ANSI_NULLS ON
-GO
-----------------------
-SET QUOTED_IDENTIFIER OFF
-GO
-SET ANSI_NULLS OFF
-GO
-
-IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_rep_campoReportesXtabla_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_rep_campoReportesXtabla_m]
-GO
-CREATE PROCEDURE [sel_rep_campoReportesXtabla_m]
-	@p_id_tabla INT,
-	@p_eid as varchar(50) = ''
-AS
-BEGIN
-	SELECT *
-	FROM [view_rep_campoReporte]
-	WHERE ([id_tabla]= @p_id_tabla)
 	AND	(eid LIKE @p_eid+'%')
 END
 GO
@@ -162635,4 +162604,4 @@ SET ANSI_NULLS ON
 GO
 ----------------------
 print 'ter_tercero_usuario'
------------------------------------7/11/2025 09:08:08
+-----------------------------------19/8/2025 3:24:26 PM
