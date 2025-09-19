@@ -1498,7 +1498,7 @@ namespace CodeGenerator.BLL
 
             content.AddRange(GetConstructorService(entityUpper, entityLower, repositoryType));
 
-            
+
             content.AddRange([
                 $"",
                 $"        #region Custom Services",

@@ -269,7 +269,7 @@ namespace CodeGenerator.BLL
                     {
                         isStandard = true;
                         line = line.Replace("string", "string?").Replace(" = null!;", string.Empty);
-                    }                     
+                    }
 
                     if (line.Contains($" {className}1 {{ get; set; }}"))
                         line = line.Replace($" {className}1 {{ get; set; }}", $" {className} {{ get; set; }}");
