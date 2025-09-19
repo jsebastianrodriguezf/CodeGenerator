@@ -1040,7 +1040,7 @@ namespace CodeGenerator.BLL
             ]);
 
             content.AddRange(GetConstructorController(entityUpper, entityLower));
-            
+
             content.AddRange([
                 $"",
                 $"        #region Custom Endpoints"
@@ -1436,7 +1436,7 @@ namespace CodeGenerator.BLL
             {
                 abstractServiceName = "ERROR";
             }
-            
+
             return abstractServiceName;
         }
 

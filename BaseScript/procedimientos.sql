@@ -111727,6 +111727,7 @@ SELECT 	[gui_campoTexto].[id] AS [id],
 [gui_funcionalidad].[cmm] as [gui_funcionalidad_cmm],
 [gui_funcionalidad].[icono] as [gui_funcionalidad_icono],
 [gui_funcionalidad].[valorDefecto] as [gui_funcionalidad_valorDefecto],
+[gui_funcionalidad].[url] as [gui_funcionalidad_url],
 		[gui_campoTexto].[cmm] AS [cmm],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [gui_campoTexto]
@@ -113709,7 +113710,8 @@ BEGIN
 		[id_formulario] AS [id_formulario],
 		[cmm] AS [cmm],
 		[icono] AS [icono],
-		[valorDefecto] AS [valorDefecto]
+		[valorDefecto] AS [valorDefecto],
+		[url] AS [url]
 	FROM [gui_funcionalidad]
 	WHERE	(id = @p_id)
 
@@ -113749,6 +113751,7 @@ SELECT 	[gui_funcionalidad].[id] AS [id],
 [gui_funcionalidad_padre].[cmm] as [gui_funcionalidad_padre_cmm],
 [gui_funcionalidad_padre].[icono] as [gui_funcionalidad_padre_icono],
 [gui_funcionalidad_padre].[valorDefecto] as [gui_funcionalidad_padre_valorDefecto],
+[gui_funcionalidad_padre].[url] as [gui_funcionalidad_padre_url],
 		[gui_funcionalidad].[id_tipoFuncionalidad] AS [id_tipoFuncionalidad],
 [gui_tipoFuncionalidad].[tipoFuncionalidad] as [gui_tipoFuncionalidad_tipoFuncionalidad],
 [gui_tipoFuncionalidad].[tipoFuncionalidad_codigo] as [gui_tipoFuncionalidad_tipoFuncionalidad_codigo],
@@ -113770,6 +113773,7 @@ SELECT 	[gui_funcionalidad].[id] AS [id],
 		[gui_funcionalidad].[cmm] AS [cmm],
 		[gui_funcionalidad].[icono] AS [icono],
 		[gui_funcionalidad].[valorDefecto] AS [valorDefecto],
+		[gui_funcionalidad].[url] AS [url],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [gui_funcionalidad]
 	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[gui_funcionalidad].[id_usuario_modifico]
@@ -113979,7 +113983,8 @@ CREATE PROCEDURE [upd_gui_funcionalidad]
 		@p_id_formulario int = null,
 		@p_cmm varchar(300) = null,
 		@p_icono varchar(100) = null,
-		@p_valorDefecto varchar(300) = null
+		@p_valorDefecto varchar(300) = null,
+		@p_url varchar(8000) = null
 AS
 BEGIN
 		UPDATE [gui_funcionalidad]
@@ -113997,7 +114002,8 @@ BEGIN
 			[id_formulario] = isnull(@p_id_formulario,[id_formulario]),
 			[cmm] = isnull(@p_cmm,[cmm]),
 			[icono] = isnull(@p_icono,[icono]),
-			[valorDefecto] = isnull(@p_valorDefecto,[valorDefecto])
+			[valorDefecto] = isnull(@p_valorDefecto,[valorDefecto]),
+			[url] = isnull(@p_url,[url])
 		WHERE (id = @p_id)
 END
 GO
@@ -114027,7 +114033,8 @@ CREATE PROCEDURE [ins_gui_funcionalidad]
 		@p_id_formulario int,
 		@p_cmm varchar(300),
 		@p_icono varchar(100),
-		@p_valorDefecto varchar(300)
+		@p_valorDefecto varchar(300),
+		@p_url varchar(8000)
 AS
 BEGIN
 	DECLARE @v_id int
@@ -114047,7 +114054,8 @@ BEGIN
 			[id_formulario],
 			[cmm],
 			[icono],
-			[valorDefecto])
+			[valorDefecto],
+			[url])
 		VALUES(	@p_uid,
 			@p_eid,
 			@p_id_usuario_modifico,
@@ -114063,7 +114071,8 @@ BEGIN
 			@p_id_formulario,
 			@p_cmm,
 			@p_icono,
-			@p_valorDefecto)
+			@p_valorDefecto,
+			@p_url)
 		SET @v_id = scope_identity()
 UPDATE [gui_funcionalidad] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
 SELECT @v_id as id
@@ -114130,7 +114139,8 @@ BEGIN
 		[id_formulario] AS [id_formulario],
 		[cmm] AS [cmm],
 		[icono] AS [icono],
-		[valorDefecto] AS [valorDefecto]
+		[valorDefecto] AS [valorDefecto],
+		[url] AS [url]
 	FROM [gui_funcionalidad]
 	WHERE	(id = @p_id)
 	AND	(eid LIKE @p_eid+'%')
@@ -114545,6 +114555,7 @@ SELECT 	[gui_funcionalidadFlujoEvento].[id] AS [id],
 [gui_funcionalidad].[cmm] as [gui_funcionalidad_cmm],
 [gui_funcionalidad].[icono] as [gui_funcionalidad_icono],
 [gui_funcionalidad].[valorDefecto] as [gui_funcionalidad_valorDefecto],
+[gui_funcionalidad].[url] as [gui_funcionalidad_url],
 		[gui_funcionalidadFlujoEvento].[tipoAccion] AS [tipoAccion],
 		[gui_funcionalidadFlujoEvento].[validador] AS [validador],
 		[gui_funcionalidadFlujoEvento].[id_flujoEventoCondicion_exitoso] AS [id_flujoEventoCondicion_exitoso],
@@ -139547,6 +139558,7 @@ SELECT 	[rep_reporte].[id] AS [id],
 [gui_funcionalidad].[cmm] as [gui_funcionalidad_cmm],
 [gui_funcionalidad].[icono] as [gui_funcionalidad_icono],
 [gui_funcionalidad].[valorDefecto] as [gui_funcionalidad_valorDefecto],
+[gui_funcionalidad].[url] as [gui_funcionalidad_url],
 		[rep_reporte].[esFormato] AS [esFormato],
 		[rep_reporte].[tieneGraficos] AS [tieneGraficos],
 		[rep_reporte].[cabecera] AS [cabecera],
@@ -144633,6 +144645,7 @@ SELECT 	[seg_perfil_funcionalidad].[id] AS [id],
 [gui_funcionalidad].[cmm] as [gui_funcionalidad_cmm],
 [gui_funcionalidad].[icono] as [gui_funcionalidad_icono],
 [gui_funcionalidad].[valorDefecto] as [gui_funcionalidad_valorDefecto],
+[gui_funcionalidad].[url] as [gui_funcionalidad_url],
 		[seg_perfil_funcionalidad].[cmm] AS [cmm],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [seg_perfil_funcionalidad]
@@ -146284,6 +146297,7 @@ SELECT 	[seg_preferencia].[id] AS [id],
 [gui_funcionalidad].[cmm] as [gui_funcionalidad_cmm],
 [gui_funcionalidad].[icono] as [gui_funcionalidad_icono],
 [gui_funcionalidad].[valorDefecto] as [gui_funcionalidad_valorDefecto],
+[gui_funcionalidad].[url] as [gui_funcionalidad_url],
 		[seg_preferencia].[cmm] AS [cmm],
 		[empresaCodigo].[empresa] As [multiempresa]
 FROM [seg_preferencia]
@@ -162604,4 +162618,4 @@ SET ANSI_NULLS ON
 GO
 ----------------------
 print 'ter_tercero_usuario'
------------------------------------19/8/2025 3:24:26 PM
+-----------------------------------18/9/2025 6:35:23 PM
