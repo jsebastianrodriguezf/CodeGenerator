@@ -137352,6 +137352,554 @@ GO
 SET ANSI_NULLS OFF
 GO
 
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[reg_rep_campoReporteDependiente]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[reg_rep_campoReporteDependiente]
+GO
+CREATE PROCEDURE [reg_rep_campoReporteDependiente]
+	@p_id INT
+AS
+BEGIN
+	SELECT 	[id] AS [id],
+		[uid] AS [uid],
+		[eid] AS [eid],
+		[id_usuario_modifico] AS [id_usuario_modifico],
+		[id_usuario_creo] AS [id_usuario_creo],
+		[fechaModificacion] AS [fechaModificacion],
+		[fechaCreacion] AS [fechaCreacion],
+		[active] AS [active],
+		[campoReporteDependiente] AS [campoReporteDependiente],
+		[campoReporteDependiente_codigo] AS [campoReporteDependiente_codigo],
+		[id_campoReporte_origen] AS [id_campoReporte_origen],
+		[id_campoReporte_dependiente] AS [id_campoReporte_dependiente],
+		[cmm] AS [cmm]
+	FROM [rep_campoReporteDependiente]
+	WHERE	(id = @p_id)
+
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+IF  EXISTS (SELECT * FROM sys.views WHERE object_id = OBJECT_ID(N'[dbo].[view_rep_campoReporteDependiente]')) DROP VIEW [dbo].[view_rep_campoReporteDependiente]
+GO
+CREATE  VIEW [view_rep_campoReporteDependiente] AS
+SELECT 	[rep_campoReporteDependiente].[id] AS [id],
+		[rep_campoReporteDependiente].[uid] AS [uid],
+		[rep_campoReporteDependiente].[eid] AS [eid],
+		[rep_campoReporteDependiente].[id_usuario_modifico] AS [id_usuario_modifico],
+		[rep_campoReporteDependiente].[id_usuario_creo] AS [id_usuario_creo],
+		[rep_campoReporteDependiente].[fechaModificacion] AS [fechaModificacion],
+		[rep_campoReporteDependiente].[fechaCreacion] AS [fechaCreacion],
+		[rep_campoReporteDependiente].[active] AS [active],
+		[rep_campoReporteDependiente].[campoReporteDependiente] AS [campoReporteDependiente],
+		[rep_campoReporteDependiente].[campoReporteDependiente_codigo] AS [campoReporteDependiente_codigo],
+		[rep_campoReporteDependiente].[id_campoReporte_origen] AS [id_campoReporte_origen],
+[rep_campoReporte_origen].[campoReporte] as [rep_campoReporte_origen_campoReporte],
+[rep_campoReporte_origen].[campoReporte_codigo] as [rep_campoReporte_origen_campoReporte_codigo],
+[rep_campoReporte_origen].[id_reporte] as [rep_campoReporte_origen_id_reporte],
+[rep_campoReporte_origen].[id_tipoCampoReporte] as [rep_campoReporte_origen_id_tipoCampoReporte],
+[rep_campoReporte_origen].[valorDefecto] as [rep_campoReporte_origen_valorDefecto],
+[rep_campoReporte_origen].[esParametro] as [rep_campoReporte_origen_esParametro],
+[rep_campoReporte_origen].[esSerie] as [rep_campoReporte_origen_esSerie],
+[rep_campoReporte_origen].[parametroTotal] as [rep_campoReporte_origen_parametroTotal],
+[rep_campoReporte_origen].[cmm] as [rep_campoReporte_origen_cmm],
+[rep_campoReporte_origen].[tabla] as [rep_campoReporte_origen_tabla],
+[rep_campoReporte_origen].[condicion] as [rep_campoReporte_origen_condicion],
+		[rep_campoReporteDependiente].[id_campoReporte_dependiente] AS [id_campoReporte_dependiente],
+[rep_campoReporte_dependiente].[campoReporte] as [rep_campoReporte_dependiente_campoReporte],
+[rep_campoReporte_dependiente].[campoReporte_codigo] as [rep_campoReporte_dependiente_campoReporte_codigo],
+[rep_campoReporte_dependiente].[id_reporte] as [rep_campoReporte_dependiente_id_reporte],
+[rep_campoReporte_dependiente].[id_tipoCampoReporte] as [rep_campoReporte_dependiente_id_tipoCampoReporte],
+[rep_campoReporte_dependiente].[valorDefecto] as [rep_campoReporte_dependiente_valorDefecto],
+[rep_campoReporte_dependiente].[esParametro] as [rep_campoReporte_dependiente_esParametro],
+[rep_campoReporte_dependiente].[esSerie] as [rep_campoReporte_dependiente_esSerie],
+[rep_campoReporte_dependiente].[parametroTotal] as [rep_campoReporte_dependiente_parametroTotal],
+[rep_campoReporte_dependiente].[cmm] as [rep_campoReporte_dependiente_cmm],
+[rep_campoReporte_dependiente].[tabla] as [rep_campoReporte_dependiente_tabla],
+[rep_campoReporte_dependiente].[condicion] as [rep_campoReporte_dependiente_condicion],
+		[rep_campoReporteDependiente].[cmm] AS [cmm],
+		[empresaCodigo].[empresa] As [multiempresa]
+FROM [rep_campoReporteDependiente]
+	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[rep_campoReporteDependiente].[id_usuario_modifico]
+	INNER JOIN [seg_usuario] AS [seg_usuario_creo] ON [seg_usuario_creo].id=[rep_campoReporteDependiente].[id_usuario_creo]
+	INNER JOIN [rep_campoReporte] AS [rep_campoReporte_origen] ON [rep_campoReporte_origen].id=[rep_campoReporteDependiente].[id_campoReporte_origen]
+	INNER JOIN [rep_campoReporte] AS [rep_campoReporte_dependiente] ON [rep_campoReporte_dependiente].id=[rep_campoReporteDependiente].[id_campoReporte_dependiente]
+	INNER JOIN [gen_empresa] AS empresaCodigo ON [rep_campoReporteDependiente].eid = [empresaCodigo].[codigo] and empresaCodigo.active=1
+WHERE [rep_campoReporteDependiente].active=1
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_rep_campoReporteDependientesXusuario_modifico]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_rep_campoReporteDependientesXusuario_modifico]
+GO
+CREATE PROCEDURE [sel_rep_campoReporteDependientesXusuario_modifico]
+	@p_id_usuario_modifico INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_rep_campoReporteDependiente]
+	WHERE ([id_usuario_modifico]= @p_id_usuario_modifico)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_rep_campoReporteDependientesXusuario_creo]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_rep_campoReporteDependientesXusuario_creo]
+GO
+CREATE PROCEDURE [sel_rep_campoReporteDependientesXusuario_creo]
+	@p_id_usuario_creo INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_rep_campoReporteDependiente]
+	WHERE ([id_usuario_creo]= @p_id_usuario_creo)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_rep_campoReporteDependientesXcampoReporte_origen]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_rep_campoReporteDependientesXcampoReporte_origen]
+GO
+CREATE PROCEDURE [sel_rep_campoReporteDependientesXcampoReporte_origen]
+	@p_id_campoReporte_origen INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_rep_campoReporteDependiente]
+	WHERE ([id_campoReporte_origen]= @p_id_campoReporte_origen)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_rep_campoReporteDependientesXcampoReporte_dependiente]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_rep_campoReporteDependientesXcampoReporte_dependiente]
+GO
+CREATE PROCEDURE [sel_rep_campoReporteDependientesXcampoReporte_dependiente]
+	@p_id_campoReporte_dependiente INT
+AS
+BEGIN
+	SELECT * 
+	FROM [view_rep_campoReporteDependiente]
+	WHERE ([id_campoReporte_dependiente]= @p_id_campoReporte_dependiente)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_rep_campoReporteDependientes]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_rep_campoReporteDependientes]
+GO
+CREATE PROCEDURE [sel_rep_campoReporteDependientes]
+	
+	@p_filtro as varchar (8000) = '1=1',
+	@p_orden as varchar (8000) = 'id',
+	@p_campos as varchar (8000) = '*' AS
+BEGIN
+exec ('SELECT '+ @p_campos +
+' FROM [view_rep_campoReporteDependiente]
+WHERE (' + @p_filtro + ') ORDER BY ' + @p_orden)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[lis_rep_campoReporteDependientes]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[lis_rep_campoReporteDependientes]
+GO
+CREATE PROCEDURE [lis_rep_campoReporteDependientes]
+	AS
+BEGIN
+	SELECT id AS id,
+[campoReporteDependiente] AS [rep_campoReporteDependiente]
+	FROM [rep_campoReporteDependiente]
+	WHERE active = 1
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[upd_rep_campoReporteDependiente]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[upd_rep_campoReporteDependiente]
+GO
+CREATE PROCEDURE [upd_rep_campoReporteDependiente]
+	@p_id int = null,
+		@p_uid varchar(500) = null,
+		@p_eid varchar(50) = null,
+		@p_id_usuario_modifico int = null,
+		@p_id_usuario_creo int = null,
+		@p_fechaCreacion smalldatetime = null,
+		@p_campoReporteDependiente varchar(300) = null,
+		@p_campoReporteDependiente_codigo varchar(100) = null,
+		@p_id_campoReporte_origen int = null,
+		@p_id_campoReporte_dependiente int = null,
+		@p_cmm varchar(300) = null
+AS
+BEGIN
+		UPDATE [rep_campoReporteDependiente]
+		SET	[uid] = isnull(@p_uid,[uid]),
+			[eid] = isnull(@p_eid,[eid]),
+			[id_usuario_modifico] = isnull(@p_id_usuario_modifico,[id_usuario_modifico]),
+			[id_usuario_creo] = isnull(@p_id_usuario_creo,[id_usuario_creo]),
+			[fechaModificacion] = GETDATE(),
+			[campoReporteDependiente] = isnull(@p_campoReporteDependiente,[campoReporteDependiente]),
+			[campoReporteDependiente_codigo] = isnull(@p_campoReporteDependiente_codigo,[campoReporteDependiente_codigo]),
+			[id_campoReporte_origen] = isnull(@p_id_campoReporte_origen,[id_campoReporte_origen]),
+			[id_campoReporte_dependiente] = isnull(@p_id_campoReporte_dependiente,[id_campoReporte_dependiente]),
+			[cmm] = isnull(@p_cmm,[cmm])
+		WHERE (id = @p_id)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[ins_rep_campoReporteDependiente]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[ins_rep_campoReporteDependiente]
+GO
+CREATE PROCEDURE [ins_rep_campoReporteDependiente]
+	@p_uid varchar(500),
+		@p_eid varchar(50),
+		@p_id_usuario_modifico int,
+		@p_id_usuario_creo int,
+		@p_campoReporteDependiente varchar(300),
+		@p_campoReporteDependiente_codigo varchar(100),
+		@p_id_campoReporte_origen int,
+		@p_id_campoReporte_dependiente int,
+		@p_cmm varchar(300)
+AS
+BEGIN
+	DECLARE @v_id int
+		INSERT INTO [rep_campoReporteDependiente]
+			([uid],
+			[eid],
+			[id_usuario_modifico],
+			[id_usuario_creo],
+			[fechaModificacion],
+			[fechaCreacion],
+			[campoReporteDependiente],
+			[campoReporteDependiente_codigo],
+			[id_campoReporte_origen],
+			[id_campoReporte_dependiente],
+			[cmm])
+		VALUES(	@p_uid,
+			@p_eid,
+			@p_id_usuario_modifico,
+			@p_id_usuario_creo,
+			GETDATE(),
+			GETDATE(),
+			@p_campoReporteDependiente,
+			@p_campoReporteDependiente_codigo,
+			@p_id_campoReporte_origen,
+			@p_id_campoReporte_dependiente,
+			@p_cmm)
+		SET @v_id = scope_identity()
+UPDATE [rep_campoReporteDependiente] set [uid] = [uid] + '_' + convert(varchar(20),@v_id) where [id]=@v_id
+SELECT @v_id as id
+RETURN @v_id
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[act_rep_campoReporteDependiente]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[act_rep_campoReporteDependiente]
+GO
+CREATE PROCEDURE [act_rep_campoReporteDependiente]
+	@p_active BIT,
+	@p_id INT,
+@p_id_usuario_modifico int = null
+AS
+BEGIN
+	UPDATE [rep_campoReporteDependiente]
+	SET active=@p_active,
+	[id_usuario_modifico] = isnull(@p_id_usuario_modifico,[id_usuario_modifico]),
+	[fechaModificacion] = GETDATE()
+	WHERE	(id = @p_id)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[reg_rep_campoReporteDependiente_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[reg_rep_campoReporteDependiente_m]
+GO
+CREATE PROCEDURE [reg_rep_campoReporteDependiente_m]
+	@p_id INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT 	[id] AS [id],
+		[uid] AS [uid],
+		[eid] AS [eid],
+		[id_usuario_modifico] AS [id_usuario_modifico],
+		[id_usuario_creo] AS [id_usuario_creo],
+		[fechaModificacion] AS [fechaModificacion],
+		[fechaCreacion] AS [fechaCreacion],
+		[active] AS [active],
+		[campoReporteDependiente] AS [campoReporteDependiente],
+		[campoReporteDependiente_codigo] AS [campoReporteDependiente_codigo],
+		[id_campoReporte_origen] AS [id_campoReporte_origen],
+		[id_campoReporte_dependiente] AS [id_campoReporte_dependiente],
+		[cmm] AS [cmm]
+	FROM [rep_campoReporteDependiente]
+	WHERE	(id = @p_id)
+	AND	(eid LIKE @p_eid+'%')
+
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_rep_campoReporteDependientesXusuario_modifico_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_rep_campoReporteDependientesXusuario_modifico_m]
+GO
+CREATE PROCEDURE [sel_rep_campoReporteDependientesXusuario_modifico_m]
+	@p_id_usuario_modifico INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_rep_campoReporteDependiente]
+	WHERE ([id_usuario_modifico]= @p_id_usuario_modifico)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_rep_campoReporteDependientesXusuario_creo_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_rep_campoReporteDependientesXusuario_creo_m]
+GO
+CREATE PROCEDURE [sel_rep_campoReporteDependientesXusuario_creo_m]
+	@p_id_usuario_creo INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_rep_campoReporteDependiente]
+	WHERE ([id_usuario_creo]= @p_id_usuario_creo)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_rep_campoReporteDependientesXcampoReporte_origen_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_rep_campoReporteDependientesXcampoReporte_origen_m]
+GO
+CREATE PROCEDURE [sel_rep_campoReporteDependientesXcampoReporte_origen_m]
+	@p_id_campoReporte_origen INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_rep_campoReporteDependiente]
+	WHERE ([id_campoReporte_origen]= @p_id_campoReporte_origen)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_rep_campoReporteDependientesXcampoReporte_dependiente_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_rep_campoReporteDependientesXcampoReporte_dependiente_m]
+GO
+CREATE PROCEDURE [sel_rep_campoReporteDependientesXcampoReporte_dependiente_m]
+	@p_id_campoReporte_dependiente INT,
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT *
+	FROM [view_rep_campoReporteDependiente]
+	WHERE ([id_campoReporte_dependiente]= @p_id_campoReporte_dependiente)
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sel_rep_campoReporteDependientes_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[sel_rep_campoReporteDependientes_m]
+GO
+CREATE PROCEDURE [sel_rep_campoReporteDependientes_m]
+	@p_eid as varchar (50)='',
+	@p_filtro as varchar (8000) = '1=1',
+	@p_orden as varchar (8000) = 'id',
+	@p_campos as varchar (8000) = '*' AS
+BEGIN
+exec ('SELECT '+ @p_campos +
+' FROM [view_rep_campoReporteDependiente]
+WHERE  (eid like '''+@p_eid+'%'+''' ) AND (' + @p_filtro + ') ORDER BY ' + @p_orden)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[lis_rep_campoReporteDependientes_m]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[lis_rep_campoReporteDependientes_m]
+GO
+CREATE PROCEDURE [lis_rep_campoReporteDependientes_m]
+	@p_eid as varchar(50) = ''
+AS
+BEGIN
+	SELECT id AS id,
+[campoReporteDependiente] AS [rep_campoReporteDependiente]
+	FROM [rep_campoReporteDependiente]
+	WHERE active = 1
+	AND	(eid LIKE @p_eid+'%')
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[aud_rep_campoReporteDependiente]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[aud_rep_campoReporteDependiente]
+GO
+CREATE PROCEDURE [aud_rep_campoReporteDependiente]
+	@p_filtro as varchar (8000) = '1=1'
+AS
+BEGIN
+exec(	'SELECT [rep_campoReporteDependiente].id as id_tabla,
+	[rep_campoReporteDependiente].id_usuario_modifico as id_usuario_modifico,
+	[rep_campoReporteDependiente].id_usuario_creo as id_usuario_creo,
+	[rep_campoReporteDependiente].fechaModificacion as fechaModificacion,
+	[rep_campoReporteDependiente].fechaCreacion as fechaCreacion,
+	[rep_campoReporteDependiente].active as active,
+	[rep_campoReporteDependiente].[campoReporteDependiente] as campoPrincipal,
+	[seg_usuario_creo].usuario as usuarioCreo,
+	[seg_usuario_modifico].usuario as usuarioModifico
+
+	FROM [rep_campoReporteDependiente]
+	INNER JOIN [seg_usuario] AS [seg_usuario_modifico] ON [seg_usuario_modifico].id=[rep_campoReporteDependiente].[id_usuario_modifico]
+	INNER JOIN [seg_usuario] AS [seg_usuario_creo] ON [seg_usuario_creo].id=[rep_campoReporteDependiente].[id_usuario_creo]
+	where ' + @p_filtro)
+END
+GO
+SET QUOTED_IDENTIFIER OFF 
+GO
+SET ANSI_NULLS ON
+GO
+----------------------
+print 'rep_campoReporteDependiente'
+--------------------------------
+SET QUOTED_IDENTIFIER OFF
+GO
+SET ANSI_NULLS OFF
+GO
+
 IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[reg_rep_categoria]') AND type in (N'P', N'PC'))DROP PROCEDURE [dbo].[reg_rep_categoria]
 GO
 CREATE PROCEDURE [reg_rep_categoria]
@@ -162618,4 +163166,4 @@ SET ANSI_NULLS ON
 GO
 ----------------------
 print 'ter_tercero_usuario'
------------------------------------18/9/2025 6:35:23 PM
+-----------------------------------19/11/2025 3:31:42 PM
