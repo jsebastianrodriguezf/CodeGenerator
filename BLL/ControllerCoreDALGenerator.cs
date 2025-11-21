@@ -407,7 +407,7 @@ namespace CodeGenerator.BLL
                 $"",
                 $"namespace SAMMAI.Core.Controllers",
                 "{",
-                $"    [Route($\"{{BaseApi}}/{Utilities.ToKebabCase(entityUpper).ToLower()}\")]",
+                $"    [Route(\"{Utilities.ToKebabCase(entityUpper).ToLower()}\")]",
                 $"    [ApiController]",
                 $"    public class {entityUpper}Controller : ControllerBase",
                 "    {",
