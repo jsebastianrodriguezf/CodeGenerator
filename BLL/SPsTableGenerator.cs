@@ -296,14 +296,14 @@ namespace CodeGenerator.BLL
 
                         allNewLines.Add("------------------------------------------");
                         allNewLines.AddRange(sp);
-                        Utilities.GenerateFile(_destinyPath, Path.Combine("StoreProcedures", tableName), spName, sp);
-                        spRoot.Add(Path.Combine("StoreProcedures", tableName, spName).Replace(@"\", "/"));
+                        Utilities.GenerateFile(_destinyPath, Path.Combine("StoredProcedures", tableName), spName, sp);
+                        spRoot.Add(Path.Combine("StoredProcedures", tableName, spName).Replace(@"\", "/"));
 
                         List<string> updateContent = GenerateBulkUpdate(sp, tableName, ref spRoot, ref allNewLines, hasCmm);
                         allNewLines.Add("------------------------------------------");
                         allNewLines.AddRange(updateContent);
-                        Utilities.GenerateFile(_destinyPath, Path.Combine("StoreProcedures", tableName), $"upd_{tableName.Replace('.', '_')}_bulk.sql", updateContent);
-                        spRoot.Add(Path.Combine("StoreProcedures", tableName, $"upd_{tableName.Replace('.', '_')}_bulk.sql").Replace(@"\", "/"));
+                        Utilities.GenerateFile(_destinyPath, Path.Combine("StoredProcedures", tableName), $"upd_{tableName.Replace('.', '_')}_bulk.sql", updateContent);
+                        spRoot.Add(Path.Combine("StoredProcedures", tableName, $"upd_{tableName.Replace('.', '_')}_bulk.sql").Replace(@"\", "/"));
 
                         sp = GenerateBulkInsert(sp, tableName, ref spRoot, ref allNewLines, hasCmm);
                         spName = spName.Replace(".sql", "_bulk.sql");
@@ -317,8 +317,8 @@ namespace CodeGenerator.BLL
 
                     allNewLines.Add("------------------------------------------");
                     allNewLines.AddRange(sp);
-                    Utilities.GenerateFile(_destinyPath, Path.Combine("StoreProcedures", tableName), spName, sp);
-                    spRoot.Add(Path.Combine("StoreProcedures", tableName, spName).Replace(@"\", "/"));
+                    Utilities.GenerateFile(_destinyPath, Path.Combine("StoredProcedures", tableName), spName, sp);
+                    spRoot.Add(Path.Combine("StoredProcedures", tableName, spName).Replace(@"\", "/"));
 
                     isView = false;
                     isInsert = false;
@@ -499,8 +499,8 @@ namespace CodeGenerator.BLL
 
             allNewLines.Add("------------------------------------------");
             allNewLines.AddRange(sp);
-            Utilities.GenerateFile(_destinyPath, Path.Combine("StoreProcedures", tableName), spNameFile, sp);
-            spRoot.Add(Path.Combine("StoreProcedures", tableName, spNameFile).Replace(@"\", "/"));
+            Utilities.GenerateFile(_destinyPath, Path.Combine("StoredProcedures", tableName), spNameFile, sp);
+            spRoot.Add(Path.Combine("StoredProcedures", tableName, spNameFile).Replace(@"\", "/"));
 
             return sp;
         }

@@ -155,7 +155,7 @@ namespace CodeGenerator.BLL
                 $"",
                 $"namespace SAMMAI.DataBase.Controllers",
                 "{",
-                $"    [Route($\"{{BaseApi}}/{{BaseController.{entityUpper}}}\")]",
+                $"    [Route(BaseController.{entityUpper})]",
                 $"    [ApiController]",
                 $"    public class {entityUpper}Controller : ControllerBase",
                 "    {",
